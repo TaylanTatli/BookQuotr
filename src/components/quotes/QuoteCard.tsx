@@ -79,7 +79,8 @@ export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProp
       <div
         className={cn(
           "absolute right-2 top-2 flex gap-1 transition-opacity",
-          hovered ? "opacity-100" : "opacity-0"
+          "opacity-100 md:opacity-0",
+          hovered && "md:opacity-100"
         )}
       >
         <AddQuoteModal bookId={bookId} existingQuote={quote} onQuoteAdded={() => { }}>

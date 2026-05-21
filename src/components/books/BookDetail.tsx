@@ -107,7 +107,7 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
               {book.publisher}
             </Badge>
           )}
-          {book.pageCount && (
+          {(book.pageCount || 0) > 0 && (
             <Badge variant="outline" className="text-xs">
               {book.pageCount} pages
             </Badge>
