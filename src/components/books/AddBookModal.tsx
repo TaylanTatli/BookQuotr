@@ -138,7 +138,7 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
           <DialogTitle>{existingBook ? "Edit Book" : "Add Book"}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 min-w-0">
           {/* Search */}
           {!existingBook && (
             <>
@@ -180,7 +180,7 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
                         key={`${r.source}-${r.externalId}`}
                         type="button"
                         onClick={() => handleSelectResult(r)}
-                        className="flex items-start gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent"
+                        className="flex w-full min-w-0 items-start gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent"
                       >
                         <div className="size-10 shrink-0 overflow-hidden rounded">
                           {r.thumbnail ? (
@@ -198,7 +198,7 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
                             </div>
                           )}
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium">{r.title}</p>
                           <p className="truncate text-xs text-muted-foreground">
                             {r.authors.join(", ")} · {r.publishedDate ?? ""}
