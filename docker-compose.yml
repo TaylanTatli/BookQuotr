@@ -7,7 +7,7 @@ services:
     volumes:
       - ./data:/app/data
     environment:
-      - DATABASE_URL=file:./data/bookquotr.db
+      - DATABASE_URL=file:/app/data/bookquotr.db
       # Authentication (Optional)
       # - AUTH_ENABLED=true
       # - AUTH_USERNAME=admin

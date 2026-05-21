@@ -36,28 +36,25 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs && \
-  adduser --system --uid 1001 nextjs
-
 # Install Prisma globally to run migrations without massive node_modules
 RUN npm install -g prisma@7.8.0
 
 # Copy built app (standalone includes only the necessary dependencies)
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=node:node /app/public ./public
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 
 # Copy Prisma schema and migrations (needed for migrate deploy)
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./
+COPY --from=builder --chown=node:node /app/prisma ./prisma
+COPY --from=builder --chown=node:node /app/prisma.config.ts ./
 # Entrypoint
-COPY --chown=nextjs:nodejs entrypoint.sh ./
+COPY --chown=node:node entrypoint.sh ./
 RUN chmod +x entrypoint.sh
 
 # Data directory (will be volume-mounted)
-RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+RUN mkdir -p /app/data && chown node:node /app/data
 
-USER nextjs
+USER node
 
 EXPOSE 3000
 ENV PORT=3000
