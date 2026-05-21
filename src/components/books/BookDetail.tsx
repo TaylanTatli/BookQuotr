@@ -17,6 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { AddBookModal } from "@/components/books/AddBookModal";
+import { useTranslation } from "@/i18n/client";
 import type { BookWithQuotes } from "@/types";
 
 interface BookDetailProps {
@@ -26,14 +27,16 @@ interface BookDetailProps {
 }
 
 export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailProps) {
+  const { t } = useTranslation();
+
   async function handleDelete() {
     try {
       const res = await fetch(`/api/books/${book.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       onBookDeleted(book.id);
-      toast.success(`"${book.title}" deleted`);
+      toast.success(t("books.deleteSuccess", { title: book.title }));
     } catch {
-      toast.error("Failed to delete book");
+      toast.error(t("books.deleteError"));
     }
   }
 
@@ -81,14 +84,14 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete &quot;{book.title}&quot;?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("books.deleteTitle", { title: book.title })}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete the book and all its quotes.
+                    {t("books.deleteDesc")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                  <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>{t("common.delete")}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -109,7 +112,7 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
           )}
           {(book.pageCount || 0) > 0 && (
             <Badge variant="outline" className="text-xs">
-              {book.pageCount} pages
+              {book.pageCount} {t("books.pages")}
             </Badge>
           )}
           {book.language && (

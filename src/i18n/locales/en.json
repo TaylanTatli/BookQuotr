@@ -1,0 +1,100 @@
+{
+  "settings": {
+    "title": "Settings",
+    "backupRestore": "Backup & Restore",
+    "exportJson": "Export JSON",
+    "importJson": "Import JSON",
+    "dangerZone": "Danger Zone",
+    "dangerDescription": "Permanently delete all books and quotes. This cannot be undone.",
+    "deleteAll": "Delete All Data",
+    "deleteAllConfirmTitle": "Delete all data?",
+    "deleteAllConfirmDesc": "Type <0>DELETE</0> to confirm. This will permanently delete all books and quotes.",
+    "cancel": "Cancel",
+    "language": "Language",
+    "typeToDelete": "Type DELETE to confirm"
+  },
+  "login": {
+    "title": "BookQuotr",
+    "subtitle": "Enter your credentials to access your library",
+    "username": "Username",
+    "password": "Password",
+    "signingIn": "Signing in...",
+    "signIn": "Sign in",
+    "success": "Logged in successfully",
+    "failed": "Login failed",
+    "error": "An error occurred during login"
+  },
+  "sidebar": {
+    "title": "BookQuotr",
+    "addBook": "Add Book",
+    "noBooks": "No books yet. Add your first book!",
+    "logout": "Logout"
+  },
+  "quotes": {
+    "emptySelection": "Select a book to see its quotes",
+    "addQuote": "Add Quote",
+    "noQuotesTitle": "No quotes yet.",
+    "noQuotesDesc": "Click \"Add Quote\" to get started.",
+    "deleteTitle": "Delete this quote?",
+    "deleteDesc": "This action cannot be undone.",
+    "deleteSuccess": "Quote deleted",
+    "deleteError": "Failed to delete quote",
+    "updateSuccess": "Quote updated",
+    "saveSuccess": "Quote saved",
+    "saveMultipleSuccess": "{count} quotes saved",
+    "saveError": "Failed to save quote"
+  },
+  "books": {
+    "deleteTitle": "Delete \"{title}\"?",
+    "deleteDesc": "This will permanently delete the book and all its quotes.",
+    "deleteDescWithCount": "This will permanently delete the book and all {count} of its quotes. This action cannot be undone.",
+    "pages": "pages",
+    "quoteCount": "quote",
+    "quotesCount": "quotes",
+    "deleteSuccess": "\"{title}\" deleted",
+    "deleteError": "Failed to delete book",
+    "updateSuccess": "Book updated",
+    "addSuccess": "Book added",
+    "saveError": "Failed to save book"
+  },
+  "addBook": {
+    "addTitle": "Add Book",
+    "editTitle": "Edit Book",
+    "searchPlaceholder": "Search by title, author, or ISBN…",
+    "title": "Title",
+    "author": "Author",
+    "publisher": "Publisher",
+    "publishedDate": "Published Date",
+    "isbn": "ISBN",
+    "pageCount": "Page Count",
+    "language": "Language",
+    "coverUrl": "Cover URL",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "required": "Title and author are required",
+    "sourceGoogle": "Google Books",
+    "sourceOpenLibrary": "Open Library"
+  },
+  "addQuote": {
+    "addTitle": "Add Quote",
+    "editTitle": "Edit Quote",
+    "placeholder": "Enter quote content (Markdown supported)…",
+    "tip": "Tip: separate multiple quotes with <0>---</0> on its own line to bulk import.",
+    "showOptional": "Show optional fields",
+    "hideOptional": "Hide optional fields",
+    "page": "Page",
+    "pagePlaceholder": "e.g. 42",
+    "chapter": "Chapter",
+    "chapterPlaceholder": "Chapter title",
+    "note": "Note",
+    "notePlaceholder": "Personal note",
+    "saveChanges": "Save Changes",
+    "saveQuote": "Save Quote",
+    "cancel": "Cancel",
+    "required": "Quote content is required"
+  },
+  "common": {
+    "delete": "Delete",
+    "cancel": "Cancel"
+  }
+}

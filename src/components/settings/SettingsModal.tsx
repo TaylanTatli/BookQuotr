@@ -24,6 +24,29 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { useRouter } from "next/navigation";
+import { useTranslation } from "@/i18n/client";
+
+const LANGUAGES = [
+  { value: "en", label: "English" },
+  { value: "tr", label: "Türkçe" },
+];
 
 interface SettingsModalProps {
   children: React.ReactElement;
@@ -36,6 +59,8 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
   const [importing, setImporting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const { t, locale } = useTranslation();
 
   async function handleExport() {
     setExporting(true);
@@ -105,19 +130,48 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
     }
   }
 
+  function handleLanguageChange(newLocale: string | null) {
+    if (!newLocale) return;
+    document.cookie = `bq_locale=${newLocale}; path=/; max-age=31536000`;
+    router.refresh();
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={children} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
+          <DialogTitle>{t("settings.title")}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-6">
+        <FieldGroup className="mt-4">
+          {/* Language Selection */}
+          <Field orientation="horizontal">
+            <FieldLabel>{t("settings.language")}</FieldLabel>
+            <FieldContent>
+              <Select value={locale} onValueChange={handleLanguageChange}>
+                <SelectTrigger className="w-[180px]">
+                  {LANGUAGES.find((l) => l.value === locale)?.label ?? "Select language"}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {LANGUAGES.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </FieldContent>
+          </Field>
+
+          <Separator />
+
           {/* Backup */}
-          <div className="flex flex-col gap-3">
-            <h3 className="text-sm font-medium">Backup & Restore</h3>
-            <div className="flex gap-2">
+          <Field>
+            <FieldLabel>{t("settings.backupRestore")}</FieldLabel>
+            <FieldContent className="flex flex-row gap-2">
               <Button
                 variant="outline"
                 className="flex-1"
@@ -129,7 +183,7 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
                 ) : (
                   <Download data-icon="inline-start" />
                 )}
-                Export JSON
+                {t("settings.exportJson")}
               </Button>
               <Button
                 variant="outline"
@@ -142,7 +196,7 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
                 ) : (
                   <Upload data-icon="inline-start" />
                 )}
-                Import JSON
+                {t("settings.importJson")}
               </Button>
               <input
                 ref={fileRef}
@@ -151,54 +205,56 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
                 className="hidden"
                 onChange={handleImport}
               />
-            </div>
-          </div>
+            </FieldContent>
+          </Field>
 
           <Separator />
 
           {/* Danger zone */}
-          <div className="flex flex-col gap-3">
-            <h3 className="text-sm font-medium text-destructive">Danger Zone</h3>
-            <p className="text-xs text-muted-foreground">
-              Permanently delete all books and quotes. This cannot be undone.
-            </p>
-            <AlertDialog>
-              <AlertDialogTrigger
-                render={
-                  <Button variant="destructive" size="sm" />
-                }
-              >
-                <Trash2 data-icon="inline-start" />
-                Delete All Data
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete all data?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Type <strong>DELETE</strong> to confirm. This will permanently
-                    delete all books and quotes.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <Input
-                  value={deleteConfirm}
-                  onChange={(e) => setDeleteConfirm(e.target.value)}
-                  placeholder="Type DELETE to confirm"
-                />
-                <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setDeleteConfirm("")}>
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteAll}
-                    disabled={deleteConfirm !== "DELETE"}
-                  >
-                    Delete Everything
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </div>
+          <Field>
+            <div className="flex flex-col gap-1">
+              <FieldLabel className="text-destructive">{t("settings.dangerZone")}</FieldLabel>
+              <FieldDescription>{t("settings.dangerDescription")}</FieldDescription>
+            </div>
+            
+            <FieldContent>
+              <AlertDialog>
+                <AlertDialogTrigger
+                  render={
+                    <Button variant="destructive" size="sm" className="w-fit" />
+                  }
+                >
+                  <Trash2 data-icon="inline-start" />
+                  {t("settings.deleteAll")}
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("settings.deleteAllConfirmTitle")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      <span dangerouslySetInnerHTML={{ __html: t("settings.deleteAllConfirmDesc").replace('<0>', '<strong>').replace('</0>', '</strong>') }} />
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <Input
+                    value={deleteConfirm}
+                    onChange={(e) => setDeleteConfirm(e.target.value)}
+                    placeholder={t("settings.typeToDelete")}
+                  />
+                  <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setDeleteConfirm("")}>
+                      {t("settings.cancel")}
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAll}
+                      disabled={deleteConfirm !== "DELETE"}
+                    >
+                      {t("settings.deleteAll")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </FieldContent>
+          </Field>
+        </FieldGroup>
       </DialogContent>
     </Dialog>
   );

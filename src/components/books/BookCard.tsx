@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/i18n/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,15 +28,17 @@ interface BookCardProps {
 }
 
 export function BookCard({ book, isSelected, onClick, onDeleted }: BookCardProps) {
+  const { t } = useTranslation();
+
   async function handleDelete(e: React.MouseEvent) {
     e.stopPropagation();
     try {
       const res = await fetch(`/api/books/${book.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       onDeleted();
-      toast.success(`"${book.title}" deleted`);
+      toast.success(t("books.deleteSuccess", { title: book.title }));
     } catch {
-      toast.error("Failed to delete book");
+      toast.error(t("books.deleteError"));
     }
   }
 
@@ -74,7 +77,7 @@ export function BookCard({ book, isSelected, onClick, onDeleted }: BookCardProps
         <p className="truncate text-sm font-medium leading-tight">{book.title}</p>
         <p className="truncate text-xs text-muted-foreground">{book.author}</p>
         <Badge variant="secondary" className="mt-1 text-xs">
-          {book._count.quotes} {book._count.quotes === 1 ? "quote" : "quotes"}
+          {book._count.quotes} {book._count.quotes === 1 ? t("books.quoteCount") : t("books.quotesCount")}
         </Badge>
       </div>
 
@@ -94,15 +97,14 @@ export function BookCard({ book, isSelected, onClick, onDeleted }: BookCardProps
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete &quot;{book.title}&quot;?</AlertDialogTitle>
+            <AlertDialogTitle>{t("books.deleteTitle", { title: book.title })}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the book and all {book._count.quotes} of its
-              quotes. This action cannot be undone.
+              {t("books.deleteDescWithCount", { count: book._count.quotes })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>{t("common.delete")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -19,18 +19,26 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
 };
 
-export default function RootLayout({
+import { I18nProvider } from "@/i18n/client";
+import { getDictionary, getLocale } from "@/i18n/server";
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const dictionary = await getDictionary();
+  const locale = await getLocale();
+
   return (
-    <html lang="en" className="dark">
+    <html lang={locale} className="dark">
       <body>
-        <TooltipProvider>
-          {children}
-          <Toaster richColors position="bottom-right" />
-        </TooltipProvider>
+        <I18nProvider dictionary={dictionary} locale={locale}>
+          <TooltipProvider>
+            {children}
+            <Toaster richColors position="bottom-right" />
+          </TooltipProvider>
+        </I18nProvider>
       </body>
     </html>
   );

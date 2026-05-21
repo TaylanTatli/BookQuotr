@@ -1,0 +1,100 @@
+{
+  "settings": {
+    "title": "Ayarlar",
+    "backupRestore": "Yedekle & Geri Yükle",
+    "exportJson": "Dışa Aktar (JSON)",
+    "importJson": "İçe Aktar (JSON)",
+    "dangerZone": "Tehlikeli Alan",
+    "dangerDescription": "Tüm kitapları ve alıntıları kalıcı olarak siler. Bu işlem geri alınamaz.",
+    "deleteAll": "Tüm Verileri Sil",
+    "deleteAllConfirmTitle": "Tüm veriler silinsin mi?",
+    "deleteAllConfirmDesc": "Onaylamak için <0>DELETE</0> yazın. Bu işlem tüm kitap ve alıntıları kalıcı olarak silecektir.",
+    "cancel": "İptal",
+    "language": "Dil",
+    "typeToDelete": "Onaylamak için DELETE yazın"
+  },
+  "login": {
+    "title": "BookQuotr",
+    "subtitle": "Kütüphanenize erişmek için bilgilerinizi girin",
+    "username": "Kullanıcı Adı",
+    "password": "Şifre",
+    "signingIn": "Giriş yapılıyor...",
+    "signIn": "Giriş yap",
+    "success": "Başarıyla giriş yapıldı",
+    "failed": "Giriş başarısız",
+    "error": "Giriş sırasında bir hata oluştu"
+  },
+  "sidebar": {
+    "title": "BookQuotr",
+    "addBook": "Kitap Ekle",
+    "noBooks": "Henüz kitap yok. İlk kitabınızı ekleyin!",
+    "logout": "Çıkış Yap"
+  },
+  "quotes": {
+    "emptySelection": "Alıntılarını görmek için bir kitap seçin",
+    "addQuote": "Alıntı Ekle",
+    "noQuotesTitle": "Henüz alıntı yok.",
+    "noQuotesDesc": "Başlamak için \"Alıntı Ekle\" butonuna tıklayın.",
+    "deleteTitle": "Bu alıntıyı silmek istiyor musunuz?",
+    "deleteDesc": "Bu işlem geri alınamaz.",
+    "deleteSuccess": "Alıntı silindi",
+    "deleteError": "Alıntı silinemedi",
+    "updateSuccess": "Alıntı güncellendi",
+    "saveSuccess": "Alıntı kaydedildi",
+    "saveMultipleSuccess": "{count} alıntı kaydedildi",
+    "saveError": "Alıntı kaydedilemedi"
+  },
+  "books": {
+    "deleteTitle": "\"{title}\" silinsin mi?",
+    "deleteDesc": "Bu işlem kitabı ve tüm alıntılarını kalıcı olarak siler.",
+    "deleteDescWithCount": "Bu işlem kitabı ve içerdiği {count} alıntıyı kalıcı olarak siler. Bu işlem geri alınamaz.",
+    "pages": "sayfa",
+    "quoteCount": "alıntı",
+    "quotesCount": "alıntı",
+    "deleteSuccess": "\"{title}\" silindi",
+    "deleteError": "Kitap silinemedi",
+    "updateSuccess": "Kitap güncellendi",
+    "addSuccess": "Kitap eklendi",
+    "saveError": "Kitap kaydedilemedi"
+  },
+  "addBook": {
+    "addTitle": "Kitap Ekle",
+    "editTitle": "Kitabı Düzenle",
+    "searchPlaceholder": "Başlık, yazar veya ISBN ile ara…",
+    "title": "Başlık",
+    "author": "Yazar",
+    "publisher": "Yayınevi",
+    "publishedDate": "Yayın Tarihi",
+    "isbn": "ISBN",
+    "pageCount": "Sayfa Sayısı",
+    "language": "Dil",
+    "coverUrl": "Kapak URL'si",
+    "saveChanges": "Değişiklikleri Kaydet",
+    "cancel": "İptal",
+    "required": "Başlık ve yazar zorunludur",
+    "sourceGoogle": "Google Books",
+    "sourceOpenLibrary": "Open Library"
+  },
+  "addQuote": {
+    "addTitle": "Alıntı Ekle",
+    "editTitle": "Alıntıyı Düzenle",
+    "placeholder": "Alıntı içeriğini girin (Markdown desteklenir)…",
+    "tip": "İpucu: Toplu ekleme yapmak için birden fazla alıntıyı kendi satırında <0>---</0> ile ayırabilirsiniz.",
+    "showOptional": "İsteğe bağlı alanları göster",
+    "hideOptional": "İsteğe bağlı alanları gizle",
+    "page": "Sayfa",
+    "pagePlaceholder": "örn. 42",
+    "chapter": "Bölüm",
+    "chapterPlaceholder": "Bölüm başlığı",
+    "note": "Not",
+    "notePlaceholder": "Kişisel not",
+    "saveChanges": "Değişiklikleri Kaydet",
+    "saveQuote": "Alıntıyı Kaydet",
+    "cancel": "İptal",
+    "required": "Alıntı içeriği zorunludur"
+  },
+  "common": {
+    "delete": "Sil",
+    "cancel": "İptal"
+  }
+}

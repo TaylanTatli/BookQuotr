@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { useTranslation } from "@/i18n/client";
 import type { SearchResult, BookWithQuotes } from "@/types";
 
 interface AddBookModalProps {
@@ -30,21 +31,21 @@ type FieldDef = {
   required?: boolean;
   type?: string;
 };
-
 const FIELDS: FieldDef[] = [
-  { key: "title", label: "Title", required: true },
-  { key: "author", label: "Author", required: true },
-  { key: "publisher", label: "Publisher" },
-  { key: "publishedDate", label: "Published Date" },
-  { key: "isbn", label: "ISBN" },
-  { key: "pageCount", label: "Page Count", type: "number" },
-  { key: "language", label: "Language" },
-  { key: "thumbnail", label: "Cover URL" },
+  { key: "title", label: "addBook.title", required: true },
+  { key: "author", label: "addBook.author", required: true },
+  { key: "publisher", label: "addBook.publisher" },
+  { key: "publishedDate", label: "addBook.publishedDate" },
+  { key: "isbn", label: "addBook.isbn" },
+  { key: "pageCount", label: "addBook.pageCount", type: "number" },
+  { key: "language", label: "addBook.language" },
+  { key: "thumbnail", label: "addBook.coverUrl" },
 ];
 
 type BookFormData = Record<string, string>;
 
 export function AddBookModal({ children, onBookAdded, existingBook }: AddBookModalProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -98,7 +99,7 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!formData.title || !formData.author) {
-      toast.error("Title and author are required");
+      toast.error(t("addBook.required"));
       return;
     }
     setSaving(true);
@@ -115,7 +116,7 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error();
-      toast.success(existingBook ? "Book updated" : "Book added");
+      toast.success(existingBook ? t("books.updateSuccess") : t("books.addSuccess"));
       onBookAdded();
       setOpen(false);
       if (!existingBook) {
@@ -124,7 +125,7 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
         setResults([]);
       }
     } catch {
-      toast.error("Failed to save book");
+      toast.error(t("books.saveError"));
     } finally {
       setSaving(false);
     }
@@ -135,7 +136,7 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
       <DialogTrigger render={children} />
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{existingBook ? "Edit Book" : "Add Book"}</DialogTitle>
+          <DialogTitle>{existingBook ? t("addBook.editTitle") : t("addBook.addTitle")}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 min-w-0">
@@ -144,7 +145,7 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
             <>
               <form onSubmit={handleSearch} className="flex gap-2">
                 <Input
-                  placeholder="Search by title, author, or ISBN…"
+                  placeholder={t("addBook.searchPlaceholder")}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="flex-1"
@@ -204,7 +205,7 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
                             {r.authors.join(", ")} · {r.publishedDate ?? ""}
                           </p>
                           <p className="text-xs text-muted-foreground/60 capitalize">
-                            {r.source === "google" ? "Google Books" : "Open Library"}
+                            {r.source === "google" ? t("addBook.sourceGoogle") : t("addBook.sourceOpenLibrary")}
                           </p>
                         </div>
                       </button>
@@ -220,10 +221,10 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
           {/* Manual form */}
           <form onSubmit={handleSave} className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3">
-              {FIELDS.map(({ key, label, required, type }) => (
+              {FIELDS.map(({ key, label, required, type }: any) => (
                 <div key={key} className={key === "thumbnail" ? "col-span-2" : ""}>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                    {label} {required && <span className="text-destructive">*</span>}
+                    {t(label)} {required && <span className="text-destructive">*</span>}
                   </label>
                   <Input
                     type={type ?? "text"}
@@ -231,18 +232,18 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, [key]: e.target.value }))
                     }
-                    placeholder={label}
+                    placeholder={t(label)}
                   />
                 </div>
               ))}
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={saving}>
                 {saving && <Loader2 className="size-4 animate-spin" data-icon="inline-start" />}
-                {existingBook ? "Save Changes" : "Add Book"}
+                {existingBook ? t("addBook.saveChanges") : t("addBook.addTitle")}
               </Button>
             </div>
           </form>

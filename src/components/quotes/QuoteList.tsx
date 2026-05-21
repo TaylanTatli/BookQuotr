@@ -1,6 +1,7 @@
 "use client";
 
 import { QuoteCard } from "@/components/quotes/QuoteCard";
+import { useTranslation } from "@/i18n/client";
 import type { Quote } from "@/types";
 
 interface QuoteListProps {
@@ -10,11 +11,13 @@ interface QuoteListProps {
 }
 
 export function QuoteList({ quotes, onQuoteDeleted, onQuoteUpdated }: QuoteListProps) {
+  const { t } = useTranslation();
+
   if (quotes.length === 0) {
     return (
       <div className="flex h-48 flex-col items-center justify-center gap-2 text-muted-foreground">
-        <p className="text-sm">No quotes yet.</p>
-        <p className="text-xs">Click &quot;Add Quote&quot; to get started.</p>
+        <p className="text-sm">{t("quotes.noQuotesTitle")}</p>
+        <p className="text-xs">{t("quotes.noQuotesDesc")}</p>
       </div>
     );
   }

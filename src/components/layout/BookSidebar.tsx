@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookCard } from "@/components/books/BookCard";
 import { AddBookModal } from "@/components/books/AddBookModal";
 import { SettingsModal } from "@/components/settings/SettingsModal";
+import { useTranslation } from "@/i18n/client";
 import type { BookWithQuoteCount } from "@/types";
 
 interface BookSidebarProps {
@@ -29,6 +30,7 @@ export function BookSidebar({
   onImportSuccess,
 }: BookSidebarProps) {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -46,7 +48,7 @@ export function BookSidebar({
           <AddBookModal onBookAdded={onBookAdded}>
             <Button size="sm" className="flex-1">
               <Plus className="mr-2 size-4" />
-              Add Book
+              {t("sidebar.addBook")}
             </Button>
           </AddBookModal>
           <SettingsModal onImportSuccess={onImportSuccess}>
@@ -71,7 +73,7 @@ export function BookSidebar({
             ))
           ) : books.length === 0 ? (
             <p className="px-2 py-8 text-center text-sm text-muted-foreground">
-              No books yet. Add your first book!
+              {t("sidebar.noBooks")}
             </p>
           ) : (
             books.map((book) => (
@@ -90,7 +92,7 @@ export function BookSidebar({
       <div className="mt-auto border-t p-4">
         <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
           <LogOut className="mr-2 size-4" />
-          Logout
+          {t("sidebar.logout")}
         </Button>
       </div>
     </div>

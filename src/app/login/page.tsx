@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { BookOpen } from "lucide-react";
+import { useTranslation } from "@/i18n/client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,15 +37,15 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        toast.success("Logged in successfully");
+        toast.success(t("login.success"));
         router.push("/");
         router.refresh();
       } else {
         const data = await res.json();
-        toast.error(data.error || "Login failed");
+        toast.error(data.error || t("login.failed"));
       }
     } catch (error) {
-      toast.error("An error occurred during login");
+      toast.error(t("login.error"));
     } finally {
       setLoading(false);
     }
@@ -57,14 +59,14 @@ export default function LoginPage() {
             <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary/10">
               <BookOpen className="size-6 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-bold">BookQuotr</CardTitle>
+            <CardTitle className="text-2xl font-bold">{t("login.title")}</CardTitle>
             <CardDescription>
-              Enter your credentials to access your library
+              {t("login.subtitle")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t("login.username")}</Label>
               <Input
                 id="username"
                 type="text"
@@ -74,7 +76,7 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("login.password")}</Label>
               <Input
                 id="password"
                 type="password"
@@ -86,7 +88,7 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? t("login.signingIn") : t("login.signIn")}
             </Button>
           </CardFooter>
         </form>

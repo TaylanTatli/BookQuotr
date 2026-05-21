@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookDetail } from "@/components/books/BookDetail";
 import { QuoteList } from "@/components/quotes/QuoteList";
 import { AddQuoteModal } from "@/components/quotes/AddQuoteModal";
+import { useTranslation } from "@/i18n/client";
 import type { BookWithQuotes, Quote } from "@/types";
 
 interface QuotesPanelProps {
@@ -31,11 +32,13 @@ export function QuotesPanel({
   onBookUpdated,
   onBookDeleted,
 }: QuotesPanelProps) {
+  const { t } = useTranslation();
+
   if (!book) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-4 bg-background text-muted-foreground">
         <BookOpen className="size-12 opacity-20" />
-        <p className="text-sm">Select a book to see its quotes</p>
+        <p className="text-sm">{t("quotes.emptySelection")}</p>
       </main>
     );
   }
@@ -79,7 +82,7 @@ export function QuotesPanel({
         <AddQuoteModal bookId={book.id} onQuoteAdded={onQuoteAdded}>
           <Button>
             <Plus data-icon="inline-start" />
-            Add Quote
+            {t("quotes.addQuote")}
           </Button>
         </AddQuoteModal>
       </div>

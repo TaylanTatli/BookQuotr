@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/i18n/client";
 import type { Quote } from "@/types";
 
 interface AddQuoteModalProps {
@@ -28,6 +29,7 @@ export function AddQuoteModal({
   onQuoteAdded,
   existingQuote,
 }: AddQuoteModalProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState(existingQuote?.content ?? "");
   const [page, setPage] = useState(existingQuote?.page?.toString() ?? "");
@@ -39,7 +41,7 @@ export function AddQuoteModal({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!content.trim()) {
-      toast.error("Quote content is required");
+      toast.error(t("addQuote.required"));
       return;
     }
     setSaving(true);
@@ -58,7 +60,7 @@ export function AddQuoteModal({
         });
         if (!res.ok) throw new Error();
         onQuoteAdded();
-        toast.success("Quote updated");
+        toast.success(t("quotes.updateSuccess"));
         setOpen(false);
       } else {
         // Create new quote(s)
@@ -78,8 +80,8 @@ export function AddQuoteModal({
         onQuoteAdded();
         toast.success(
           data.count > 1
-            ? `${data.count} quotes saved`
-            : "Quote saved"
+            ? t("quotes.saveMultipleSuccess", { count: data.count })
+            : t("quotes.saveSuccess")
         );
         setContent("");
         setPage("");
@@ -88,7 +90,7 @@ export function AddQuoteModal({
         setOpen(false);
       }
     } catch {
-      toast.error("Failed to save quote");
+      toast.error(t("quotes.saveError"));
     } finally {
       setSaving(false);
     }
@@ -99,7 +101,7 @@ export function AddQuoteModal({
       <DialogTrigger render={children} />
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{existingQuote ? "Edit Quote" : "Add Quote"}</DialogTitle>
+          <DialogTitle>{existingQuote ? t("addQuote.editTitle") : t("addQuote.addTitle")}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -108,15 +110,13 @@ export function AddQuoteModal({
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Enter quote content (Markdown supported)…"
+              placeholder={t("addQuote.placeholder")}
               className="min-h-36 resize-none font-mono text-sm"
               autoFocus
             />
             {!existingQuote && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Tip: separate multiple quotes with{" "}
-                <code className="rounded bg-muted px-1 py-0.5">---</code> on its own
-                line to bulk import.
+                <span dangerouslySetInnerHTML={{ __html: t("addQuote.tip").replace('<0>', '<code class="rounded bg-muted px-1 py-0.5">').replace('</0>', '</code>') }} />
               </p>
             )}
           </div>
@@ -130,40 +130,40 @@ export function AddQuoteModal({
             <ChevronDown
               className={`size-3.5 transition-transform ${showExtra ? "rotate-180" : ""}`}
             />
-            {showExtra ? "Hide" : "Show"} optional fields
+            {showExtra ? t("addQuote.hideOptional") : t("addQuote.showOptional")}
           </button>
 
           {showExtra && (
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  Page
+                  {t("addQuote.page")}
                 </label>
                 <Input
                   type="number"
                   value={page}
                   onChange={(e) => setPage(e.target.value)}
-                  placeholder="e.g. 42"
+                  placeholder={t("addQuote.pagePlaceholder")}
                 />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  Chapter
+                  {t("addQuote.chapter")}
                 </label>
                 <Input
                   value={chapter}
                   onChange={(e) => setChapter(e.target.value)}
-                  placeholder="Chapter title"
+                  placeholder={t("addQuote.chapterPlaceholder")}
                 />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  Note
+                  {t("addQuote.note")}
                 </label>
                 <Input
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Personal note"
+                  placeholder={t("addQuote.notePlaceholder")}
                 />
               </div>
             </div>
@@ -171,13 +171,13 @@ export function AddQuoteModal({
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={saving}>
               {saving && (
                 <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
               )}
-              {existingQuote ? "Save Changes" : "Save Quote"}
+              {existingQuote ? t("addQuote.saveChanges") : t("addQuote.saveQuote")}
             </Button>
           </div>
         </form>

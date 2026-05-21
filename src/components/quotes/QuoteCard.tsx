@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/i18n/client";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
@@ -31,15 +32,16 @@ interface QuoteCardProps {
 
 export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProps) {
   const [hovered, setHovered] = useState(false);
+  const { t } = useTranslation();
 
   async function handleDelete() {
     try {
       const res = await fetch(`/api/quotes/${quote.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       onDeleted(quote.id);
-      toast.success("Quote deleted");
+      toast.success(t("quotes.deleteSuccess"));
     } catch {
-      toast.error("Failed to delete quote");
+      toast.error(t("quotes.deleteError"));
     }
   }
 
@@ -109,14 +111,14 @@ export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProp
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete this quote?</AlertDialogTitle>
+              <AlertDialogTitle>{t("quotes.deleteTitle")}</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone.
+                {t("quotes.deleteDesc")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete}>{t("common.delete")}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
