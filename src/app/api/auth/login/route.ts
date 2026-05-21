@@ -8,6 +8,10 @@ export async function POST(req: Request) {
     const envUsername = process.env.AUTH_USERNAME || "admin";
     const envPassword = process.env.AUTH_PASSWORD || "bookquotr";
 
+    // Only set Secure flag when actually behind HTTPS (e.g. reverse proxy).
+    // This ensures cookies work in Docker/self-hosted HTTP setups too.
+    const isSecure = req.headers.get("x-forwarded-proto") === "https";
+
     if (username === envUsername && password === envPassword) {
       const token = await signToken({ username });
 
@@ -17,7 +21,7 @@ export async function POST(req: Request) {
         name: "auth_token",
         value: token,
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: isSecure,
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 30, // 30 days
         path: "/",
