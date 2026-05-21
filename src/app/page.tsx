@@ -5,7 +5,22 @@ import { BookSidebar } from "@/components/layout/BookSidebar";
 import { QuotesPanel } from "@/components/layout/QuotesPanel";
 import type { BookWithQuoteCount, BookWithQuotes, Quote } from "@/types";
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+  SheetHeader,
+} from "@/components/ui/sheet";
 
 export default function HomePage() {
   const [books, setBooks] = useState<BookWithQuoteCount[]>([]);
@@ -14,6 +29,8 @@ export default function HomePage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loadingBooks, setLoadingBooks] = useState(true);
   const [loadingQuotes, setLoadingQuotes] = useState(false);
+
+  const isMobile = useIsMobile();
 
   const fetchBooks = useCallback(async () => {
     setLoadingBooks(true);
@@ -92,22 +109,38 @@ export default function HomePage() {
     setQuotes((prev) => prev.map((q) => (q.id === updated.id ? updated : q)));
   }, []);
 
-  return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full overflow-hidden bg-background">
-        <BookSidebar
-          books={books}
-          selectedBookId={selectedBookId}
-          loading={loadingBooks}
-          onSelectBook={setSelectedBookId}
-          onBookAdded={handleBookAdded}
-          onBookDeleted={handleBookDeleted}
-          onImportSuccess={fetchBooks}
-        />
-        <main className="relative flex min-w-0 flex-1 flex-col">
-          <div className="absolute left-2 top-2 z-10">
-            <SidebarTrigger />
-          </div>
+  // Separate, mobile-first layout using a drawer
+  if (isMobile) {
+    return (
+      <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
+        <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-sidebar px-4">
+          <Sheet>
+            <SheetTrigger 
+              render={
+                <Button variant="ghost" size="icon" className="shrink-0 text-sidebar-foreground" />
+              }
+            >
+              <Menu className="size-5" />
+              <span className="sr-only">Toggle menu</span>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[85vw] p-0" showCloseButton={true}>
+              <SheetHeader className="sr-only">
+                <SheetTitle>Navigation Menu</SheetTitle>
+              </SheetHeader>
+              <BookSidebar
+                books={books}
+                selectedBookId={selectedBookId}
+                loading={loadingBooks}
+                onSelectBook={setSelectedBookId}
+                onBookAdded={handleBookAdded}
+                onBookDeleted={handleBookDeleted}
+                onImportSuccess={fetchBooks}
+              />
+            </SheetContent>
+          </Sheet>
+          <div className="font-semibold text-sidebar-foreground">BookQuotr</div>
+        </header>
+        <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
           <QuotesPanel
             book={selectedBook}
             quotes={quotes}
@@ -120,6 +153,46 @@ export default function HomePage() {
           />
         </main>
       </div>
-    </SidebarProvider>
+    );
+  }
+
+  // Desktop layout using resizable panels
+  return (
+    <div className="flex h-screen w-full overflow-hidden bg-background">
+      <ResizablePanelGroup orientation="horizontal">
+        <ResizablePanel 
+          minSize="20%" 
+          defaultSize="25%" 
+          maxSize="40%"
+        >
+          <BookSidebar
+            books={books}
+            selectedBookId={selectedBookId}
+            loading={loadingBooks}
+            onSelectBook={setSelectedBookId}
+            onBookAdded={handleBookAdded}
+            onBookDeleted={handleBookDeleted}
+            onImportSuccess={fetchBooks}
+          />
+        </ResizablePanel>
+        
+        <ResizableHandle withHandle />
+        
+        <ResizablePanel defaultSize="75%">
+          <main className="relative flex h-full min-w-0 flex-col overflow-hidden">
+            <QuotesPanel
+              book={selectedBook}
+              quotes={quotes}
+              loading={loadingQuotes}
+              onQuoteAdded={handleQuoteAdded}
+              onQuoteDeleted={handleQuoteDeleted}
+              onQuoteUpdated={handleQuoteUpdated}
+              onBookUpdated={() => selectedBookId && fetchQuotes(selectedBookId)}
+              onBookDeleted={handleBookDeleted}
+            />
+          </main>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
   );
 }

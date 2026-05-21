@@ -7,12 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookCard } from "@/components/books/BookCard";
 import { AddBookModal } from "@/components/books/AddBookModal";
 import { SettingsModal } from "@/components/settings/SettingsModal";
-import {
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarFooter,
-} from "@/components/ui/sidebar";
 import type { BookWithQuoteCount } from "@/types";
 
 interface BookSidebarProps {
@@ -42,30 +36,28 @@ export function BookSidebar({
   };
 
   return (
-    <Sidebar style={{ "--sidebar-width": "20rem" } as React.CSSProperties}>
-      <SidebarHeader>
-        <div className="flex flex-col gap-3 p-2">
-          <div className="flex items-center gap-2 px-2">
-            <BookOpen className="size-5 text-primary" />
-            <h1 className="text-lg font-semibold tracking-tight">BookQuotr</h1>
-          </div>
-          <div className="flex gap-2 px-1">
-            <AddBookModal onBookAdded={onBookAdded}>
-              <Button size="sm" className="flex-1">
-                <Plus data-icon="inline-start" />
-                Add Book
-              </Button>
-            </AddBookModal>
-            <SettingsModal onImportSuccess={onImportSuccess}>
-              <Button size="sm" variant="outline">
-                <Settings className="size-4" />
-              </Button>
-            </SettingsModal>
-          </div>
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+      <div className="flex flex-col gap-3 p-4 border-b">
+        <div className="flex items-center gap-2 px-2">
+          <BookOpen className="size-5 text-primary" />
+          <h1 className="text-lg font-semibold tracking-tight">BookQuotr</h1>
         </div>
-      </SidebarHeader>
+        <div className="flex gap-2 px-1">
+          <AddBookModal onBookAdded={onBookAdded}>
+            <Button size="sm" className="flex-1">
+              <Plus className="mr-2 size-4" />
+              Add Book
+            </Button>
+          </AddBookModal>
+          <SettingsModal onImportSuccess={onImportSuccess}>
+            <Button size="sm" variant="outline">
+              <Settings className="size-4" />
+            </Button>
+          </SettingsModal>
+        </div>
+      </div>
 
-      <SidebarContent>
+      <div className="flex-1 overflow-auto">
         <div className="flex flex-col gap-1 p-2">
           {loading ? (
             Array.from({ length: 5 }).map((_, i) => (
@@ -93,16 +85,14 @@ export function BookSidebar({
             ))
           )}
         </div>
-      </SidebarContent>
+      </div>
       
-      <SidebarFooter>
-        <div className="p-2">
-          <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
-            <LogOut className="mr-2 size-4" />
-            Logout
-          </Button>
-        </div>
-      </SidebarFooter>
-    </Sidebar>
+      <div className="mt-auto border-t p-4">
+        <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+          <LogOut className="mr-2 size-4" />
+          Logout
+        </Button>
+      </div>
+    </div>
   );
 }
