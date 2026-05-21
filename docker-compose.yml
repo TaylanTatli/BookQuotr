@@ -1,0 +1,17 @@
+services:
+  bookquotr:
+    build: .
+    container_name: bookquotr
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DATABASE_URL=file:./data/bookquotr.db
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/books"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

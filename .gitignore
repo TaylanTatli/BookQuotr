@@ -30,7 +30,16 @@ pnpm-debug.log*
 
 # env files
 .env*.local
+.env
+
+# database
+/data/
+
+# prisma generated
+/generated/prisma
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/generated/prisma
