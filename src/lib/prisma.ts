@@ -8,7 +8,10 @@ const globalForPrisma = globalThis as unknown as {
 const dbUrl = process.env.DATABASE_URL;
 const url = !dbUrl || dbUrl === "undefined" ? "file:./data/bookquotr.db" : dbUrl;
 
-const adapter = new PrismaLibSql({ url });
+const adapter = new PrismaLibSql({ 
+  url, 
+  ...(process.env.DATABASE_AUTH_TOKEN && { authToken: process.env.DATABASE_AUTH_TOKEN })
+});
 
 export const prisma =
   globalForPrisma.prisma ??

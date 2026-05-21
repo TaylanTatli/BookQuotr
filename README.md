@@ -92,13 +92,14 @@ To fix this, BookQuotr is pre-configured with the **Turso (LibSQL)** adapter, ma
    - Import the project into Vercel.
 
 3. **Set Environment Variables in Vercel:**
-   Go to your project's settings in Vercel and add the following Environment Variable:
-   - `DATABASE_URL="libsql://your-db-name.turso.io?authToken=YOUR_AUTH_TOKEN"`
+   Go to your project's settings in Vercel and add the following Environment Variables:
+   - `DATABASE_URL="libsql://your-db-name.turso.io"`
+   - `DATABASE_AUTH_TOKEN="YOUR_AUTH_TOKEN"`
 
 4. **Migrate the Database (Once):**
    You need to push your Prisma schema to your new Turso database. On your local machine, run:
    ```bash
-   DATABASE_URL="libsql://your-db-name.turso.io?authToken=YOUR_AUTH_TOKEN" pnpm prisma db push
+   DATABASE_URL="libsql://your-db-name.turso.io" DATABASE_AUTH_TOKEN="YOUR_AUTH_TOKEN" pnpm prisma db push
    ```
 
 That's it! Your BookQuotr application will now run globally on Vercel while safely persisting all your books and quotes on Turso.
