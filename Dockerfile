@@ -5,7 +5,7 @@ RUN corepack enable pnpm
 
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm config set minimum-release-age 0
-RUN pnpm install --frozen-lockfile --prod --config.unsafe-perm=true
+RUN pnpm install --frozen-lockfile --prod
 
 #### Stage 2: Build ####
 FROM node:22-alpine AS builder
@@ -14,7 +14,7 @@ RUN corepack enable pnpm
 
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm config set minimum-release-age 0
-RUN pnpm install --frozen-lockfile --config.unsafe-perm=true
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 

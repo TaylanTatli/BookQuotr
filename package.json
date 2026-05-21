@@ -1,6 +1,6 @@
 {
   "name": "bookquotr",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "private": true,
   "scripts": {
@@ -46,5 +46,14 @@
     "prisma": "^7.8.0",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "msw",
+      "prisma",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }
