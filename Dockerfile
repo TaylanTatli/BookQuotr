@@ -4,6 +4,7 @@ WORKDIR /app
 RUN corepack enable pnpm
 
 COPY package.json pnpm-lock.yaml ./
+RUN pnpm config set minimum-release-age 0
 RUN pnpm install --frozen-lockfile --prod
 
 #### Stage 2: Build ####
@@ -12,6 +13,7 @@ WORKDIR /app
 RUN corepack enable pnpm
 
 COPY package.json pnpm-lock.yaml ./
+RUN pnpm config set minimum-release-age 0
 RUN pnpm install --frozen-lockfile
 
 COPY . .
