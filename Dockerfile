@@ -9,16 +9,12 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-# Generate Prisma client (with Alpine/musl target)
+# Generate Prisma client (with Alpine target)
 RUN npx prisma generate
 
 # Build Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
-
-# Prepare a minimal Prisma CLI bundle for runtime migrations.
-# Resolves pnpm symlinks (-L) so Docker COPY gets real files.
-RUN mkdir -p /prisma-cli && cp -rL node_modules/prisma /prisma-cli/prisma
 
 #### Stage 2: Production runner ####
 FROM node:22-alpine AS runner
@@ -26,6 +22,10 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# Install Prisma globally to run migrations without massive node_modules.
+# We also clean the npm cache immediately to save space.
+RUN npm install -g prisma@7.8.0 && npm cache clean --force
 
 # Copy built app (standalone includes only the necessary dependencies)
 COPY --from=builder --chown=node:node /app/public ./public
@@ -35,9 +35,6 @@ COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 # Copy Prisma schema and migrations (needed for migrate deploy)
 COPY --from=builder --chown=node:node /app/prisma ./prisma
 COPY --from=builder --chown=node:node /app/prisma.config.ts ./
-
-# Copy Prisma CLI from builder (avoids ~300MB global install)
-COPY --from=builder --chown=node:node /prisma-cli/prisma ./node_modules/prisma
 
 # Entrypoint
 COPY --chown=node:node entrypoint.sh ./
