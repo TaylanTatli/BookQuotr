@@ -39,19 +39,19 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs && \
   adduser --system --uid 1001 nextjs
 
-# Copy production node_modules (this now includes the generated Prisma client)
-COPY --from=deps /app/node_modules ./node_modules
+# Install Prisma globally to run migrations without massive node_modules
+RUN npm install -g prisma@7.8.0
 
-# Copy built app
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
+# Copy built app (standalone includes only the necessary dependencies)
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Copy Prisma schema and migrations (needed for migrate deploy)
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 # Entrypoint
-COPY entrypoint.sh ./
+COPY --chown=nextjs:nodejs entrypoint.sh ./
 RUN chmod +x entrypoint.sh
 
 # Data directory (will be volume-mounted)
