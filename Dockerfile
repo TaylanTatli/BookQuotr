@@ -49,7 +49,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Copy Prisma schema and migrations (needed for migrate deploy)
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./
 # Entrypoint
 COPY --chown=nextjs:nodejs entrypoint.sh ./
 RUN chmod +x entrypoint.sh
