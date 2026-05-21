@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
 interface SettingsModalProps {
-  children: React.ReactNode;
+  children: React.ReactElement;
   onImportSuccess: () => void;
 }
 
@@ -107,7 +107,7 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger render={children} />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
@@ -163,11 +163,13 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
               Permanently delete all books and quotes. This cannot be undone.
             </p>
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash2 data-icon="inline-start" />
-                  Delete All Data
-                </Button>
+              <AlertDialogTrigger
+                render={
+                  <Button variant="destructive" size="sm" />
+                }
+              >
+                <Trash2 data-icon="inline-start" />
+                Delete All Data
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>

@@ -72,10 +72,12 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
               </Button>
             </AddBookModal>
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-7">
-                  <Trash2 className="size-3.5" />
-                </Button>
+              <AlertDialogTrigger
+                render={
+                  <Button variant="ghost" size="icon" className="size-7" />
+                }
+              >
+                <Trash2 className="size-3.5" />
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>

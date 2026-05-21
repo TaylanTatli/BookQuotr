@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import type { Quote } from "@/types";
 
 interface AddQuoteModalProps {
-  children: React.ReactNode;
+  children: React.ReactElement;
   bookId: string;
   onQuoteAdded: () => void;
   existingQuote?: Quote;
@@ -96,7 +96,7 @@ export function AddQuoteModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger render={children} />
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{existingQuote ? "Edit Quote" : "Add Quote"}</DialogTitle>

@@ -8,7 +8,8 @@ export async function GET() {
       include: { _count: { select: { quotes: true } } },
     });
     return NextResponse.json({ books });
-  } catch {
+  } catch (error) {
+    console.error("GET /api/books error:", error);
     return NextResponse.json({ error: "Failed to fetch books" }, { status: 500 });
   }
 }

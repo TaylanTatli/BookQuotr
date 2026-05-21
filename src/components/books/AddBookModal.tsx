@@ -19,12 +19,19 @@ import { Separator } from "@/components/ui/separator";
 import type { SearchResult, BookWithQuotes } from "@/types";
 
 interface AddBookModalProps {
-  children: React.ReactNode;
+  children: React.ReactElement;
   onBookAdded: () => void;
   existingBook?: BookWithQuotes;
 }
 
-const FIELDS = [
+type FieldDef = {
+  key: string;
+  label: string;
+  required?: boolean;
+  type?: string;
+};
+
+const FIELDS: FieldDef[] = [
   { key: "title", label: "Title", required: true },
   { key: "author", label: "Author", required: true },
   { key: "publisher", label: "Publisher" },
@@ -33,7 +40,7 @@ const FIELDS = [
   { key: "pageCount", label: "Page Count", type: "number" },
   { key: "language", label: "Language" },
   { key: "thumbnail", label: "Cover URL" },
-] as const;
+];
 
 type BookFormData = Record<string, string>;
 
@@ -125,7 +132,7 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger render={children} />
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{existingBook ? "Edit Book" : "Add Book"}</DialogTitle>

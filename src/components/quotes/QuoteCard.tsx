@@ -94,15 +94,17 @@ export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProp
         </AddQuoteModal>
 
         <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-6"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Trash2 className="size-3" />
-            </Button>
+          <AlertDialogTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-6"
+                onClick={(e) => e.stopPropagation()}
+              />
+            }
+          >
+            <Trash2 className="size-3" />
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>

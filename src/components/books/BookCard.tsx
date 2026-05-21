@@ -80,15 +80,17 @@ export function BookCard({ book, isSelected, onClick, onDeleted }: BookCardProps
 
       {/* Delete button */}
       <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-1 top-1 size-6 opacity-0 transition-opacity group-hover:opacity-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Trash2 className="size-3" />
-          </Button>
+        <AlertDialogTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1 size-6 opacity-0 transition-opacity group-hover:opacity-100"
+              onClick={(e) => e.stopPropagation()}
+            />
+          }
+        >
+          <Trash2 className="size-3" />
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
