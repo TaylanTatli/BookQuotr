@@ -17,6 +17,7 @@ export async function proxy(request: NextRequest) {
     path.startsWith("/favicon.ico") ||
     path.startsWith("/favicon.svg") ||
     path === "/login" ||
+    path === "/api/health" ||
     path === "/api/auth/login"
   ) {
     return NextResponse.next();

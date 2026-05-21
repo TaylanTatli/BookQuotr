@@ -16,7 +16,7 @@ services:
       # - GOOGLE_BOOKS_API_KEY=your_api_key_here
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/books"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
