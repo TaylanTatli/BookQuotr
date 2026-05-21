@@ -16,6 +16,12 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import {
+  Field,
+  FieldContent,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { useTranslation } from "@/i18n/client";
 import type { SearchResult, BookWithQuotes } from "@/types";
 
@@ -220,23 +226,25 @@ export function AddBookModal({ children, onBookAdded, existingBook }: AddBookMod
 
           {/* Manual form */}
           <form onSubmit={handleSave} className="flex flex-col gap-3">
-            <div className="grid grid-cols-2 gap-3">
+            <FieldGroup className="grid grid-cols-2 gap-3">
               {FIELDS.map(({ key, label, required, type }: any) => (
-                <div key={key} className={key === "thumbnail" ? "col-span-2" : ""}>
-                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                <Field key={key} className={key === "thumbnail" ? "col-span-2" : ""}>
+                  <FieldLabel>
                     {t(label)} {required && <span className="text-destructive">*</span>}
-                  </label>
-                  <Input
-                    type={type ?? "text"}
-                    value={formData[key] ?? ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, [key]: e.target.value }))
-                    }
-                    placeholder={t(label)}
-                  />
-                </div>
+                  </FieldLabel>
+                  <FieldContent>
+                    <Input
+                      type={type ?? "text"}
+                      value={formData[key] ?? ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, [key]: e.target.value }))
+                      }
+                      placeholder={t(label)}
+                    />
+                  </FieldContent>
+                </Field>
               ))}
-            </div>
+            </FieldGroup>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 {t("common.cancel")}

@@ -13,6 +13,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { useTranslation } from "@/i18n/client";
 import type { Quote } from "@/types";
 
@@ -105,21 +112,24 @@ export function AddQuoteModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* Main textarea */}
-          <div>
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder={t("addQuote.placeholder")}
-              className="min-h-36 resize-none font-mono text-sm"
-              autoFocus
-            />
-            {!existingQuote && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                <span dangerouslySetInnerHTML={{ __html: t("addQuote.tip").replace('<0>', '<code class="rounded bg-muted px-1 py-0.5">').replace('</0>', '</code>') }} />
-              </p>
-            )}
-          </div>
+          <FieldGroup>
+            {/* Main textarea */}
+            <Field>
+              <FieldContent>
+                <Textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder={t("addQuote.placeholder")}
+                  className="min-h-36 resize-none font-mono text-sm"
+                  autoFocus
+                />
+              </FieldContent>
+              {!existingQuote && (
+                <FieldDescription>
+                  <span dangerouslySetInnerHTML={{ __html: t("addQuote.tip").replace('<0>', '<code class="rounded bg-muted px-1 py-0.5">').replace('</0>', '</code>') }} />
+                </FieldDescription>
+              )}
+            </Field>
 
           {/* Optional fields toggle */}
           <button
@@ -134,40 +144,41 @@ export function AddQuoteModal({
           </button>
 
           {showExtra && (
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  {t("addQuote.page")}
-                </label>
-                <Input
-                  type="number"
-                  value={page}
-                  onChange={(e) => setPage(e.target.value)}
-                  placeholder={t("addQuote.pagePlaceholder")}
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  {t("addQuote.chapter")}
-                </label>
-                <Input
-                  value={chapter}
-                  onChange={(e) => setChapter(e.target.value)}
-                  placeholder={t("addQuote.chapterPlaceholder")}
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  {t("addQuote.note")}
-                </label>
-                <Input
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder={t("addQuote.notePlaceholder")}
-                />
-              </div>
-            </div>
+            <FieldGroup className="grid grid-cols-3 gap-3">
+              <Field>
+                <FieldLabel>{t("addQuote.page")}</FieldLabel>
+                <FieldContent>
+                  <Input
+                    type="number"
+                    value={page}
+                    onChange={(e) => setPage(e.target.value)}
+                    placeholder={t("addQuote.pagePlaceholder")}
+                  />
+                </FieldContent>
+              </Field>
+              <Field>
+                <FieldLabel>{t("addQuote.chapter")}</FieldLabel>
+                <FieldContent>
+                  <Input
+                    value={chapter}
+                    onChange={(e) => setChapter(e.target.value)}
+                    placeholder={t("addQuote.chapterPlaceholder")}
+                  />
+                </FieldContent>
+              </Field>
+              <Field>
+                <FieldLabel>{t("addQuote.note")}</FieldLabel>
+                <FieldContent>
+                  <Input
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder={t("addQuote.notePlaceholder")}
+                  />
+                </FieldContent>
+              </Field>
+            </FieldGroup>
           )}
+          </FieldGroup>
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

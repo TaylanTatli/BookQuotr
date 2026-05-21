@@ -1,14 +1,15 @@
 "use client";
 
-import { BookOpen, Plus, Settings, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { AddBookModal } from "@/components/books/AddBookModal";
+import { BookCard } from "@/components/books/BookCard";
+import { SettingsModal } from "@/components/settings/SettingsModal";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookCard } from "@/components/books/BookCard";
-import { AddBookModal } from "@/components/books/AddBookModal";
-import { SettingsModal } from "@/components/settings/SettingsModal";
 import { useTranslation } from "@/i18n/client";
 import type { BookWithQuoteCount } from "@/types";
+import { LogOut, Plus, Settings } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface BookSidebarProps {
   books: BookWithQuoteCount[];
@@ -41,7 +42,7 @@ export function BookSidebar({
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex flex-col gap-3 p-4 border-b">
         <div className="flex items-center gap-2 px-2">
-          <BookOpen className="size-5 text-primary" />
+          <Image src="/favicon.svg" alt="BookQuotr" width={28} height={28} className="text-primary" />
           <h1 className="text-lg font-semibold tracking-tight">BookQuotr</h1>
         </div>
         <div className="flex gap-2 px-1">

@@ -15,6 +15,7 @@ export async function proxy(request: NextRequest) {
   if (
     path.startsWith("/_next") ||
     path.startsWith("/favicon.ico") ||
+    path.startsWith("/favicon.svg") ||
     path === "/login" ||
     path === "/api/auth/login"
   ) {
@@ -43,5 +44,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|favicon.svg).*)"],
 };

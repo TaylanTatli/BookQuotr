@@ -1,14 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { BookOpen } from "lucide-react";
 import { useTranslation } from "@/i18n/client";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -17,6 +16,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Field,
+  FieldContent,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -55,39 +61,48 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-sm">
         <form onSubmit={handleLogin}>
-          <CardHeader className="space-y-3 text-center">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary/10">
-              <BookOpen className="size-6 text-primary" />
+          <CardHeader className="flex flex-col gap-3 text-center">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary/10 overflow-hidden">
+              <Image src="/favicon.svg" alt="BookQuotr" width={40} height={40} className="text-primary" />
             </div>
-            <CardTitle className="text-2xl font-bold">{t("login.title")}</CardTitle>
-            <CardDescription>
-              {t("login.subtitle")}
-            </CardDescription>
+            <div className="flex flex-col items-center gap-1 mx-auto">
+              <CardTitle className="text-2xl font-bold">{t("login.title")}</CardTitle>
+              <CardDescription className="text-sm text-balance">
+                {t("login.subtitle")}
+              </CardDescription>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">{t("login.username")}</Label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">{t("login.password")}</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+          <CardContent className="my-6">
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="username">{t("login.username")}</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                  />
+                </FieldContent>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="password">{t("login.password")}</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </FieldContent>
+              </Field>
+            </FieldGroup>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="pt-4 mt-8">
             <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="animate-spin" data-icon="inline-start" />}
               {loading ? t("login.signingIn") : t("login.signIn")}
             </Button>
           </CardFooter>
