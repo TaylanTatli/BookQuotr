@@ -3,7 +3,7 @@ FROM node:22-alpine AS deps
 WORKDIR /app
 RUN corepack enable pnpm
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm config set minimum-release-age 0
 RUN pnpm install --frozen-lockfile --prod
 
@@ -12,7 +12,7 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 RUN corepack enable pnpm
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm config set minimum-release-age 0
 RUN pnpm install --frozen-lockfile
 
@@ -33,7 +33,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+  adduser --system --uid 1001 nextjs
 
 # Copy production node_modules
 COPY --from=deps /app/node_modules ./node_modules
