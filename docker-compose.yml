@@ -1,6 +1,6 @@
 services:
   bookquotr:
-    build: .
+    image: ghcr.io/taylantatli/bookquotr:latest
     container_name: bookquotr
     ports:
       - "3000:3000"
@@ -8,7 +8,12 @@ services:
       - ./data:/app/data
     environment:
       - DATABASE_URL=file:./data/bookquotr.db
-      - NODE_ENV=production
+      # Authentication (Optional)
+      # - AUTH_ENABLED=true
+      # - AUTH_USERNAME=admin
+      # - AUTH_PASSWORD=bookquotr
+      # External APIs (Optional)
+      # - GOOGLE_BOOKS_API_KEY=your_api_key_here
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/books"]
