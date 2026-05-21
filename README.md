@@ -73,34 +73,6 @@ docker-compose up -d --build
 ```
 Your application will be available at `http://localhost:3000`. The database file will be safely persisted in the `./data` directory on your host machine.
 
----
 
-## ▲ Deploying to Vercel (Important!)
-
-BookQuotr is perfectly compatible with Vercel and can be deployed with one click. However, **Vercel's Serverless environment does not have a persistent file system**. If you use a local SQLite file (`file:./data/bookquotr.db`) on Vercel, your data will be erased every time the serverless function spins down.
-
-To fix this, BookQuotr is pre-configured with the **Turso (LibSQL)** adapter, making it trivial to use a hosted SQLite database.
-
-### Steps to Deploy on Vercel:
-
-1. **Create a Turso Database:**
-   - Go to [Turso](https://turso.tech/) and create a free account.
-   - Create a new database and copy the database URL (it will look like `libsql://your-db-name.turso.io`) and your Auth Token.
-
-2. **Deploy to Vercel:**
-   - Push your code to a GitHub repository.
-   - Import the project into Vercel.
-
-3. **Set Environment Variables in Vercel:**
-   Go to your project's settings in Vercel and add your Turso database URL with the auth token appended as a query parameter:
-   - `DATABASE_URL="libsql://your-db-name.turso.io?authToken=YOUR_AUTH_TOKEN"`
-
-*(That's it! When Vercel builds your project, it will automatically connect to Turso and create the necessary tables).*
-
-That's it! Your BookQuotr application will now run globally on Vercel while safely persisting all your books and quotes on Turso.
-
----
-
-## 📝 License
 
 This project is open-source and available under the [MIT License](LICENSE).
