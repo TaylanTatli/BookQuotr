@@ -5,6 +5,8 @@ import { BookSidebar } from "@/components/layout/BookSidebar";
 import { QuotesPanel } from "@/components/layout/QuotesPanel";
 import type { BookWithQuoteCount, BookWithQuotes, Quote } from "@/types";
 
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+
 export default function HomePage() {
   const [books, setBooks] = useState<BookWithQuoteCount[]>([]);
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
@@ -91,26 +93,33 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <BookSidebar
-        books={books}
-        selectedBookId={selectedBookId}
-        loading={loadingBooks}
-        onSelectBook={setSelectedBookId}
-        onBookAdded={handleBookAdded}
-        onBookDeleted={handleBookDeleted}
-        onImportSuccess={fetchBooks}
-      />
-      <QuotesPanel
-        book={selectedBook}
-        quotes={quotes}
-        loading={loadingQuotes}
-        onQuoteAdded={handleQuoteAdded}
-        onQuoteDeleted={handleQuoteDeleted}
-        onQuoteUpdated={handleQuoteUpdated}
-        onBookUpdated={() => selectedBookId && fetchQuotes(selectedBookId)}
-        onBookDeleted={handleBookDeleted}
-      />
-    </div>
+    <SidebarProvider>
+      <div className="flex h-screen w-full overflow-hidden bg-background">
+        <BookSidebar
+          books={books}
+          selectedBookId={selectedBookId}
+          loading={loadingBooks}
+          onSelectBook={setSelectedBookId}
+          onBookAdded={handleBookAdded}
+          onBookDeleted={handleBookDeleted}
+          onImportSuccess={fetchBooks}
+        />
+        <main className="relative flex min-w-0 flex-1 flex-col">
+          <div className="absolute left-2 top-2 z-10">
+            <SidebarTrigger />
+          </div>
+          <QuotesPanel
+            book={selectedBook}
+            quotes={quotes}
+            loading={loadingQuotes}
+            onQuoteAdded={handleQuoteAdded}
+            onQuoteDeleted={handleQuoteDeleted}
+            onQuoteUpdated={handleQuoteUpdated}
+            onBookUpdated={() => selectedBookId && fetchQuotes(selectedBookId)}
+            onBookDeleted={handleBookDeleted}
+          />
+        </main>
+      </div>
+    </SidebarProvider>
   );
 }

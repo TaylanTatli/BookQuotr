@@ -1,6 +1,6 @@
 "use client";
 
-import { QuoteCard } from "./QuoteCard";
+import { QuoteCard } from "@/components/quotes/QuoteCard";
 import type { Quote } from "@/types";
 
 interface QuoteListProps {

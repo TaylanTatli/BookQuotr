@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { AddBookModal } from "./AddBookModal";
+import { AddBookModal } from "@/components/books/AddBookModal";
 import type { BookWithQuotes } from "@/types";
 
 interface BookDetailProps {

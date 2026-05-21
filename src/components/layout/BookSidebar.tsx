@@ -1,13 +1,18 @@
 "use client";
 
-import { BookOpen, Plus, Settings } from "lucide-react";
+import { BookOpen, Plus, Settings, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookCard } from "@/components/books/BookCard";
 import { AddBookModal } from "@/components/books/AddBookModal";
 import { SettingsModal } from "@/components/settings/SettingsModal";
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+} from "@/components/ui/sidebar";
 import type { BookWithQuoteCount } from "@/types";
 
 interface BookSidebarProps {
@@ -29,33 +34,38 @@ export function BookSidebar({
   onBookDeleted,
   onImportSuccess,
 }: BookSidebarProps) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+  };
+
   return (
-    <aside className="flex w-[30%] min-w-[260px] max-w-[360px] flex-col border-r border-border bg-muted/20">
-      {/* Header */}
-      <div className="flex flex-col gap-3 p-4">
-        <div className="flex items-center gap-2">
-          <BookOpen className="size-5 text-primary" />
-          <h1 className="text-lg font-semibold tracking-tight">BookQuotr</h1>
+    <Sidebar style={{ "--sidebar-width": "20rem" } as React.CSSProperties}>
+      <SidebarHeader>
+        <div className="flex flex-col gap-3 p-2">
+          <div className="flex items-center gap-2 px-2">
+            <BookOpen className="size-5 text-primary" />
+            <h1 className="text-lg font-semibold tracking-tight">BookQuotr</h1>
+          </div>
+          <div className="flex gap-2 px-1">
+            <AddBookModal onBookAdded={onBookAdded}>
+              <Button size="sm" className="flex-1">
+                <Plus data-icon="inline-start" />
+                Add Book
+              </Button>
+            </AddBookModal>
+            <SettingsModal onImportSuccess={onImportSuccess}>
+              <Button size="sm" variant="outline">
+                <Settings className="size-4" />
+              </Button>
+            </SettingsModal>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <AddBookModal onBookAdded={onBookAdded}>
-            <Button size="sm" className="flex-1">
-              <Plus data-icon="inline-start" />
-              Add Book
-            </Button>
-          </AddBookModal>
-          <SettingsModal onImportSuccess={onImportSuccess}>
-            <Button size="sm" variant="outline">
-              <Settings className="size-4" />
-            </Button>
-          </SettingsModal>
-        </div>
-      </div>
+      </SidebarHeader>
 
-      <Separator />
-
-      {/* Book list */}
-      <ScrollArea className="flex-1">
+      <SidebarContent>
         <div className="flex flex-col gap-1 p-2">
           {loading ? (
             Array.from({ length: 5 }).map((_, i) => (
@@ -83,7 +93,16 @@ export function BookSidebar({
             ))
           )}
         </div>
-      </ScrollArea>
-    </aside>
+      </SidebarContent>
+      
+      <SidebarFooter>
+        <div className="p-2">
+          <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+            <LogOut className="mr-2 size-4" />
+            Logout
+          </Button>
+        </div>
+      </SidebarFooter>
+    </Sidebar>
   );
 }

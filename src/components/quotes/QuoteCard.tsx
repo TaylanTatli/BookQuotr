@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { AddQuoteModal } from "./AddQuoteModal";
+import { AddQuoteModal } from "@/components/quotes/AddQuoteModal";
 import type { Quote } from "@/types";
 
 interface QuoteCardProps {

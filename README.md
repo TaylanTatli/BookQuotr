@@ -46,6 +46,14 @@ cp .env.example .env
 ```
 *(By default, this sets up your local SQLite database inside the `/data` folder).*
 
+**Authentication (Optional):**
+If you want to protect your dashboard with a login screen, configure these variables in your `.env` file:
+```env
+AUTH_ENABLED="true"
+AUTH_USERNAME="admin"
+AUTH_PASSWORD="bookquotr"
+```
+
 ### 3. Database Migration
 
 Run the Prisma migration command to create the database tables:
