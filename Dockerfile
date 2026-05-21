@@ -7,6 +7,10 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm config set minimum-release-age 0
 RUN pnpm install --frozen-lockfile --prod
 
+# Copy Prisma schema and generate client for production node_modules
+COPY prisma ./prisma
+RUN npx prisma generate
+
 #### Stage 2: Build ####
 FROM node:22-alpine AS builder
 WORKDIR /app
@@ -35,7 +39,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs && \
   adduser --system --uid 1001 nextjs
 
-# Copy production node_modules
+# Copy production node_modules (this now includes the generated Prisma client)
 COPY --from=deps /app/node_modules ./node_modules
 
 # Copy built app
@@ -45,8 +49,6 @@ COPY --from=builder /app/public ./public
 
 # Copy Prisma schema and migrations (needed for migrate deploy)
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # Entrypoint
 COPY entrypoint.sh ./
