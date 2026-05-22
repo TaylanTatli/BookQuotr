@@ -11,11 +11,16 @@ export async function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // Allow static files and login route
+  // Allow static files, manifests, icons, and login route
   if (
     path.startsWith("/_next") ||
     path.startsWith("/favicon.ico") ||
     path.startsWith("/favicon.svg") ||
+    path === "/site.webmanifest" ||
+    path === "/apple-touch-icon.png" ||
+    path === "/favicon-96x96.png" ||
+    path === "/web-app-manifest-192x192.png" ||
+    path === "/web-app-manifest-512x512.png" ||
     path === "/login" ||
     path === "/api/health" ||
     path === "/api/auth/login"
@@ -45,5 +50,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|favicon.svg).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon\\.ico|favicon\\.svg|site\\.webmanifest|apple-touch-icon\\.png|favicon-96x96\\.png|web-app-manifest-192x192\\.png|web-app-manifest-512x512\\.png).*)",
+  ],
 };

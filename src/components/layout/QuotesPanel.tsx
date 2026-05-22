@@ -39,15 +39,30 @@ export function QuotesPanel({
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<QuoteViewMode>("default");
 
-  // Persist view mode in localStorage
+  // Persist view mode and sync with localStorage changes
   useEffect(() => {
-    const saved = localStorage.getItem(VIEW_MODE_KEY) as QuoteViewMode | null;
-    if (saved) setViewMode(saved);
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem(VIEW_MODE_KEY) as QuoteViewMode | null;
+      if (saved) setViewMode(saved);
+    };
+
+    handleStorageChange();
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("local-storage-update", handleStorageChange);
+    
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("local-storage-update", handleStorageChange);
+    };
   }, []);
 
   function handleViewModeChange(mode: QuoteViewMode) {
     setViewMode(mode);
     localStorage.setItem(VIEW_MODE_KEY, mode);
+    // Dispatch events to notify other components (e.g. SettingsModal)
+    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new Event("local-storage-update"));
   }
 
   if (!book) {

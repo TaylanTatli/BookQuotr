@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Download, Upload, Loader2, Trash2 } from "lucide-react";
 import type { QuoteViewMode } from "@/components/quotes/QuoteViewOptions";
 import { toast } from "sonner";
@@ -79,11 +79,40 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
   const router = useRouter();
   const { t, locale } = useTranslation();
 
+  // Sync state when Modal is opened
+  useEffect(() => {
+    if (open) {
+      try {
+        const saved = localStorage.getItem(VIEW_MODE_KEY) as QuoteViewMode | null;
+        if (saved) setDefaultViewMode(saved);
+      } catch {}
+    }
+  }, [open]);
+
+  // Sync with storage changes in the same tab
+  useEffect(() => {
+    const handleStorageChange = () => {
+      try {
+        const saved = localStorage.getItem(VIEW_MODE_KEY) as QuoteViewMode | null;
+        if (saved) setDefaultViewMode(saved);
+      } catch {}
+    };
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("local-storage-update", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("local-storage-update", handleStorageChange);
+    };
+  }, []);
+
   function handleDefaultViewChange(newMode: string | null) {
     if (!newMode) return;
     const mode = newMode as QuoteViewMode;
     setDefaultViewMode(mode);
     localStorage.setItem(VIEW_MODE_KEY, mode);
+    // Dispatch events to notify other components instantly
+    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new Event("local-storage-update"));
   }
 
   async function handleExport() {
