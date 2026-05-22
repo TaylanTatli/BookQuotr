@@ -56,9 +56,10 @@ export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProp
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{quote.content}</ReactMarkdown>
       </div>
 
-      {/* Meta badges */}
-      {(quote.page || quote.chapter || quote.note) && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
+      {/* Bottom row: meta badges + action buttons */}
+      <div className="mt-3 flex items-end justify-between gap-2">
+        {/* Meta badges */}
+        <div className="flex flex-wrap gap-1.5">
           {quote.page && (
             <Badge variant="secondary" className="text-xs">
               p. {quote.page}
@@ -75,53 +76,53 @@ export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProp
             </Badge>
           )}
         </div>
-      )}
 
-      {/* Action buttons */}
-      <div
-        className={cn(
-          "absolute right-2 top-2 flex gap-1 transition-opacity",
-          "opacity-100 md:opacity-0",
-          hovered && "md:opacity-100"
-        )}
-      >
-        <AddQuoteModal bookId={bookId} existingQuote={quote} onQuoteAdded={() => { }}>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Pencil className="size-3" />
-          </Button>
-        </AddQuoteModal>
+        {/* Action buttons — always visible on mobile, hover on desktop */}
+        <div
+          className={cn(
+            "flex shrink-0 gap-1 transition-opacity",
+            "opacity-100 md:opacity-0",
+            hovered && "md:opacity-100"
+          )}
+        >
+          <AddQuoteModal bookId={bookId} existingQuote={quote} onQuoteAdded={() => onUpdated(quote)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Pencil className="size-3" />
+            </Button>
+          </AddQuoteModal>
 
-        <AlertDialog>
-          <AlertDialogTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-6"
-                onClick={(e) => e.stopPropagation()}
-              />
-            }
-          >
-            <Trash2 className="size-3" />
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t("quotes.deleteTitle")}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("quotes.deleteDesc")}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>{t("common.delete")}</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          <AlertDialog>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-6 text-destructive hover:text-destructive"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              }
+            >
+              <Trash2 className="size-3" />
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("quotes.deleteTitle")}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("quotes.deleteDesc")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>{t("common.delete")}</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Download, Upload, Loader2, Trash2 } from "lucide-react";
+import type { QuoteViewMode } from "@/components/quotes/QuoteViewOptions";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -53,14 +54,36 @@ interface SettingsModalProps {
   onImportSuccess: () => void;
 }
 
+const VIEW_MODE_KEY = "bq_quote_view_mode";
+
+const VIEW_MODE_OPTIONS: { value: QuoteViewMode; labelKey: string }[] = [
+  { value: "default", labelKey: "quotes.viewDefault" },
+  { value: "two-column", labelKey: "quotes.viewTwoColumn" },
+  { value: "centered", labelKey: "quotes.viewCentered" },
+  { value: "masonry", labelKey: "quotes.viewMasonry" },
+];
+
 export function SettingsModal({ children, onImportSuccess }: SettingsModalProps) {
   const [open, setOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [defaultViewMode, setDefaultViewMode] = useState<QuoteViewMode>("default");
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { t, locale } = useTranslation();
+
+  useEffect(() => {
+    const saved = localStorage.getItem(VIEW_MODE_KEY) as QuoteViewMode | null;
+    if (saved) setDefaultViewMode(saved);
+  }, []);
+
+  function handleDefaultViewChange(newMode: string | null) {
+    if (!newMode) return;
+    const mode = newMode as QuoteViewMode;
+    setDefaultViewMode(mode);
+    localStorage.setItem(VIEW_MODE_KEY, mode);
+  }
 
   async function handleExport() {
     setExporting(true);
@@ -158,6 +181,29 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
                     {LANGUAGES.map((lang) => (
                       <SelectItem key={lang.value} value={lang.value}>
                         {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </FieldContent>
+          </Field>
+
+          <Separator />
+
+          {/* Default quote view */}
+          <Field orientation="horizontal">
+            <FieldLabel>{t("settings.defaultQuoteView")}</FieldLabel>
+            <FieldContent>
+              <Select value={defaultViewMode} onValueChange={handleDefaultViewChange}>
+                <SelectTrigger className="w-[180px]">
+                  {VIEW_MODE_OPTIONS.find((o) => o.value === defaultViewMode) ? t(VIEW_MODE_OPTIONS.find((o) => o.value === defaultViewMode)!.labelKey) : "Select"}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {VIEW_MODE_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {t(opt.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectGroup>

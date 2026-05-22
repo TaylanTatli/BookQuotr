@@ -11,7 +11,9 @@
     "deleteAllConfirmDesc": "Onaylamak için <0>DELETE</0> yazın. Bu işlem tüm kitap ve alıntıları kalıcı olarak silecektir.",
     "cancel": "İptal",
     "language": "Dil",
-    "typeToDelete": "Onaylamak için DELETE yazın"
+    "typeToDelete": "Onaylamak için DELETE yazın",
+    "defaultQuoteView": "Varsayılan Alıntı Görünümü",
+    "defaultSort": "Varsayılan Sıralama"
   },
   "login": {
     "title": "BookQuotr",
@@ -42,7 +44,11 @@
     "updateSuccess": "Alıntı güncellendi",
     "saveSuccess": "Alıntı kaydedildi",
     "saveMultipleSuccess": "{count} alıntı kaydedildi",
-    "saveError": "Alıntı kaydedilemedi"
+    "saveError": "Alıntı kaydedilemedi",
+    "viewDefault": "Varsayılan (Tek sütun)",
+    "viewTwoColumn": "İki sütun",
+    "viewCentered": "Ortalanmış dar",
+    "viewMasonry": "Masonry"
   },
   "books": {
     "deleteTitle": "\"{title}\" silinsin mi?",
@@ -55,7 +61,21 @@
     "deleteError": "Kitap silinemedi",
     "updateSuccess": "Kitap güncellendi",
     "addSuccess": "Kitap eklendi",
-    "saveError": "Kitap kaydedilemedi"
+    "saveError": "Kitap kaydedilemedi",
+    "startedAt": "Okumaya başlandı",
+    "finishedAt": "Okundu",
+    "readingDuration": "{days} günde okundu",
+    "rating": "Puan",
+    "stars": "yıldız",
+    "favorite": "Favorilere ekle",
+    "unfavorite": "Favorilerden çıkar",
+    "addedToFavorites": "Favorilere eklendi",
+    "removedFromFavorites": "Favorilerden çıkarıldı",
+    "sortByAdded": "Eklenme Tarihi",
+    "sortByFinished": "Bitirilme Tarihi",
+    "sortByTitle": "Başlık",
+    "sortByAuthor": "Yazar",
+    "sortByRating": "Puan"
   },
   "addBook": {
     "addTitle": "Kitap Ekle",
@@ -69,6 +89,8 @@
     "pageCount": "Sayfa Sayısı",
     "language": "Dil",
     "coverUrl": "Kapak URL'si",
+    "startedAt": "Okumaya Başlama Tarihi",
+    "finishedAt": "Bitirilme Tarihi",
     "saveChanges": "Değişiklikleri Kaydet",
     "cancel": "İptal",
     "required": "Başlık ve yazar zorunludur",

@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Book {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   title         String
   author        String
   publisher     String?
@@ -18,10 +18,14 @@ model Book {
   pageCount     Int?
   language      String?
   thumbnail     String?
-  googleBooksId String?  @unique
-  openLibraryId String?  @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  googleBooksId String?   @unique
+  openLibraryId String?   @unique
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  rating        Int?
+  isFavorite    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   quotes Quote[]
 }

@@ -11,7 +11,9 @@
     "deleteAllConfirmDesc": "Type <0>DELETE</0> to confirm. This will permanently delete all books and quotes.",
     "cancel": "Cancel",
     "language": "Language",
-    "typeToDelete": "Type DELETE to confirm"
+    "typeToDelete": "Type DELETE to confirm",
+    "defaultQuoteView": "Default Quote View",
+    "defaultSort": "Default Sort Order"
   },
   "login": {
     "title": "BookQuotr",
@@ -42,7 +44,11 @@
     "updateSuccess": "Quote updated",
     "saveSuccess": "Quote saved",
     "saveMultipleSuccess": "{count} quotes saved",
-    "saveError": "Failed to save quote"
+    "saveError": "Failed to save quote",
+    "viewDefault": "Default (Single column)",
+    "viewTwoColumn": "Two columns",
+    "viewCentered": "Centered narrow",
+    "viewMasonry": "Masonry"
   },
   "books": {
     "deleteTitle": "Delete \"{title}\"?",
@@ -55,7 +61,21 @@
     "deleteError": "Failed to delete book",
     "updateSuccess": "Book updated",
     "addSuccess": "Book added",
-    "saveError": "Failed to save book"
+    "saveError": "Failed to save book",
+    "startedAt": "Started reading",
+    "finishedAt": "Finished reading",
+    "readingDuration": "Read in {days} days",
+    "rating": "Rating",
+    "stars": "stars",
+    "favorite": "Add to favorites",
+    "unfavorite": "Remove from favorites",
+    "addedToFavorites": "Added to favorites",
+    "removedFromFavorites": "Removed from favorites",
+    "sortByAdded": "Date Added",
+    "sortByFinished": "Date Finished",
+    "sortByTitle": "Title",
+    "sortByAuthor": "Author",
+    "sortByRating": "Rating"
   },
   "addBook": {
     "addTitle": "Add Book",
@@ -69,6 +89,8 @@
     "pageCount": "Page Count",
     "language": "Language",
     "coverUrl": "Cover URL",
+    "startedAt": "Started Reading",
+    "finishedAt": "Finished Reading",
     "saveChanges": "Save Changes",
     "cancel": "Cancel",
     "required": "Title and author are required",

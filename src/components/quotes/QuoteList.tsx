@@ -2,15 +2,23 @@
 
 import { QuoteCard } from "@/components/quotes/QuoteCard";
 import { useTranslation } from "@/i18n/client";
+import { cn } from "@/lib/utils";
 import type { Quote } from "@/types";
+import type { QuoteViewMode } from "@/components/quotes/QuoteViewOptions";
 
 interface QuoteListProps {
   quotes: Quote[];
   onQuoteDeleted: (id: string) => void;
   onQuoteUpdated: (quote: Quote) => void;
+  viewMode?: QuoteViewMode;
 }
 
-export function QuoteList({ quotes, onQuoteDeleted, onQuoteUpdated }: QuoteListProps) {
+export function QuoteList({
+  quotes,
+  onQuoteDeleted,
+  onQuoteUpdated,
+  viewMode = "default",
+}: QuoteListProps) {
   const { t } = useTranslation();
 
   if (quotes.length === 0) {
@@ -22,6 +30,63 @@ export function QuoteList({ quotes, onQuoteDeleted, onQuoteUpdated }: QuoteListP
     );
   }
 
+  if (viewMode === "two-column") {
+    return (
+      <div className="grid grid-cols-1 gap-3 pb-20 sm:grid-cols-2">
+        {quotes.map((quote) => (
+          <QuoteCard
+            key={quote.id}
+            quote={quote}
+            bookId={quote.bookId}
+            onDeleted={onQuoteDeleted}
+            onUpdated={onQuoteUpdated}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (viewMode === "centered") {
+    return (
+      <div className="flex flex-col gap-3 pb-20">
+        {quotes.map((quote) => (
+          <div key={quote.id} className="mx-auto w-full max-w-2xl">
+            <QuoteCard
+              quote={quote}
+              bookId={quote.bookId}
+              onDeleted={onQuoteDeleted}
+              onUpdated={onQuoteUpdated}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (viewMode === "masonry") {
+    return (
+      <div
+        className="pb-20"
+        style={{
+          columnCount: 2,
+          columnGap: "0.75rem",
+        }}
+      >
+        {quotes.map((quote) => (
+          <div key={quote.id} className="mb-3 break-inside-avoid">
+            <QuoteCard
+              quote={quote}
+              bookId={quote.bookId}
+              onDeleted={onQuoteDeleted}
+              onUpdated={onQuoteUpdated}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // default: single column
   return (
     <div className="flex flex-col gap-3 pb-20">
       {quotes.map((quote) => (

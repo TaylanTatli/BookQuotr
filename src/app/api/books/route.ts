@@ -1,10 +1,24 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const sortBy = searchParams.get("sortBy") ?? "createdAt";
+
+    type BookOrderByField = { createdAt?: "asc" | "desc" } | { title?: "asc" | "desc" } | { author?: "asc" | "desc" } | { rating?: "asc" | "desc" } | { finishedAt?: "asc" | "desc" };
+    const orderByMap: Record<string, BookOrderByField[]> = {
+      finishedAt: [{ finishedAt: "desc" }, { title: "asc" }],
+      title: [{ title: "asc" }],
+      author: [{ author: "asc" }],
+      rating: [{ rating: "desc" }, { title: "asc" }],
+      createdAt: [{ createdAt: "desc" }],
+    };
+    const orderBy = orderByMap[sortBy] ?? orderByMap.createdAt;
+
     const books = await prisma.book.findMany({
-      orderBy: { createdAt: "desc" },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      orderBy: orderBy as any,
       include: { _count: { select: { quotes: true } } },
     });
     return NextResponse.json({ books });

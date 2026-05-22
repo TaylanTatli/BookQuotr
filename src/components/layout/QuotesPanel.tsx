@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Plus, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,8 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookDetail } from "@/components/books/BookDetail";
 import { QuoteList } from "@/components/quotes/QuoteList";
 import { AddQuoteModal } from "@/components/quotes/AddQuoteModal";
+import { QuoteViewOptions, type QuoteViewMode } from "@/components/quotes/QuoteViewOptions";
 import { useTranslation } from "@/i18n/client";
 import type { BookWithQuotes, Quote } from "@/types";
+
+const VIEW_MODE_KEY = "bq_quote_view_mode";
 
 interface QuotesPanelProps {
   book: BookWithQuotes | null;
@@ -33,6 +37,18 @@ export function QuotesPanel({
   onBookDeleted,
 }: QuotesPanelProps) {
   const { t } = useTranslation();
+  const [viewMode, setViewMode] = useState<QuoteViewMode>("default");
+
+  // Persist view mode in localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(VIEW_MODE_KEY) as QuoteViewMode | null;
+    if (saved) setViewMode(saved);
+  }, []);
+
+  function handleViewModeChange(mode: QuoteViewMode) {
+    setViewMode(mode);
+    localStorage.setItem(VIEW_MODE_KEY, mode);
+  }
 
   if (!book) {
     return (
@@ -56,8 +72,16 @@ export function QuotesPanel({
 
       <Separator className="mx-6 mt-4" />
 
+      {/* Toolbar: count + view options */}
+      <div className="shrink-0 flex items-center justify-between px-6 py-2">
+        <p className="text-xs text-muted-foreground">
+          {quotes.length} {quotes.length === 1 ? t("books.quoteCount") : t("books.quotesCount")}
+        </p>
+        <QuoteViewOptions value={viewMode} onChange={handleViewModeChange} />
+      </div>
+
       {/* Quotes list */}
-      <ScrollArea className="flex-1 px-6 py-4">
+      <ScrollArea className="flex-1 px-6 pb-4">
         {loading ? (
           <div className="flex flex-col gap-4">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -73,6 +97,7 @@ export function QuotesPanel({
             quotes={quotes}
             onQuoteDeleted={onQuoteDeleted}
             onQuoteUpdated={onQuoteUpdated}
+            viewMode={viewMode}
           />
         )}
       </ScrollArea>

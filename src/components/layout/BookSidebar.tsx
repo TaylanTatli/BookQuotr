@@ -1,15 +1,56 @@
 "use client";
 
+import { useState } from "react";
 import { AddBookModal } from "@/components/books/AddBookModal";
 import { BookCard } from "@/components/books/BookCard";
 import { SettingsModal } from "@/components/settings/SettingsModal";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTranslation } from "@/i18n/client";
 import type { BookWithQuoteCount } from "@/types";
 import { LogOut, Plus, Settings } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+type SortKey = "createdAt" | "finishedAt" | "title" | "author" | "rating";
+
+function sortBooks(books: BookWithQuoteCount[], sortKey: SortKey): BookWithQuoteCount[] {
+  const copy = [...books];
+  switch (sortKey) {
+    case "finishedAt":
+      return copy.sort((a, b) => {
+        if (a.finishedAt && b.finishedAt)
+          return new Date(b.finishedAt).getTime() - new Date(a.finishedAt).getTime();
+        if (a.finishedAt) return -1;
+        if (b.finishedAt) return 1;
+        return a.title.localeCompare(b.title);
+      });
+    case "title":
+      return copy.sort((a, b) => a.title.localeCompare(b.title));
+    case "author":
+      return copy.sort((a, b) => a.author.localeCompare(b.author));
+    case "rating":
+      return copy.sort((a, b) => {
+        const ra = a.rating ?? 0;
+        const rb = b.rating ?? 0;
+        if (rb !== ra) return rb - ra;
+        return a.title.localeCompare(b.title);
+      });
+    case "createdAt":
+    default:
+      return copy.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+  }
+}
 
 interface BookSidebarProps {
   books: BookWithQuoteCount[];
@@ -32,15 +73,18 @@ export function BookSidebar({
 }: BookSidebarProps) {
   const router = useRouter();
   const { t } = useTranslation();
+  const [sortKey, setSortKey] = useState<SortKey>("createdAt");
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
   };
 
+  const sortedBooks = sortBooks(books, sortKey);
+
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex flex-col gap-3 p-4 border-b">
+      <div className="flex flex-col gap-3 border-b p-4">
         <div className="flex items-center gap-2 px-2">
           <Image src="/favicon.svg" alt="BookQuotr" width={28} height={28} className="text-primary" />
           <h1 className="text-lg font-semibold tracking-tight">BookQuotr</h1>
@@ -58,6 +102,26 @@ export function BookSidebar({
             </Button>
           </SettingsModal>
         </div>
+
+        {/* Sort selector */}
+        {books.length > 1 && (
+          <div className="px-1">
+            <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+              <SelectTrigger className="h-7 w-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="createdAt">{t("books.sortByAdded")}</SelectItem>
+                  <SelectItem value="finishedAt">{t("books.sortByFinished")}</SelectItem>
+                  <SelectItem value="title">{t("books.sortByTitle")}</SelectItem>
+                  <SelectItem value="author">{t("books.sortByAuthor")}</SelectItem>
+                  <SelectItem value="rating">{t("books.sortByRating")}</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-auto">
@@ -77,7 +141,7 @@ export function BookSidebar({
               {t("sidebar.noBooks")}
             </p>
           ) : (
-            books.map((book) => (
+            sortedBooks.map((book) => (
               <BookCard
                 key={book.id}
                 book={book}
@@ -89,7 +153,7 @@ export function BookSidebar({
           )}
         </div>
       </div>
-      
+
       <div className="mt-auto border-t p-4">
         <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
           <LogOut className="mr-2 size-4" />

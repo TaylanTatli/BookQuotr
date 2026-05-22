@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Trash2 } from "lucide-react";
+import { Trash2, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/i18n/client";
@@ -74,7 +74,12 @@ export function BookCard({ book, isSelected, onClick, onDeleted }: BookCardProps
 
       {/* Info */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium leading-tight">{book.title}</p>
+        <div className="flex items-start gap-1">
+          <p className="min-w-0 flex-1 truncate text-sm font-medium leading-tight">{book.title}</p>
+          {book.isFavorite && (
+            <Heart className="mt-0.5 size-3 shrink-0 fill-red-500 text-red-500" />
+          )}
+        </div>
         <p className="truncate text-xs text-muted-foreground">{book.author}</p>
         <Badge variant="secondary" className="mt-1 text-xs">
           {book._count.quotes} {book._count.quotes === 1 ? t("books.quoteCount") : t("books.quotesCount")}

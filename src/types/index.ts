@@ -1,12 +1,27 @@
 import type { Book, Quote } from "@prisma/client";
 
-export type { Book, Quote };
+export type { Quote };
 
-export interface BookWithQuoteCount extends Book {
+/**
+ * Base Book type augmented with fields added in migration
+ * (startedAt, finishedAt, rating, isFavorite).
+ * We re-declare these here so the IDE always sees them,
+ * regardless of Prisma client cache state.
+ */
+export interface BookBase extends Book {
+  startedAt: Date | null;
+  finishedAt: Date | null;
+  rating: number | null;
+  isFavorite: boolean;
+}
+
+export type { Book };
+
+export interface BookWithQuoteCount extends BookBase {
   _count: { quotes: number };
 }
 
-export interface BookWithQuotes extends Book {
+export interface BookWithQuotes extends BookBase {
   quotes: Quote[];
 }
 

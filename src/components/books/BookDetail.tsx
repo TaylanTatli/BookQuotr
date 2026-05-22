@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil, Star, Heart } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AddBookModal } from "@/components/books/AddBookModal";
 import { useTranslation } from "@/i18n/client";
+import { getLanguageName } from "@/lib/languageMap";
+import { cn } from "@/lib/utils";
 import type { BookWithQuotes } from "@/types";
 
 interface BookDetailProps {
@@ -26,8 +29,31 @@ interface BookDetailProps {
   onBookDeleted: (id: string) => void;
 }
 
+function formatDate(dateStr: string | Date | null | undefined, locale: string): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function calcReadingDays(startedAt: Date | null | undefined, finishedAt: Date | null | undefined): number | null {
+  if (!startedAt || !finishedAt) return null;
+  const start = new Date(startedAt);
+  const end = new Date(finishedAt);
+  const diff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  return diff >= 0 ? diff : null;
+}
+
 export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const [rating, setRating] = useState<number | null>(book.rating ?? null);
+  const [isFavorite, setIsFavorite] = useState(book.isFavorite ?? false);
+  const [hoveredStar, setHoveredStar] = useState<number | null>(null);
+  const [savingRating, setSavingRating] = useState(false);
+  const [savingFavorite, setSavingFavorite] = useState(false);
 
   async function handleDelete() {
     try {
@@ -39,6 +65,46 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
       toast.error(t("books.deleteError"));
     }
   }
+
+  async function handleRating(newRating: number) {
+    // Toggle off if same star clicked
+    const value = newRating === rating ? null : newRating;
+    setRating(value);
+    setSavingRating(true);
+    try {
+      await fetch(`/api/books/${book.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: value }),
+      });
+    } catch {
+      toast.error(t("books.saveError"));
+      setRating(book.rating ?? null);
+    } finally {
+      setSavingRating(false);
+    }
+  }
+
+  async function handleFavorite() {
+    const newValue = !isFavorite;
+    setIsFavorite(newValue);
+    setSavingFavorite(true);
+    try {
+      await fetch(`/api/books/${book.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFavorite: newValue }),
+      });
+      toast.success(newValue ? t("books.addedToFavorites") : t("books.removedFromFavorites"));
+    } catch {
+      toast.error(t("books.saveError"));
+      setIsFavorite(book.isFavorite ?? false);
+    } finally {
+      setSavingFavorite(false);
+    }
+  }
+
+  const readingDays = calcReadingDays(book.startedAt, book.finishedAt);
 
   return (
     <div className="flex gap-5">
@@ -69,6 +135,17 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
           </div>
           {/* Actions */}
           <div className="flex shrink-0 gap-1">
+            {/* Favorite button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("size-7", isFavorite && "text-red-500 hover:text-red-500")}
+              onClick={handleFavorite}
+              disabled={savingFavorite}
+              title={isFavorite ? t("books.unfavorite") : t("books.favorite")}
+            >
+              <Heart className={cn("size-3.5", isFavorite && "fill-current")} />
+            </Button>
             <AddBookModal existingBook={book} onBookAdded={onBookUpdated}>
               <Button variant="ghost" size="icon" className="size-7">
                 <Pencil className="size-3.5" />
@@ -98,6 +175,32 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
           </div>
         </div>
 
+        {/* Star rating */}
+        <div className="mt-2 flex items-center gap-0.5" aria-label={t("books.rating")}>
+          {[1, 2, 3, 4, 5].map((star) => {
+            const filled = (hoveredStar ?? rating ?? 0) >= star;
+            return (
+              <button
+                key={star}
+                type="button"
+                disabled={savingRating}
+                onClick={() => handleRating(star)}
+                onMouseEnter={() => setHoveredStar(star)}
+                onMouseLeave={() => setHoveredStar(null)}
+                className="text-muted-foreground transition-colors hover:text-yellow-400 disabled:opacity-50"
+                aria-label={`${star} ${t("books.stars")}`}
+              >
+                <Star
+                  className={cn(
+                    "size-4 transition-colors",
+                    filled ? "fill-yellow-400 text-yellow-400" : "fill-none"
+                  )}
+                />
+              </button>
+            );
+          })}
+        </div>
+
         {/* Meta badges */}
         <div className="mt-2 flex flex-wrap gap-1.5">
           {book.publishedDate && (
@@ -116,8 +219,8 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
             </Badge>
           )}
           {book.language && (
-            <Badge variant="outline" className="text-xs uppercase">
-              {book.language}
+            <Badge variant="outline" className="text-xs">
+              {getLanguageName(book.language, locale)}
             </Badge>
           )}
           {book.isbn && (
@@ -126,6 +229,27 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
             </Badge>
           )}
         </div>
+
+        {/* Reading dates */}
+        {(book.startedAt || book.finishedAt) && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {book.startedAt && (
+              <Badge variant="secondary" className="text-xs">
+                📖 {t("books.startedAt")}: {formatDate(book.startedAt, locale)}
+              </Badge>
+            )}
+            {book.finishedAt && (
+              <Badge variant="secondary" className="text-xs">
+                ✅ {t("books.finishedAt")}: {formatDate(book.finishedAt, locale)}
+              </Badge>
+            )}
+            {readingDays !== null && (
+              <Badge variant="secondary" className="text-xs">
+                ⏱ {t("books.readingDuration", { days: readingDays })}
+              </Badge>
+            )}
+          </div>
+        )}
 
         {/* Description */}
         {book.description && (

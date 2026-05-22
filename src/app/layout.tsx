@@ -1,7 +1,18 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "BookQuotr",
@@ -31,12 +42,12 @@ export default async function RootLayout({
   const locale = await getLocale();
 
   return (
-    <html lang={locale} className="dark">
+    <html lang={locale} className={`dark ${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <I18nProvider dictionary={dictionary} locale={locale}>
           <TooltipProvider>
             {children}
-            <Toaster richColors position="bottom-right" />
+            <Toaster richColors position="top-right" />
           </TooltipProvider>
         </I18nProvider>
       </body>
