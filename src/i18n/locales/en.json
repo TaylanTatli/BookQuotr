@@ -13,7 +13,11 @@
     "language": "Language",
     "typeToDelete": "Type DELETE to confirm",
     "defaultQuoteView": "Default Quote View",
-    "defaultSort": "Default Sort Order"
+    "defaultSort": "Default Sort Order",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System"
   },
   "login": {
     "title": "BookQuotr",

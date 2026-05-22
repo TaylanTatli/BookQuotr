@@ -32,6 +32,7 @@ export const metadata: Metadata = {
 
 import { I18nProvider } from "@/i18n/client";
 import { getDictionary, getLocale } from "@/i18n/server";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 export default async function RootLayout({
   children,
@@ -42,14 +43,16 @@ export default async function RootLayout({
   const locale = await getLocale();
 
   return (
-    <html lang={locale} className={`dark ${geistSans.variable} ${geistMono.variable}`}>
+    <html lang={locale} className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body>
-        <I18nProvider dictionary={dictionary} locale={locale}>
-          <TooltipProvider>
-            {children}
-            <Toaster richColors position="top-right" />
-          </TooltipProvider>
-        </I18nProvider>
+        <ThemeProvider>
+          <I18nProvider dictionary={dictionary} locale={locale}>
+            <TooltipProvider>
+              {children}
+              <Toaster richColors position="top-right" />
+            </TooltipProvider>
+          </I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

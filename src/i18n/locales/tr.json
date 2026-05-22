@@ -13,7 +13,11 @@
     "language": "Dil",
     "typeToDelete": "Onaylamak için DELETE yazın",
     "defaultQuoteView": "Varsayılan Alıntı Görünümü",
-    "defaultSort": "Varsayılan Sıralama"
+    "defaultSort": "Varsayılan Sıralama",
+    "theme": "Tema",
+    "themeLight": "Açık",
+    "themeDark": "Koyu",
+    "themeSystem": "Sistem"
   },
   "login": {
     "title": "BookQuotr",

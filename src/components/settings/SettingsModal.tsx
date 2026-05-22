@@ -42,10 +42,17 @@ import {
 
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/i18n/client";
+import { useTheme } from "next-themes";
 
 const LANGUAGES = [
   { value: "en", label: "English" },
   { value: "tr", label: "Türkçe" },
+];
+
+const THEME_OPTIONS = [
+  { value: "system", labelKey: "settings.themeSystem" },
+  { value: "light", labelKey: "settings.themeLight" },
+  { value: "dark", labelKey: "settings.themeDark" },
 ];
 
 interface SettingsModalProps {
@@ -78,6 +85,12 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { t, locale } = useTranslation();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Sync state when Modal is opened
   useEffect(() => {
@@ -211,6 +224,29 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
                     {LANGUAGES.map((lang) => (
                       <SelectItem key={lang.value} value={lang.value}>
                         {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </FieldContent>
+          </Field>
+
+          <Separator />
+
+          {/* Theme Selection */}
+          <Field orientation="horizontal">
+            <FieldLabel>{t("settings.theme")}</FieldLabel>
+            <FieldContent>
+              <Select value={mounted ? theme : "system"} onValueChange={(val) => setTheme(val || "system")}>
+                <SelectTrigger className="w-[180px]">
+                  {mounted && theme ? t(THEME_OPTIONS.find((t) => t.value === theme)?.labelKey || "settings.themeSystem") : t("settings.themeSystem")}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {THEME_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {t(opt.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectGroup>
