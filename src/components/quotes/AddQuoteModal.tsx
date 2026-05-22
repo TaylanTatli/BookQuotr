@@ -146,7 +146,7 @@ export function AddQuoteModal({
                         __html: t("addQuote.tip")
                           .replace(
                             "<0>",
-                            '<code class="rounded bg-muted px-1 py-0.5">'
+                            '<code class="font-mono rounded bg-muted px-1 py-0.5">'
                           )
                           .replace("</0>", "</code>"),
                       }}

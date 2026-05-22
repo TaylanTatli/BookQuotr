@@ -123,7 +123,7 @@ export function BookDetail({
   return (
     <div className="flex items-center gap-5">
       {/* Cover */}
-      <div className="aspect-2/3 h-30 shrink-0 overflow-hidden rounded-lg shadow-md">
+      <div className="h-30 w-auto shrink-0 overflow-hidden rounded-lg shadow-md">
         {book.thumbnail ? (
           <Image
             src={book.thumbnail}

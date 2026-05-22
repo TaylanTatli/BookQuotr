@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "@/i18n/client";
 import ReactMarkdown from "react-markdown";
@@ -32,6 +32,7 @@ interface QuoteCardProps {
 
 export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProps) {
   const [hovered, setHovered] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { t } = useTranslation();
 
   async function handleDelete() {
@@ -42,6 +43,18 @@ export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProp
       toast.success(t("quotes.deleteSuccess"));
     } catch {
       toast.error(t("quotes.deleteError"));
+    }
+  }
+
+  async function handleCopy(e: React.MouseEvent) {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(quote.content);
+      setCopied(true);
+      toast.success(t("quotes.copySuccess"));
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error(t("quotes.copyError"));
     }
   }
 
@@ -85,6 +98,19 @@ export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProp
             hovered && "md:opacity-100"
           )}
         >
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-6"
+            onClick={handleCopy}
+          >
+            {copied ? (
+              <Check className="size-3 text-green-600 dark:text-green-400" />
+            ) : (
+              <Copy className="size-3" />
+            )}
+          </Button>
+
           <AddQuoteModal bookId={bookId} existingQuote={quote} onQuoteAdded={() => onUpdated(quote)}>
             <Button
               variant="ghost"

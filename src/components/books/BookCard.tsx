@@ -66,7 +66,7 @@ export function BookCard({
       {/* Thumbnail */}
       <ItemMedia
         variant="image"
-        className="aspect-2/3 h-full shrink-0 overflow-hidden rounded"
+        className="h-16 w-auto shrink-0 overflow-hidden rounded"
       >
         {book.thumbnail ? (
           <Image

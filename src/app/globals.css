@@ -65,6 +65,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.1904 0.004 106.7692);
   --foreground: oklch(0.9755 0.0067 97.351);
   --card: oklch(0.2343 0.0038 106.6863);
@@ -191,6 +192,9 @@
   }
   html {
     @apply scrollbar-gutter-stable font-sans;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    @apply cursor-pointer dark:invert;
   }
 }
 ::-webkit-scrollbar {

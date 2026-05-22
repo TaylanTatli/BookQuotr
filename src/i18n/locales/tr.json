@@ -45,6 +45,8 @@
     "saveSuccess": "Alıntı kaydedildi",
     "saveMultipleSuccess": "{count} alıntı kaydedildi",
     "saveError": "Alıntı kaydedilemedi",
+    "copySuccess": "Alıntı panoya kopyalandı",
+    "copyError": "Alıntı kopyalanamadı",
     "viewDefault": "Varsayılan (Tek sütun)",
     "viewTwoColumn": "İki sütun",
     "viewCentered": "Ortalanmış dar",

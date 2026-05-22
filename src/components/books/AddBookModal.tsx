@@ -232,7 +232,7 @@ export function AddBookModal({
                           onClick={() => handleSelectResult(r)}
                           className="flex w-full min-w-0 items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-secondary"
                         >
-                          <div className="aspect-2/3 size-10 h-auto shrink-0 overflow-hidden rounded">
+                          <div className="h-14 w-auto shrink-0 overflow-hidden rounded">
                             {r.thumbnail ? (
                               <Image
                                 src={r.thumbnail}

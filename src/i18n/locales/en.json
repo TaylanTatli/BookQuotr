@@ -45,6 +45,8 @@
     "saveSuccess": "Quote saved",
     "saveMultipleSuccess": "{count} quotes saved",
     "saveError": "Failed to save quote",
+    "copySuccess": "Quote copied to clipboard",
+    "copyError": "Failed to copy quote",
     "viewDefault": "Default (Single column)",
     "viewTwoColumn": "Two columns",
     "viewCentered": "Centered narrow",
