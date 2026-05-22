@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import type { ExportPayload } from "@/types";
+import type { Prisma } from "@prisma/client";
 
 export async function GET() {
   try {
@@ -28,22 +29,68 @@ export async function POST(request: Request) {
     for (const book of body.books) {
       const { quotes, ...bookData } = book;
 
-      await prisma.book.upsert({
-        where: { id: bookData.id },
-        update: bookData,
-        create: bookData,
-      });
-      importedBooks++;
-
-      if (quotes && Array.isArray(quotes)) {
-        for (const quote of quotes) {
-          await prisma.quote.upsert({
-            where: { id: quote.id },
-            update: quote,
-            create: { ...quote, bookId: bookData.id },
-          });
-          importedQuotes++;
+      try {
+        // Determine where clause for upsert - prioritize unique IDs over book ID
+        let whereClause: Prisma.BookWhereUniqueInput;
+        
+        if (bookData.googleBooksId) {
+          whereClause = { googleBooksId: bookData.googleBooksId };
+        } else if (bookData.openLibraryId) {
+          whereClause = { openLibraryId: bookData.openLibraryId };
+        } else {
+          whereClause = { id: bookData.id };
         }
+
+        // Sanitize book data - preserve all fields from export, let Prisma handle nulls
+        const sanitizedBookData = {
+          ...bookData,
+          // Ensure null values for optional fields that might be missing
+          googleBooksId: bookData.googleBooksId ?? null,
+          openLibraryId: bookData.openLibraryId ?? null,
+          isFavorite: typeof bookData.isFavorite === 'boolean' ? bookData.isFavorite : false,
+          startedAt: bookData.startedAt ?? null,
+          finishedAt: bookData.finishedAt ?? null,
+          rating: bookData.rating ?? null,
+        };
+
+        await prisma.book.upsert({
+          where: whereClause,
+          update: sanitizedBookData,
+          create: sanitizedBookData,
+        });
+        importedBooks++;
+
+        // Import quotes for this book
+        if (quotes && Array.isArray(quotes)) {
+          for (const quote of quotes) {
+            try {
+              await prisma.quote.upsert({
+                where: { id: quote.id },
+                update: { 
+                  content: quote.content,
+                  page: quote.page ?? null,
+                  chapter: quote.chapter ?? null,
+                  note: quote.note ?? null,
+                },
+                create: { 
+                  ...quote, 
+                  bookId: bookData.id,
+                  page: quote.page ?? null,
+                  chapter: quote.chapter ?? null,
+                  note: quote.note ?? null,
+                },
+              });
+              importedQuotes++;
+            } catch {
+              // Skip individual quotes that fail
+              continue;
+            }
+          }
+        }
+      } catch (error) {
+        // Skip books that fail to import and continue with next book
+        console.error(`Failed to import book ${bookData.id}:`, error);
+        continue;
       }
     }
 
@@ -52,7 +99,8 @@ export async function POST(request: Request) {
       importedBooks,
       importedQuotes,
     });
-  } catch {
+  } catch (error) {
+    console.error("Import error:", error);
     return NextResponse.json({ error: "Import failed" }, { status: 500 });
   }
 }

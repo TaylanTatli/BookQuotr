@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Download, Upload, Loader2, Trash2 } from "lucide-react";
 import type { QuoteViewMode } from "@/components/quotes/QuoteViewOptions";
 import { toast } from "sonner";
@@ -37,8 +37,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
+  SelectTrigger
 } from "@/components/ui/select";
 
 import { useRouter } from "next/navigation";
@@ -68,15 +67,17 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
-  const [defaultViewMode, setDefaultViewMode] = useState<QuoteViewMode>("default");
+  const [defaultViewMode, setDefaultViewMode] = useState<QuoteViewMode>(() => {
+    try {
+      const saved = localStorage.getItem(VIEW_MODE_KEY) as QuoteViewMode | null;
+      return saved || "default";
+    } catch {
+      return "default";
+    }
+  });
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { t, locale } = useTranslation();
-
-  useEffect(() => {
-    const saved = localStorage.getItem(VIEW_MODE_KEY) as QuoteViewMode | null;
-    if (saved) setDefaultViewMode(saved);
-  }, []);
 
   function handleDefaultViewChange(newMode: string | null) {
     if (!newMode) return;
