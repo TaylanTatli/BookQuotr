@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import Image from "next/image";
-import { Trash2, Pencil, Star, Heart } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import Image from "next/image"
+import { Trash2, Pencil, Star, Heart } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,107 +16,121 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { AddBookModal } from "@/components/books/AddBookModal";
-import { useTranslation } from "@/i18n/client";
-import { getLanguageName } from "@/lib/languageMap";
-import { cn } from "@/lib/utils";
-import type { BookWithQuotes } from "@/types";
+} from "@/components/ui/alert-dialog"
+import { AddBookModal } from "@/components/books/AddBookModal"
+import { useTranslation } from "@/i18n/client"
+import { getLanguageName } from "@/lib/languageMap"
+import { cn } from "@/lib/utils"
+import type { BookWithQuotes } from "@/types"
 
 interface BookDetailProps {
-  book: BookWithQuotes;
-  onBookUpdated: () => void;
-  onBookDeleted: (id: string) => void;
+  book: BookWithQuotes
+  onBookUpdated: () => void
+  onBookDeleted: (id: string) => void
 }
 
-function formatDate(dateStr: string | Date | null | undefined, locale: string): string {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
+function formatDate(
+  dateStr: string | Date | null | undefined,
+  locale: string
+): string {
+  if (!dateStr) return ""
+  const d = new Date(dateStr)
   return d.toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
-  });
+  })
 }
 
-function calcReadingDays(startedAt: Date | null | undefined, finishedAt: Date | null | undefined): number | null {
-  if (!startedAt || !finishedAt) return null;
-  const start = new Date(startedAt);
-  const end = new Date(finishedAt);
-  const diff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  return diff >= 0 ? diff : null;
+function calcReadingDays(
+  startedAt: Date | null | undefined,
+  finishedAt: Date | null | undefined
+): number | null {
+  if (!startedAt || !finishedAt) return null
+  const start = new Date(startedAt)
+  const end = new Date(finishedAt)
+  const diff = Math.round(
+    (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+  )
+  return diff >= 0 ? diff : null
 }
 
-export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailProps) {
-  const { t, locale } = useTranslation();
-  const [rating, setRating] = useState<number | null>(book.rating ?? null);
-  const [isFavorite, setIsFavorite] = useState(book.isFavorite ?? false);
-  const [hoveredStar, setHoveredStar] = useState<number | null>(null);
-  const [savingRating, setSavingRating] = useState(false);
-  const [savingFavorite, setSavingFavorite] = useState(false);
+export function BookDetail({
+  book,
+  onBookUpdated,
+  onBookDeleted,
+}: BookDetailProps) {
+  const { t, locale } = useTranslation()
+  const [rating, setRating] = useState<number | null>(book.rating ?? null)
+  const [isFavorite, setIsFavorite] = useState(book.isFavorite ?? false)
+  const [hoveredStar, setHoveredStar] = useState<number | null>(null)
+  const [savingRating, setSavingRating] = useState(false)
+  const [savingFavorite, setSavingFavorite] = useState(false)
 
   async function handleDelete() {
     try {
-      const res = await fetch(`/api/books/${book.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
-      onBookDeleted(book.id);
-      toast.success(t("books.deleteSuccess", { title: book.title }));
+      const res = await fetch(`/api/books/${book.id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error()
+      onBookDeleted(book.id)
+      toast.success(t("books.deleteSuccess", { title: book.title }))
     } catch {
-      toast.error(t("books.deleteError"));
+      toast.error(t("books.deleteError"))
     }
   }
 
   async function handleRating(newRating: number) {
     // Toggle off if same star clicked
-    const value = newRating === rating ? null : newRating;
-    setRating(value);
-    setSavingRating(true);
+    const value = newRating === rating ? null : newRating
+    setRating(value)
+    setSavingRating(true)
     try {
       await fetch(`/api/books/${book.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating: value }),
-      });
+      })
     } catch {
-      toast.error(t("books.saveError"));
-      setRating(book.rating ?? null);
+      toast.error(t("books.saveError"))
+      setRating(book.rating ?? null)
     } finally {
-      setSavingRating(false);
+      setSavingRating(false)
     }
   }
 
   async function handleFavorite() {
-    const newValue = !isFavorite;
-    setIsFavorite(newValue);
-    setSavingFavorite(true);
+    const newValue = !isFavorite
+    setIsFavorite(newValue)
+    setSavingFavorite(true)
     try {
       await fetch(`/api/books/${book.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isFavorite: newValue }),
-      });
-      toast.success(newValue ? t("books.addedToFavorites") : t("books.removedFromFavorites"));
+      })
+      toast.success(
+        newValue ? t("books.addedToFavorites") : t("books.removedFromFavorites")
+      )
     } catch {
-      toast.error(t("books.saveError"));
-      setIsFavorite(book.isFavorite ?? false);
+      toast.error(t("books.saveError"))
+      setIsFavorite(book.isFavorite ?? false)
     } finally {
-      setSavingFavorite(false);
+      setSavingFavorite(false)
     }
   }
 
-  const readingDays = calcReadingDays(book.startedAt, book.finishedAt);
+  const readingDays = calcReadingDays(book.startedAt, book.finishedAt)
 
   return (
-    <div className="flex gap-5">
+    <div className="flex items-center gap-5">
       {/* Cover */}
-      <div className="size-24 shrink-0 overflow-hidden rounded-lg shadow-md">
+      <div className="aspect-2/3 h-30 shrink-0 overflow-hidden rounded-lg shadow-md">
         {book.thumbnail ? (
           <Image
             src={book.thumbnail}
             alt={book.title}
             width={96}
             height={96}
-            className="size-full object-cover"
+            className="size-full w-auto object-cover"
             unoptimized
           />
         ) : (
@@ -130,7 +144,9 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h2 className="truncate text-xl font-semibold leading-tight">{book.title}</h2>
+            <h2 className="truncate text-xl leading-tight font-semibold">
+              {book.title}
+            </h2>
             <p className="text-sm text-muted-foreground">{book.author}</p>
           </div>
           {/* Actions */}
@@ -139,7 +155,10 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
             <Button
               variant="ghost"
               size="icon"
-              className={cn("size-7", isFavorite && "text-red-500 hover:text-red-500")}
+              className={cn(
+                "size-7",
+                isFavorite && "text-red-500 hover:text-red-500"
+              )}
               onClick={handleFavorite}
               disabled={savingFavorite}
               title={isFavorite ? t("books.unfavorite") : t("books.favorite")}
@@ -161,14 +180,18 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>{t("books.deleteTitle", { title: book.title })}</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {t("books.deleteTitle", { title: book.title })}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
                     {t("books.deleteDesc")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>{t("common.delete")}</AlertDialogAction>
+                  <AlertDialogAction onClick={handleDelete}>
+                    {t("common.delete")}
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -176,9 +199,12 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
         </div>
 
         {/* Star rating */}
-        <div className="mt-2 flex items-center gap-0.5" aria-label={t("books.rating")}>
+        <div
+          className="mt-2 flex items-center gap-0.5"
+          aria-label={t("books.rating")}
+        >
           {[1, 2, 3, 4, 5].map((star) => {
-            const filled = (hoveredStar ?? rating ?? 0) >= star;
+            const filled = (hoveredStar ?? rating ?? 0) >= star
             return (
               <button
                 key={star}
@@ -197,7 +223,7 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
                   )}
                 />
               </button>
-            );
+            )
           })}
         </div>
 
@@ -240,7 +266,8 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
             )}
             {book.finishedAt && (
               <Badge variant="secondary" className="text-xs">
-                ✅ {t("books.finishedAt")}: {formatDate(book.finishedAt, locale)}
+                ✅ {t("books.finishedAt")}:{" "}
+                {formatDate(book.finishedAt, locale)}
               </Badge>
             )}
             {readingDays !== null && (
@@ -259,5 +286,5 @@ export function BookDetail({ book, onBookUpdated, onBookDeleted }: BookDetailPro
         )}
       </div>
     </div>
-  );
+  )
 }

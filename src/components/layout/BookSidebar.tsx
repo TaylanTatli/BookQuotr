@@ -15,12 +15,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTranslation } from "@/i18n/client";
+import { ItemGroup } from "@/components/ui/item";
 import type { BookWithQuoteCount } from "@/types";
 import { LogOut, Plus, Settings } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 type SortKey = "createdAt" | "finishedAt" | "title" | "author" | "rating";
+
+const SORT_OPTIONS: { value: SortKey; labelKey: string }[] = [
+  { value: "createdAt", labelKey: "books.sortByAdded" },
+  { value: "finishedAt", labelKey: "books.sortByFinished" },
+  { value: "title", labelKey: "books.sortByTitle" },
+  { value: "author", labelKey: "books.sortByAuthor" },
+  { value: "rating", labelKey: "books.sortByRating" },
+];
 
 function sortBooks(books: BookWithQuoteCount[], sortKey: SortKey): BookWithQuoteCount[] {
   const copy = [...books];
@@ -108,15 +117,15 @@ export function BookSidebar({
           <div className="px-1">
             <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
               <SelectTrigger className="h-7 w-full text-xs">
-                <SelectValue />
+                {SORT_OPTIONS.find((o) => o.value === sortKey) ? t(SORT_OPTIONS.find((o) => o.value === sortKey)!.labelKey) : <SelectValue />}
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="createdAt">{t("books.sortByAdded")}</SelectItem>
-                  <SelectItem value="finishedAt">{t("books.sortByFinished")}</SelectItem>
-                  <SelectItem value="title">{t("books.sortByTitle")}</SelectItem>
-                  <SelectItem value="author">{t("books.sortByAuthor")}</SelectItem>
-                  <SelectItem value="rating">{t("books.sortByRating")}</SelectItem>
+                  {SORT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {t(opt.labelKey)}
+                    </SelectItem>
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -125,7 +134,7 @@ export function BookSidebar({
       </div>
 
       <div className="flex-1 overflow-auto">
-        <div className="flex flex-col gap-1 p-2">
+        <ItemGroup className="gap-1 p-2">
           {loading ? (
             Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex gap-3 rounded-md p-2">
@@ -151,7 +160,7 @@ export function BookSidebar({
               />
             ))
           )}
-        </div>
+        </ItemGroup>
       </div>
 
       <div className="mt-auto border-t p-4">

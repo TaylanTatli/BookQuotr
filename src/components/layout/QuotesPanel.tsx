@@ -81,7 +81,7 @@ export function QuotesPanel({
       </div>
 
       {/* Quotes list */}
-      <ScrollArea className="flex-1 px-6 pb-4">
+      <div className="flex-1 overflow-y-auto px-6 pb-4">
         {loading ? (
           <div className="flex flex-col gap-4">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -100,7 +100,7 @@ export function QuotesPanel({
             viewMode={viewMode}
           />
         )}
-      </ScrollArea>
+      </div>
 
       {/* Add Quote FAB */}
       <div className="absolute bottom-6 right-6">

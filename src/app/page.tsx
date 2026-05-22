@@ -1,113 +1,113 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useCallback } from "react";
-import { BookSidebar } from "@/components/layout/BookSidebar";
-import { QuotesPanel } from "@/components/layout/QuotesPanel";
-import type { BookWithQuoteCount, BookWithQuotes, Quote } from "@/types";
+import { useState, useEffect, useCallback } from "react"
+import { BookSidebar } from "@/components/layout/BookSidebar"
+import { QuotesPanel } from "@/components/layout/QuotesPanel"
+import type { BookWithQuoteCount, BookWithQuotes, Quote } from "@/types"
 
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { useIsMobile } from "@/hooks/use-mobile";
+} from "@/components/ui/resizable"
+import { useIsMobile } from "@/hooks/use-mobile"
 
-import { Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
   SheetTitle,
   SheetHeader,
-} from "@/components/ui/sheet";
+} from "@/components/ui/sheet"
 
 export default function HomePage() {
-  const [books, setBooks] = useState<BookWithQuoteCount[]>([]);
-  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
-  const [selectedBook, setSelectedBook] = useState<BookWithQuotes | null>(null);
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [loadingBooks, setLoadingBooks] = useState(true);
-  const [loadingQuotes, setLoadingQuotes] = useState(false);
+  const [books, setBooks] = useState<BookWithQuoteCount[]>([])
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null)
+  const [selectedBook, setSelectedBook] = useState<BookWithQuotes | null>(null)
+  const [quotes, setQuotes] = useState<Quote[]>([])
+  const [loadingBooks, setLoadingBooks] = useState(true)
+  const [loadingQuotes, setLoadingQuotes] = useState(false)
 
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile()
 
   const fetchBooks = useCallback(async () => {
-    setLoadingBooks(true);
+    setLoadingBooks(true)
     try {
-      const res = await fetch("/api/books");
-      const data = await res.json();
-      setBooks(data.books ?? []);
+      const res = await fetch("/api/books")
+      const data = await res.json()
+      setBooks(data.books ?? [])
     } finally {
-      setLoadingBooks(false);
+      setLoadingBooks(false)
     }
-  }, []);
+  }, [])
 
   const fetchQuotes = useCallback(async (bookId: string) => {
-    setLoadingQuotes(true);
+    setLoadingQuotes(true)
     try {
       const [bookRes, quotesRes] = await Promise.all([
         fetch(`/api/books/${bookId}`),
         fetch(`/api/quotes?bookId=${bookId}`),
-      ]);
-      const bookData = await bookRes.json();
-      const quotesData = await quotesRes.json();
-      setSelectedBook(bookData.book ?? null);
-      setQuotes(quotesData.quotes ?? []);
+      ])
+      const bookData = await bookRes.json()
+      const quotesData = await quotesRes.json()
+      setSelectedBook(bookData.book ?? null)
+      setQuotes(quotesData.quotes ?? [])
     } finally {
-      setLoadingQuotes(false);
+      setLoadingQuotes(false)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    fetchBooks();
-  }, [fetchBooks]);
+    fetchBooks()
+  }, [fetchBooks])
 
   useEffect(() => {
     if (selectedBookId) {
-      fetchQuotes(selectedBookId);
+      fetchQuotes(selectedBookId)
     } else {
-      setSelectedBook(null);
-      setQuotes([]);
+      setSelectedBook(null)
+      setQuotes([])
     }
-  }, [selectedBookId, fetchQuotes]);
+  }, [selectedBookId, fetchQuotes])
 
   const handleBookAdded = useCallback(() => {
-    fetchBooks();
-  }, [fetchBooks]);
+    fetchBooks()
+  }, [fetchBooks])
 
   const handleBookDeleted = useCallback(
     (id: string) => {
-      setBooks((prev) => prev.filter((b) => b.id !== id));
+      setBooks((prev) => prev.filter((b) => b.id !== id))
       if (selectedBookId === id) {
-        setSelectedBookId(null);
+        setSelectedBookId(null)
       }
     },
     [selectedBookId]
-  );
+  )
 
   const handleQuoteAdded = useCallback(() => {
-    if (selectedBookId) fetchQuotes(selectedBookId);
-    fetchBooks();
-  }, [selectedBookId, fetchQuotes, fetchBooks]);
+    if (selectedBookId) fetchQuotes(selectedBookId)
+    fetchBooks()
+  }, [selectedBookId, fetchQuotes, fetchBooks])
 
   const handleQuoteDeleted = useCallback(
     (id: string) => {
-      setQuotes((prev) => prev.filter((q) => q.id !== id));
+      setQuotes((prev) => prev.filter((q) => q.id !== id))
       setBooks((prev) =>
         prev.map((b) =>
           b.id === selectedBookId
             ? { ...b, _count: { quotes: b._count.quotes - 1 } }
             : b
         )
-      );
+      )
     },
     [selectedBookId]
-  );
+  )
 
   const handleQuoteUpdated = useCallback((updated: Quote) => {
-    setQuotes((prev) => prev.map((q) => (q.id === updated.id ? updated : q)));
-  }, []);
+    setQuotes((prev) => prev.map((q) => (q.id === updated.id ? updated : q)))
+  }, [])
 
   // Separate, mobile-first layout using a drawer
   if (isMobile) {
@@ -115,15 +115,23 @@ export default function HomePage() {
       <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
         <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-sidebar px-4">
           <Sheet>
-            <SheetTrigger 
+            <SheetTrigger
               render={
-                <Button variant="ghost" size="icon" className="shrink-0 text-sidebar-foreground" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0 text-sidebar-foreground"
+                />
               }
             >
               <Menu className="size-5" />
               <span className="sr-only">Toggle menu</span>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[85vw] p-0" showCloseButton={true}>
+            <SheetContent
+              side="left"
+              className="w-[85vw] p-0"
+              showCloseButton={true}
+            >
               <SheetHeader className="sr-only">
                 <SheetTitle>Navigation Menu</SheetTitle>
               </SheetHeader>
@@ -153,18 +161,14 @@ export default function HomePage() {
           />
         </main>
       </div>
-    );
+    )
   }
 
   // Desktop layout using resizable panels
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       <ResizablePanelGroup orientation="horizontal">
-        <ResizablePanel 
-          minSize="20%" 
-          defaultSize="25%" 
-          maxSize="40%"
-        >
+        <ResizablePanel minSize="20%" defaultSize="25%" maxSize="40%">
           <BookSidebar
             books={books}
             selectedBookId={selectedBookId}
@@ -175,9 +179,9 @@ export default function HomePage() {
             onImportSuccess={fetchBooks}
           />
         </ResizablePanel>
-        
+
         <ResizableHandle withHandle />
-        
+
         <ResizablePanel defaultSize="75%">
           <main className="relative flex h-full min-w-0 flex-col overflow-hidden">
             <QuotesPanel
@@ -187,12 +191,14 @@ export default function HomePage() {
               onQuoteAdded={handleQuoteAdded}
               onQuoteDeleted={handleQuoteDeleted}
               onQuoteUpdated={handleQuoteUpdated}
-              onBookUpdated={() => selectedBookId && fetchQuotes(selectedBookId)}
+              onBookUpdated={() =>
+                selectedBookId && fetchQuotes(selectedBookId)
+              }
               onBookDeleted={handleBookDeleted}
             />
           </main>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
-  );
+  )
 }
