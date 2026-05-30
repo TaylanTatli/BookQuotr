@@ -15,18 +15,11 @@ export async function GET(_req: Request, { params }: Params) {
       return NextResponse.json({ error: "Book not found" }, { status: 404 });
     }
 
-    if (book.thumbnail && !book.thumbnail.startsWith("/api/covers/")) {
-      downloadAndSaveCover(book.id, book.thumbnail).then((localPath) => {
-        if (localPath && localPath !== book.thumbnail) {
-          prisma.book.update({
-            where: { id: book.id },
-            data: { thumbnail: localPath },
-          }).catch(console.error);
-        }
-      }).catch(console.error);
-
-      // We DO NOT optimistically return the new path here anymore.
-      // Instead, we return the original external URL so the user sees the image immediately.
+    if (book.thumbnail && book.thumbnail.startsWith("http")) {
+      // We do NOT update the database here.
+      // We just tell the frontend to load it from our local route.
+      // The local route will download and cache it on the first request.
+      book.thumbnail = `/api/covers/${book.id}`;
     }
 
     return NextResponse.json({ book });
@@ -49,10 +42,8 @@ export async function PATCH(request: Request, { params }: Params) {
           if (isLocalCover(existingBook.thumbnail)) {
              await deleteCover(id);
           }
-          // If the new thumbnail is a remote URL, download and save it
-          if (body.thumbnail && !isLocalCover(body.thumbnail)) {
-              body.thumbnail = await downloadAndSaveCover(id, body.thumbnail);
-          }
+          // Note: we don't download remote URLs here anymore. 
+          // They will be downloaded and cached on-the-fly by the /api/covers route.
        }
     }
 

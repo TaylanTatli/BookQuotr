@@ -23,22 +23,13 @@ export async function GET(request: Request) {
       include: { _count: { select: { quotes: true } } },
     });
 
-    // Auto-migrate covers on the fly for existing users
+    // Rewrite remote URLs to use our local proxy/cache on the fly
     for (const book of books) {
-      if (book.thumbnail && !book.thumbnail.startsWith("/api/covers/")) {
-        // Run migration in background without blocking the response
-        downloadAndSaveCover(book.id, book.thumbnail).then((localPath) => {
-          if (localPath && localPath !== book.thumbnail) {
-            prisma.book.update({
-              where: { id: book.id },
-              data: { thumbnail: localPath },
-            }).catch(console.error);
-          }
-        }).catch(console.error);
-
-        // We DO NOT optimistically return the new path here anymore.
-        // Instead, we return the original external URL so the user sees the image immediately.
-        // The next time they refresh or fetch books, they will get the updated local path from the DB.
+      if (book.thumbnail && book.thumbnail.startsWith("http")) {
+        // We do NOT update the database here.
+        // We just tell the frontend to load it from our local route.
+        // The local route will download and cache it on the first request.
+        book.thumbnail = `/api/covers/${book.id}`;
       }
     }
 
@@ -65,17 +56,8 @@ export async function POST(request: Request) {
       data: { title, author, ...rest },
     });
     
-    // Attempt to download the cover if a URL was provided
-    if (rest.thumbnail) {
-      const localThumbnail = await downloadAndSaveCover(book.id, rest.thumbnail);
-      if (localThumbnail && localThumbnail !== rest.thumbnail) {
-        await prisma.book.update({
-           where: { id: book.id },
-           data: { thumbnail: localThumbnail }
-        });
-        book.thumbnail = localThumbnail;
-      }
-    }
+    // Note: we don't download remote URLs here anymore. 
+    // They will be downloaded and cached on-the-fly by the /api/covers route.
 
     return NextResponse.json({ book }, { status: 201 });
   } catch {

@@ -21,6 +21,7 @@ export async function proxy(request: NextRequest) {
     path === "/favicon-96x96.png" ||
     path === "/web-app-manifest-192x192.png" ||
     path === "/web-app-manifest-512x512.png" ||
+    path.startsWith("/api/covers") ||
     path === "/login" ||
     path === "/api/health" ||
     path === "/api/auth/login"

@@ -75,7 +75,8 @@ export async function deleteCover(bookId: string): Promise<void> {
 export async function readCoverFile(bookId: string): Promise<Buffer | null> {
   try {
     return await fs.readFile(path.join(COVERS_DIR, `${bookId}.jpg`));
-  } catch {
+  } catch (error) {
+    console.error("readCoverFile failed for", bookId, error);
     return null;
   }
 }
