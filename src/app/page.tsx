@@ -31,7 +31,23 @@ export default function HomePage() {
   const [loadingBooks, setLoadingBooks] = useState(true)
   const [loadingQuotes, setLoadingQuotes] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-  const [highlightedQuoteId, setHighlightedQuoteId] = useState<string | null>(null)
+  const [highlightedQuoteId, setHighlightedQuoteId] = useState<string | null>(
+    null
+  )
+
+  const [isMounted, setIsMounted] = useState(false)
+  const [sidebarSize, setSidebarSize] = useState<number>(25)
+
+  useEffect(() => {
+    setIsMounted(true)
+    const saved = window.localStorage.getItem("bq_sidebar_width")
+    if (saved && saved !== "undefined" && saved !== "NaN") {
+      const parsed = Number(saved)
+      if (!isNaN(parsed) && parsed > 0) {
+        setSidebarSize(parsed)
+      }
+    }
+  }, [])
 
   const isMobile = useIsMobile()
 
@@ -184,6 +200,8 @@ export default function HomePage() {
     )
   }
 
+  if (!isMounted) return null
+
   // Desktop layout using resizable panels
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
@@ -197,7 +215,18 @@ export default function HomePage() {
         }}
       />
       <ResizablePanelGroup orientation="horizontal">
-        <ResizablePanel minSize="20%" defaultSize="25%" maxSize="40%">
+        <ResizablePanel 
+          minSize="20%" 
+          defaultSize={`${sidebarSize}%`} 
+          maxSize="40%"
+          onResize={(size: any) => {
+            const newSize = typeof size === 'number' ? size : size.asPercentage
+            if (newSize) {
+              setSidebarSize(newSize)
+              window.localStorage.setItem("bq_sidebar_width", String(newSize))
+            }
+          }}
+        >
           <BookSidebar
             books={books}
             selectedBookId={selectedBookId}
@@ -212,7 +241,7 @@ export default function HomePage() {
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize="75%">
+        <ResizablePanel defaultSize={`${100 - sidebarSize}%`}>
           <main className="relative flex h-full min-w-0 flex-col overflow-hidden">
             <QuotesPanel
               book={selectedBook}
