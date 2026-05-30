@@ -13,7 +13,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { QuoteImageTemplate, type ExportColors } from "@/components/quotes/QuoteImageTemplate"
+import {
+  QuoteImageTemplate,
+  type ExportColors,
+} from "@/components/quotes/QuoteImageTemplate"
 import { useTranslation } from "@/i18n/client"
 import { useTheme } from "next-themes"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -21,21 +24,78 @@ import type { Quote, BookWithQuotes } from "@/types"
 
 // ─── Presets ────────────────────────────────────────────────────
 const PRESETS = [
-  { id: "dark",    label: "Koyu",    bg: "#1c1a17", fg: "#ede8e0", accent: "#c49a5a", muted: "#8a8070", border: "#2e2a24", watermark: "#4a4540" },
-  { id: "light",   label: "Açık",    bg: "#faf8f5", fg: "#2a2520", accent: "#8b5e2a", muted: "#7a7060", border: "#e8e0d4", watermark: "#c8bfb0" },
-  { id: "cream",   label: "Krem",    bg: "#f2ebdc", fg: "#3a3025", accent: "#9c6f3a", muted: "#8a7060", border: "#ddd0bb", watermark: "#c0b090" },
-  { id: "forest",  label: "Orman",   bg: "#0d2117", fg: "#e8f0e4", accent: "#4caf82", muted: "#6a8a70", border: "#1a3525", watermark: "#2a5035" },
-  { id: "ocean",   label: "Okyanus", bg: "#0a1628", fg: "#e0eaf8", accent: "#5b8fd4", muted: "#607080", border: "#162038", watermark: "#20304a" },
+  {
+    id: "dark",
+    label: "Koyu",
+    bg: "#1c1a17",
+    fg: "#ede8e0",
+    accent: "#c49a5a",
+    muted: "#8a8070",
+    border: "#2e2a24",
+    watermark: "#4a4540",
+  },
+  {
+    id: "light",
+    label: "Açık",
+    bg: "#faf8f5",
+    fg: "#2a2520",
+    accent: "#8b5e2a",
+    muted: "#7a7060",
+    border: "#e8e0d4",
+    watermark: "#c8bfb0",
+  },
+  {
+    id: "cream",
+    label: "Krem",
+    bg: "#f2ebdc",
+    fg: "#3a3025",
+    accent: "#9c6f3a",
+    muted: "#8a7060",
+    border: "#ddd0bb",
+    watermark: "#c0b090",
+  },
+  {
+    id: "forest",
+    label: "Orman",
+    bg: "#0d2117",
+    fg: "#e8f0e4",
+    accent: "#4caf82",
+    muted: "#6a8a70",
+    border: "#1a3525",
+    watermark: "#2a5035",
+  },
+  {
+    id: "ocean",
+    label: "Okyanus",
+    bg: "#0a1628",
+    fg: "#e0eaf8",
+    accent: "#5b8fd4",
+    muted: "#607080",
+    border: "#162038",
+    watermark: "#20304a",
+  },
 ] as const
 
 type PresetId = (typeof PRESETS)[number]["id"] | "custom"
 
 // ─── Font presets ────────────────────────────────────────
 const FONT_PRESETS = [
-  { id: "sans",   label: "Sans",   value: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" },
-  { id: "serif",  label: "Serif",  value: "Georgia, 'Times New Roman', Cambria, serif" },
-  { id: "mono",   label: "Mono",   value: "'Courier New', Courier, 'Lucida Console', monospace" },
-  { id: "system", label: "System", value: "system-ui, -apple-system, sans-serif" },
+  {
+    id: "sans",
+    label: "Sans",
+    value:
+      "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  },
+  {
+    id: "serif",
+    label: "Serif",
+    value: "Georgia, 'Times New Roman', Cambria, serif",
+  },
+  {
+    id: "system",
+    label: "System",
+    value: "system-ui, -apple-system, sans-serif",
+  },
   { id: "custom", label: "Custom", value: "" },
 ] as const
 
@@ -43,10 +103,10 @@ type FontPresetId = (typeof FONT_PRESETS)[number]["id"]
 
 // ─── Aspect ratios ───────────────────────────────────────────────
 const RATIOS = [
-  { id: "1:1",    label: "1:1",  width: 1080, height: 1080 },
-  { id: "4:5",    label: "4:5",  width: 1080, height: 1350 },
-  { id: "16:9",   label: "16:9", width: 1920, height: 1080 },
-  { id: "9:16",   label: "9:16", width: 1080, height: 1920 },
+  { id: "1:1", label: "1:1", width: 1080, height: 1080 },
+  { id: "4:5", label: "4:5", width: 1080, height: 1350 },
+  { id: "16:9", label: "16:9", width: 1920, height: 1080 },
+  { id: "9:16", label: "9:16", width: 1080, height: 1920 },
   { id: "custom", label: "Özel", width: 1080, height: 1080 },
 ] as const
 
@@ -60,7 +120,11 @@ interface QuoteExportModalProps {
 }
 
 // ─── Component ──────────────────────────────────────────────────
-export function QuoteExportModal({ children, quote, book }: QuoteExportModalProps) {
+export function QuoteExportModal({
+  children,
+  quote,
+  book,
+}: QuoteExportModalProps) {
   const { t } = useTranslation()
   const { resolvedTheme } = useTheme()
   const isMobile = useIsMobile()
@@ -85,22 +149,35 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
 
   // Export dimensions
   const baseRatio = RATIOS.find((r) => r.id === ratioId)!
-  const exportWidth  = ratioId === "custom" ? Math.max(400, parseInt(customWidth)  || 1080) : baseRatio.width
-  const exportHeight = ratioId === "custom" ? Math.max(400, parseInt(customHeight) || 1080) : baseRatio.height
+  const exportWidth =
+    ratioId === "custom"
+      ? Math.max(400, parseInt(customWidth) || 1080)
+      : baseRatio.width
+  const exportHeight =
+    ratioId === "custom"
+      ? Math.max(400, parseInt(customHeight) || 1080)
+      : baseRatio.height
 
   // Responsive preview bounds
-  const maxPreviewW = isMobile ? 240 : 420
-  const maxPreviewH = isMobile ? 200 : 480
+  const maxPreviewW = isMobile ? 260 : 600
+  const maxPreviewH = isMobile ? 220 : 680
   const scaleByW = maxPreviewW / exportWidth
   const scaleByH = maxPreviewH / exportHeight
   const previewScale = Math.min(scaleByW, scaleByH)
-  const previewW = Math.round(exportWidth  * previewScale)
+  const previewW = Math.round(exportWidth * previewScale)
   const previewH = Math.round(exportHeight * previewScale)
 
   // Handlers
   function selectPreset(preset: (typeof PRESETS)[number]) {
     setSelectedPreset(preset.id)
-    setColors({ bg: preset.bg, fg: preset.fg, accent: preset.accent, muted: preset.muted, border: preset.border, watermark: preset.watermark })
+    setColors({
+      bg: preset.bg,
+      fg: preset.fg,
+      accent: preset.accent,
+      muted: preset.muted,
+      border: preset.border,
+      watermark: preset.watermark,
+    })
   }
 
   function handleColorChange(key: keyof ExportColors, value: string) {
@@ -112,7 +189,10 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
     if (!exportRef.current) return
     setExporting(true)
     try {
-      const png = await toPng(exportRef.current, { pixelRatio: 2, quality: 1.0 })
+      const png = await toPng(exportRef.current, {
+        pixelRatio: 2,
+        quality: 1.0,
+      })
       const link = document.createElement("a")
       link.download = `quote-${quote.id.slice(0, 8)}.png`
       link.href = png
@@ -140,7 +220,7 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
     <>
       {/* Theme presets */}
       <section className="flex flex-col gap-2.5">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase">
           {t("quotes.exportTheme")}
         </p>
         <div className="grid grid-cols-5 gap-2 sm:grid-cols-3">
@@ -167,23 +247,28 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
 
       {/* Color pickers */}
       <section className="flex flex-col gap-2.5">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase">
           {t("quotes.exportColors")}
         </p>
         <div className="flex flex-col gap-2">
           {(
             [
-              { key: "bg"     as const, label: t("quotes.exportBg")     },
-              { key: "fg"     as const, label: t("quotes.exportFg")     },
+              { key: "bg" as const, label: t("quotes.exportBg") },
+              { key: "fg" as const, label: t("quotes.exportFg") },
               { key: "accent" as const, label: t("quotes.exportAccent") },
             ] as const
           ).map(({ key, label }) => (
             <div key={key} className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">{label}</span>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono text-muted-foreground">{colors[key]}</span>
+                <span className="font-mono text-[11px] text-muted-foreground">
+                  {colors[key]}
+                </span>
                 <label className="relative size-6 cursor-pointer overflow-hidden rounded border border-border shadow-sm">
-                  <div className="absolute inset-0" style={{ backgroundColor: colors[key] }} />
+                  <div
+                    className="absolute inset-0"
+                    style={{ backgroundColor: colors[key] }}
+                  />
                   <input
                     type="color"
                     value={colors[key]}
@@ -199,7 +284,7 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
 
       {/* Aspect ratio */}
       <section className="flex flex-col gap-2.5">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase">
           {t("quotes.exportSize")}
         </p>
         <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-3">
@@ -246,7 +331,7 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
 
       {/* Font */}
       <section className="flex flex-col gap-2.5">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase">
           {t("quotes.exportFont")}
         </p>
         <div className="grid grid-cols-4 gap-1.5">
@@ -261,8 +346,7 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
                   : "border-border hover:bg-accent/50",
               ].join(" ")}
               style={{
-                fontFamily:
-                  fp.id !== "custom" ? fp.value : undefined,
+                fontFamily: fp.id !== "custom" ? fp.value : undefined,
               }}
             >
               {fp.label}
@@ -283,7 +367,9 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
 
       {/* Watermark toggle */}
       <section className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{t("quotes.exportWatermark")}</span>
+        <span className="text-xs text-muted-foreground">
+          {t("quotes.exportWatermark")}
+        </span>
         <button
           onClick={() => setShowWatermark((v) => !v)}
           className={[
@@ -310,7 +396,8 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
         height: previewH,
         overflow: "hidden",
         borderRadius: "8px",
-        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.15), 0 10px 32px -4px rgb(0 0 0 / 0.3)",
+        boxShadow:
+          "0 4px 6px -1px rgb(0 0 0 / 0.15), 0 10px 32px -4px rgb(0 0 0 / 0.3)",
         flexShrink: 0,
       }}
     >
@@ -341,7 +428,15 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
   return (
     <>
       {/* Hidden full-res export template */}
-      <div style={{ position: "fixed", top: "-9999px", left: "-9999px", zIndex: -1, pointerEvents: "none" }}>
+      <div
+        style={{
+          position: "fixed",
+          top: "-9999px",
+          left: "-9999px",
+          zIndex: -1,
+          pointerEvents: "none",
+        }}
+      >
         <QuoteImageTemplate
           ref={exportRef}
           content={quote.content}
@@ -361,7 +456,7 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
         <DialogTrigger render={children} />
 
         <DialogContent
-          className="flex flex-col overflow-hidden p-0"
+          className="flex flex-col gap-0 overflow-hidden p-0"
           style={{
             width: "min(calc(100vw - 1rem), 960px)",
             maxWidth: "min(calc(100vw - 1rem), 960px)",
@@ -376,11 +471,11 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
           {isMobile ? (
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-t border-b">
               {/* Preview strip */}
-              <div className="flex shrink-0 items-center justify-center bg-muted/20 py-5 px-4 border-b">
+              <div className="flex shrink-0 items-center justify-center border-b bg-muted/20 px-4 py-5">
                 {previewBox}
               </div>
               {/* Settings scroll */}
-              <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-5">
+              <div className="flex flex-1 flex-col gap-5 overflow-y-auto p-5">
                 {settingsContent}
               </div>
             </div>
@@ -388,7 +483,7 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
             /* ── Desktop layout: settings left, preview right ── */
             <div className="flex min-h-0 flex-1 overflow-hidden border-t border-b">
               {/* Settings panel */}
-              <div className="w-72 shrink-0 overflow-y-auto border-r p-6 flex flex-col gap-5">
+              <div className="flex w-72 shrink-0 flex-col gap-5 overflow-y-auto border-r p-6">
                 {settingsContent}
               </div>
               {/* Preview panel */}
@@ -399,13 +494,16 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
           )}
 
           {/* Footer */}
-          <DialogFooter className="m-0 shrink-0 bg-muted/30 px-5 py-4 sm:px-6">
+          <DialogFooter className="m-0 shrink-0 px-5 py-4 sm:px-6">
             <Button variant="outline" onClick={() => setOpen(false)}>
               {t("common.cancel")}
             </Button>
             <Button onClick={handleDownload} disabled={exporting}>
               {exporting ? (
-                <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
+                <Loader2
+                  className="size-4 animate-spin"
+                  data-icon="inline-start"
+                />
               ) : (
                 <Download className="size-4" data-icon="inline-start" />
               )}
