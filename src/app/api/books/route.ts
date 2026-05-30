@@ -36,9 +36,9 @@ export async function GET(request: Request) {
           }
         }).catch(console.error);
 
-        // We can optimistically return the new path assuming it succeeds
-        // (If it doesn't, it will just fallback to the old URL next time or the UI will handle the broken image)
-        book.thumbnail = `/api/covers/${book.id}`;
+        // We DO NOT optimistically return the new path here anymore.
+        // Instead, we return the original external URL so the user sees the image immediately.
+        // The next time they refresh or fetch books, they will get the updated local path from the DB.
       }
     }
 

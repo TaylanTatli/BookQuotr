@@ -25,7 +25,8 @@ export async function GET(_req: Request, { params }: Params) {
         }
       }).catch(console.error);
 
-      book.thumbnail = `/api/covers/${book.id}`;
+      // We DO NOT optimistically return the new path here anymore.
+      // Instead, we return the original external URL so the user sees the image immediately.
     }
 
     return NextResponse.json({ book });
