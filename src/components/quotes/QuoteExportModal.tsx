@@ -13,11 +13,15 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
+import { Switch } from "@/components/ui/switch"
 import {
   QuoteImageTemplate,
   type ExportColors,
 } from "@/components/quotes/QuoteImageTemplate"
+import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/client"
 import { useTheme } from "next-themes"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -291,38 +295,38 @@ export function QuoteExportModal({
         </p>
         <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-3">
           {RATIOS.map((ratio) => (
-            <button
+            <Button
               key={ratio.id}
+              variant="outline"
+              size="sm"
               onClick={() => setRatioId(ratio.id)}
-              className={[
-                "rounded-md border px-2 py-1.5 text-xs font-medium transition-all",
-                ratioId === ratio.id
-                  ? "border-primary bg-accent ring-1 ring-primary"
-                  : "border-border hover:bg-accent/50",
-              ].join(" ")}
+              className={cn(
+                "text-xs",
+                ratioId === ratio.id && "border-primary bg-accent ring-1 ring-primary"
+              )}
             >
               {ratio.label}
-            </button>
+            </Button>
           ))}
         </div>
         {ratioId === "custom" && (
           <div className="flex items-center gap-2">
-            <input
+            <Input
               type="number"
               value={customWidth}
               onChange={(e) => setCustomWidth(e.target.value)}
-              className="h-7 w-full rounded-md border border-input bg-background px-2 text-xs"
               placeholder="Genişlik"
               min={400}
+              className="h-7 text-xs"
             />
             <span className="shrink-0 text-xs text-muted-foreground">×</span>
-            <input
+            <Input
               type="number"
               value={customHeight}
               onChange={(e) => setCustomHeight(e.target.value)}
-              className="h-7 w-full rounded-md border border-input bg-background px-2 text-xs"
               placeholder="Yükseklik"
               min={400}
+              className="h-7 text-xs"
             />
           </div>
         )}
@@ -338,30 +342,30 @@ export function QuoteExportModal({
         </p>
         <div className="grid grid-cols-4 gap-1.5">
           {FONT_PRESETS.map((fp) => (
-            <button
+            <Button
               key={fp.id}
+              variant="outline"
+              size="sm"
               onClick={() => setFontPresetId(fp.id)}
-              className={[
-                "rounded-md border px-2 py-1.5 text-xs font-medium transition-all",
-                fontPresetId === fp.id
-                  ? "border-primary bg-accent ring-1 ring-primary"
-                  : "border-border hover:bg-accent/50",
-              ].join(" ")}
+              className={cn(
+                "text-xs",
+                fontPresetId === fp.id && "border-primary bg-accent ring-1 ring-primary"
+              )}
               style={{
                 fontFamily: fp.id !== "custom" ? fp.value : undefined,
               }}
             >
               {fp.label}
-            </button>
+            </Button>
           ))}
         </div>
         {fontPresetId === "custom" && (
-          <input
+          <Input
             type="text"
             value={customFont}
             onChange={(e) => setCustomFont(e.target.value)}
             placeholder={t("quotes.exportFontCustomPlaceholder")}
-            className="h-7 w-full rounded-md border border-input bg-background px-2 text-xs"
+            className="h-7 text-xs"
             style={{ fontFamily: customFont || undefined }}
           />
         )}
@@ -398,23 +402,14 @@ export function QuoteExportModal({
 
       {/* Watermark toggle */}
       <section className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">
+        <Label className="text-xs text-muted-foreground font-normal cursor-pointer" htmlFor="watermark-switch">
           {t("quotes.exportWatermark")}
-        </span>
-        <button
-          onClick={() => setShowWatermark((v) => !v)}
-          className={[
-            "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
-            showWatermark ? "bg-primary" : "bg-muted",
-          ].join(" ")}
-        >
-          <span
-            className={[
-              "inline-block size-3.5 rounded-full bg-white shadow transition-transform",
-              showWatermark ? "translate-x-[18px]" : "translate-x-[2px]",
-            ].join(" ")}
-          />
-        </button>
+        </Label>
+        <Switch
+          id="watermark-switch"
+          checked={showWatermark}
+          onCheckedChange={setShowWatermark}
+        />
       </section>
     </>
   )
