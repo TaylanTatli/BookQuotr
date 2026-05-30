@@ -385,8 +385,11 @@ export function QuoteExportModal({
           min={60}
           max={150}
           step={5}
-          value={[Math.round(fontSizeScale * 100)]}
-          onValueChange={([v]) => setFontSizeScale(v / 100)}
+          value={[isFinite(fontSizeScale) ? Math.round(fontSizeScale * 100) : 100]}
+          onValueChange={(v) => {
+            const val = Array.isArray(v) ? v[0] : v
+            if (typeof val === "number" && isFinite(val)) setFontSizeScale(val / 100)
+          }}
         />
         <p className="text-[11px] text-muted-foreground">
           {t("quotes.exportFontSizeHint")}
