@@ -71,13 +71,13 @@ export function QuoteCard({
 
   return (
     <div className="group relative rounded-lg border border-border bg-card p-4 transition-shadow hover:shadow-sm">
-      {/* Markdown content */}
-      <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
+      {/* Quote content */}
+      <div className="prose prose-sm max-w-none dark:prose-invert [&_p+p]:mt-[1.2em]">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkBreaks, remarkSmartypants]}
           rehypePlugins={[rehypeSanitize]}
         >
-          {quote.content}
+          {quote.content.replace(/\n/gi, "&nbsp; \n")}
         </ReactMarkdown>
       </div>
 
