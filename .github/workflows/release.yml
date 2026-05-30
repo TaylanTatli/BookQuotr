@@ -43,13 +43,49 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Generate Changelog
+        if: steps.check_tag.outputs.exists == 'false'
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"%s" HEAD)
+          else
+            COMMITS=$(git log --pretty=format:"%s" "$PREV_TAG"..HEAD)
+          fi
+
+          FEATURES=$(echo "$COMMITS" | grep -E "^feat(\(.+\))?!?:" | sed 's/^feat[^:]*: //' | sed 's/^/- /' || true)
+          FIXES=$(echo "$COMMITS" | grep -E "^fix(\(.+\))?!?:" | sed 's/^fix[^:]*: //' | sed 's/^/- /' || true)
+          REFACTORS=$(echo "$COMMITS" | grep -E "^refactor(\(.+\))?!?:" | sed 's/^refactor[^:]*: //' | sed 's/^/- /' || true)
+          STYLES=$(echo "$COMMITS" | grep -E "^(style|ui)(\(.+\))?!?:" | sed 's/^[^:]*: //' | sed 's/^/- /' || true)
+          CHORES=$(echo "$COMMITS" | grep -E "^(chore|build|ci)(\(.+\))?!?:" | sed 's/^[^:]*: //' | sed 's/^/- /' || true)
+          OTHERS=$(echo "$COMMITS" | grep -vE "^(feat|fix|refactor|style|ui|chore|build|ci)(\(.+\))?!?:" | sed 's/^/- /' || true)
+
+          NOTES=""
+          [ -n "$FEATURES" ]  && NOTES="${NOTES}## 🚀 Features\n${FEATURES}\n\n"
+          [ -n "$FIXES" ]     && NOTES="${NOTES}## 🐛 Bug Fixes\n${FIXES}\n\n"
+          [ -n "$REFACTORS" ] && NOTES="${NOTES}## ♻️ Refactors\n${REFACTORS}\n\n"
+          [ -n "$STYLES" ]    && NOTES="${NOTES}## 🎨 Styles & UI\n${STYLES}\n\n"
+          [ -n "$CHORES" ]    && NOTES="${NOTES}## 🔧 Chores\n${CHORES}\n\n"
+          [ -n "$OTHERS" ]    && NOTES="${NOTES}## 📝 Other Changes\n${OTHERS}\n\n"
+
+          if [ -n "$PREV_TAG" ]; then
+            NOTES="${NOTES}**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${{ steps.get_version.outputs.tag }}"
+          fi
+
+          {
+            echo "notes<<EOF"
+            printf "%b" "$NOTES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.tag }}
           name: Release ${{ steps.get_version.outputs.tag }}
-          generate_release_notes: true
+          body: ${{ steps.changelog.outputs.notes }}
 
       - name: Log in to the Container registry
         if: steps.check_tag.outputs.exists == 'false'
