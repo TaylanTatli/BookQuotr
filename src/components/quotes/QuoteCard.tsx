@@ -70,9 +70,7 @@ export function QuoteCard({
   }
 
   return (
-    <div
-      className="group relative rounded-lg border border-border bg-card p-4 transition-shadow hover:shadow-sm"
-    >
+    <div className="group relative rounded-lg border border-border bg-card p-4 transition-shadow hover:shadow-sm">
       {/* Markdown content */}
       <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
         <ReactMarkdown
@@ -108,7 +106,7 @@ export function QuoteCard({
         </div>
 
         {/* Action buttons — always visible on mobile, hover on desktop */}
-        <ButtonGroup className="shrink-0 transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100">
+        <ButtonGroup className="shrink-0 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
           {/* Export as image */}
           <QuoteExportModal quote={quote} book={book}>
             <Button
