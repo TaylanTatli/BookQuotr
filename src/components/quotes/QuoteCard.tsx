@@ -12,6 +12,7 @@ import rehypeSanitize from "rehype-sanitize"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -107,25 +108,30 @@ export function QuoteCard({
         </div>
 
         {/* Action buttons — always visible on mobile, hover on desktop */}
-        <div className="flex shrink-0 items-center gap-1 transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100">
+        <ButtonGroup className="shrink-0 transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100">
           {/* Export as image */}
           <QuoteExportModal quote={quote} book={book}>
             <Button
-              variant="ghost"
-              size="icon"
-              className="size-6"
+              variant="outline"
+              size="icon-sm"
+              className="cursor-pointer"
               onClick={(e) => e.stopPropagation()}
             >
-              <ImageDown className="size-3" />
+              <ImageDown />
             </Button>
           </QuoteExportModal>
 
           {/* Copy */}
-          <Button variant="ghost" size="icon" className="size-6" onClick={handleCopy}>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            className="cursor-pointer"
+            onClick={handleCopy}
+          >
             {copied ? (
-              <Check className="size-3 text-green-600 dark:text-green-400" />
+              <Check className="text-green-600 dark:text-green-400" />
             ) : (
-              <Copy className="size-3" />
+              <Copy />
             )}
           </Button>
 
@@ -136,12 +142,12 @@ export function QuoteCard({
             onQuoteAdded={() => onUpdated(quote)}
           >
             <Button
-              variant="ghost"
-              size="icon"
-              className="size-6"
+              variant="outline"
+              size="icon-sm"
+              className="cursor-pointer"
               onClick={(e) => e.stopPropagation()}
             >
-              <Pencil className="size-3" />
+              <Pencil />
             </Button>
           </AddQuoteModal>
 
@@ -150,14 +156,14 @@ export function QuoteCard({
             <AlertDialogTrigger
               render={
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-6 text-destructive hover:text-destructive"
+                  variant="outline"
+                  size="icon-sm"
+                  className="cursor-pointer text-destructive hover:text-destructive"
                   onClick={(e) => e.stopPropagation()}
                 />
               }
             >
-              <Trash2 className="size-3" />
+              <Trash2 />
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -174,7 +180,7 @@ export function QuoteCard({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
+        </ButtonGroup>
       </div>
     </div>
   )
