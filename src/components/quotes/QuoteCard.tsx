@@ -9,7 +9,7 @@ import remarkGfm from "remark-gfm"
 import remarkBreaks from "remark-breaks"
 import remarkSmartypants from "remark-smartypants"
 import rehypeSanitize from "rehype-sanitize"
-import { cn } from "@/lib/utils"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -42,7 +42,6 @@ export function QuoteCard({
   onDeleted,
   onUpdated,
 }: QuoteCardProps) {
-  const [hovered, setHovered] = useState(false)
   const [copied, setCopied] = useState(false)
   const { t } = useTranslation()
 
@@ -72,8 +71,6 @@ export function QuoteCard({
   return (
     <div
       className="group relative rounded-lg border border-border bg-card p-4 transition-shadow hover:shadow-sm"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       {/* Markdown content */}
       <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
@@ -110,13 +107,7 @@ export function QuoteCard({
         </div>
 
         {/* Action buttons — always visible on mobile, hover on desktop */}
-        <div
-          className={cn(
-            "flex shrink-0 items-center gap-1 transition-opacity",
-            "opacity-100 md:opacity-0",
-            hovered && "md:opacity-100"
-          )}
-        >
+        <div className="flex shrink-0 items-center gap-1 transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100">
           {/* Export as image */}
           <QuoteExportModal quote={quote} book={book}>
             <Button
