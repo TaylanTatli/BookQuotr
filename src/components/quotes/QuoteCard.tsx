@@ -95,7 +95,7 @@ export function QuoteCard({
     <div
       ref={cardRef}
       className={cn(
-        "group relative rounded-lg border border-border bg-card p-4 transition-all duration-700 hover:shadow-sm",
+        "group relative rounded-lg border border-border bg-card p-4 pb-12 md:pb-4 transition-all duration-700 hover:shadow-sm",
         showHighlight && "ring-2 ring-primary/70 shadow-md"
       )}
     >
@@ -109,10 +109,9 @@ export function QuoteCard({
         </ReactMarkdown>
       </div>
 
-      {/* Bottom row: meta badges + action buttons */}
-      <div className="mt-3 flex items-end justify-between gap-2">
-        {/* Meta badges */}
-        <div className="flex flex-wrap gap-1.5">
+      {/* Meta badges — only rendered when at least one exists */}
+      {(quote.page || quote.chapter || quote.note) && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {quote.page && (
             <Badge variant="secondary" className="text-xs">
               p. {quote.page}
@@ -132,82 +131,84 @@ export function QuoteCard({
             </Badge>
           )}
         </div>
+      )}
 
-        {/* Action buttons — always visible on mobile, hover on desktop */}
-        <ButtonGroup className="shrink-0 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
-          {/* Export as image */}
-          <QuoteExportModal quote={quote} book={book}>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              className="cursor-pointer"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ImageDown />
-            </Button>
-          </QuoteExportModal>
-
-          {/* Copy */}
+      {/* Action buttons — absolute positioned, no layout impact.
+          Mobile: always visible in the pb-12 bottom padding space.
+          Desktop: invisible, fade in on hover. */}
+      <ButtonGroup className="absolute bottom-3 right-3 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+        {/* Export as image */}
+        <QuoteExportModal quote={quote} book={book}>
           <Button
             variant="outline"
             size="icon-sm"
             className="cursor-pointer"
-            onClick={handleCopy}
+            onClick={(e) => e.stopPropagation()}
           >
-            {copied ? (
-              <Check className="text-green-600 dark:text-green-400" />
-            ) : (
-              <Copy />
-            )}
+            <ImageDown />
           </Button>
+        </QuoteExportModal>
 
-          {/* Edit */}
-          <AddQuoteModal
-            bookId={bookId}
-            existingQuote={quote}
-            onQuoteAdded={onUpdated}
+        {/* Copy */}
+        <Button
+          variant="outline"
+          size="icon-sm"
+          className="cursor-pointer"
+          onClick={handleCopy}
+        >
+          {copied ? (
+            <Check className="text-green-600 dark:text-green-400" />
+          ) : (
+            <Copy />
+          )}
+        </Button>
+
+        {/* Edit */}
+        <AddQuoteModal
+          bookId={bookId}
+          existingQuote={quote}
+          onQuoteAdded={onUpdated}
+        >
+          <Button
+            variant="outline"
+            size="icon-sm"
+            className="cursor-pointer"
+            onClick={(e) => e.stopPropagation()}
           >
-            <Button
-              variant="outline"
-              size="icon-sm"
-              className="cursor-pointer"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Pencil />
-            </Button>
-          </AddQuoteModal>
+            <Pencil />
+          </Button>
+        </AddQuoteModal>
 
-          {/* Delete */}
-          <AlertDialog>
-            <AlertDialogTrigger
-              render={
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  className="cursor-pointer text-destructive hover:text-destructive"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              }
-            >
-              <Trash2 />
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("quotes.deleteTitle")}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t("quotes.deleteDesc")}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  {t("common.delete")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </ButtonGroup>
-      </div>
+        {/* Delete */}
+        <AlertDialog>
+          <AlertDialogTrigger
+            render={
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className="cursor-pointer text-destructive hover:text-destructive"
+                onClick={(e) => e.stopPropagation()}
+              />
+            }
+          >
+            <Trash2 />
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("quotes.deleteTitle")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("quotes.deleteDesc")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete}>
+                {t("common.delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </ButtonGroup>
     </div>
   )
 }
