@@ -105,7 +105,10 @@ export function QuoteCard({
           remarkPlugins={[remarkGfm, remarkBreaks, remarkSmartypants]}
           rehypePlugins={[rehypeSanitize]}
         >
-          {quote.content.replace(/\n/gi, "&nbsp; \n")}
+          {quote.content
+            .split(/\n\n/)
+            .map((block) => block.replace(/\n/g, "&nbsp; \n"))
+            .join("\n\n")}
         </ReactMarkdown>
       </div>
 
