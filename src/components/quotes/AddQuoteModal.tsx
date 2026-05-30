@@ -135,7 +135,7 @@ export function AddQuoteModal({
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder={t("addQuote.placeholder")}
-                    className="max-h-96 min-h-40 max-w-full resize-none font-mono text-sm"
+                    className="max-h-96 min-h-40 max-w-full resize-none text-sm"
                     autoFocus
                   />
                 </FieldContent>
@@ -146,7 +146,7 @@ export function AddQuoteModal({
                         __html: t("addQuote.tip")
                           .replace(
                             "<0>",
-                            '<code class="font-mono rounded bg-muted px-1 py-0.5">'
+                            '<code class="font-sans rounded bg-muted px-1 py-0.5">'
                           )
                           .replace("</0>", "</code>"),
                       }}

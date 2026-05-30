@@ -1,14 +1,15 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Pencil, Trash2, Copy, Check } from "lucide-react";
-import { toast } from "sonner";
-import { useTranslation } from "@/i18n/client";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useState } from "react"
+import { Pencil, Trash2, Copy, Check } from "lucide-react"
+import { toast } from "sonner"
+import { useTranslation } from "@/i18n/client"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import remarkBreaks from "remark-breaks"
+import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,42 +20,47 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { AddQuoteModal } from "@/components/quotes/AddQuoteModal";
-import type { Quote } from "@/types";
+} from "@/components/ui/alert-dialog"
+import { AddQuoteModal } from "@/components/quotes/AddQuoteModal"
+import type { Quote } from "@/types"
 
 interface QuoteCardProps {
-  quote: Quote;
-  bookId: string;
-  onDeleted: (id: string) => void;
-  onUpdated: (quote: Quote) => void;
+  quote: Quote
+  bookId: string
+  onDeleted: (id: string) => void
+  onUpdated: (quote: Quote) => void
 }
 
-export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProps) {
-  const [hovered, setHovered] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const { t } = useTranslation();
+export function QuoteCard({
+  quote,
+  bookId,
+  onDeleted,
+  onUpdated,
+}: QuoteCardProps) {
+  const [hovered, setHovered] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const { t } = useTranslation()
 
   async function handleDelete() {
     try {
-      const res = await fetch(`/api/quotes/${quote.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
-      onDeleted(quote.id);
-      toast.success(t("quotes.deleteSuccess"));
+      const res = await fetch(`/api/quotes/${quote.id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error()
+      onDeleted(quote.id)
+      toast.success(t("quotes.deleteSuccess"))
     } catch {
-      toast.error(t("quotes.deleteError"));
+      toast.error(t("quotes.deleteError"))
     }
   }
 
   async function handleCopy(e: React.MouseEvent) {
-    e.stopPropagation();
+    e.stopPropagation()
     try {
-      await navigator.clipboard.writeText(quote.content);
-      setCopied(true);
-      toast.success(t("quotes.copySuccess"));
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(quote.content)
+      setCopied(true)
+      toast.success(t("quotes.copySuccess"))
+      setTimeout(() => setCopied(false), 2000)
     } catch {
-      toast.error(t("quotes.copyError"));
+      toast.error(t("quotes.copyError"))
     }
   }
 
@@ -66,7 +72,9 @@ export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProp
     >
       {/* Markdown content */}
       <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{quote.content}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+          {quote.content}
+        </ReactMarkdown>
       </div>
 
       {/* Bottom row: meta badges + action buttons */}
@@ -84,7 +92,10 @@ export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProp
             </Badge>
           )}
           {quote.note && (
-            <Badge variant="outline" className="max-w-[200px] truncate text-xs italic">
+            <Badge
+              variant="outline"
+              className="max-w-[200px] truncate text-xs italic"
+            >
               {quote.note}
             </Badge>
           )}
@@ -111,7 +122,11 @@ export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProp
             )}
           </Button>
 
-          <AddQuoteModal bookId={bookId} existingQuote={quote} onQuoteAdded={() => onUpdated(quote)}>
+          <AddQuoteModal
+            bookId={bookId}
+            existingQuote={quote}
+            onQuoteAdded={() => onUpdated(quote)}
+          >
             <Button
               variant="ghost"
               size="icon"
@@ -144,12 +159,14 @@ export function QuoteCard({ quote, bookId, onDeleted, onUpdated }: QuoteCardProp
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>{t("common.delete")}</AlertDialogAction>
+                <AlertDialogAction onClick={handleDelete}>
+                  {t("common.delete")}
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         </div>
       </div>
     </div>
-  );
+  )
 }
