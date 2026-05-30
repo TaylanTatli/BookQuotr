@@ -62,6 +62,8 @@
     "exportAccent": "Accent",
     "exportSize": "Size",
     "exportWatermark": "BookQuotr watermark",
+    "exportFont": "Font",
+    "exportFontCustomPlaceholder": "Enter font name…",
     "exportDownload": "Download PNG",
     "viewDefault": "Default (Single column)",
     "viewTwoColumn": "Two columns",

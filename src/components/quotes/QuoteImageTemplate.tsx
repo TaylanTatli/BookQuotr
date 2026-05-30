@@ -22,6 +22,7 @@ interface QuoteImageTemplateProps {
   width: number
   height: number
   showWatermark?: boolean
+  fontFamily?: string
 }
 
 /**
@@ -85,6 +86,7 @@ export const QuoteImageTemplate = React.forwardRef<
     width,
     height,
     showWatermark = true,
+    fontFamily = "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   },
   ref
 ) {
@@ -108,8 +110,7 @@ export const QuoteImageTemplate = React.forwardRef<
         height: `${height}px`,
         backgroundColor: colors.bg,
         color: colors.fg,
-        fontFamily:
-          "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        fontFamily,
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",

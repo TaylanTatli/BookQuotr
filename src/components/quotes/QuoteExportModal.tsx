@@ -30,6 +30,17 @@ const PRESETS = [
 
 type PresetId = (typeof PRESETS)[number]["id"] | "custom"
 
+// ─── Font presets ────────────────────────────────────────
+const FONT_PRESETS = [
+  { id: "sans",   label: "Sans",   value: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" },
+  { id: "serif",  label: "Serif",  value: "Georgia, 'Times New Roman', Cambria, serif" },
+  { id: "mono",   label: "Mono",   value: "'Courier New', Courier, 'Lucida Console', monospace" },
+  { id: "system", label: "System", value: "system-ui, -apple-system, sans-serif" },
+  { id: "custom", label: "Custom", value: "" },
+] as const
+
+type FontPresetId = (typeof FONT_PRESETS)[number]["id"]
+
 // ─── Aspect ratios ───────────────────────────────────────────────
 const RATIOS = [
   { id: "1:1",    label: "1:1",  width: 1080, height: 1080 },
@@ -63,6 +74,14 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
   const [customHeight, setCustomHeight] = useState("1080")
   const [showWatermark, setShowWatermark] = useState(true)
   const [exporting, setExporting] = useState(false)
+  const [fontPresetId, setFontPresetId] = useState<FontPresetId>("sans")
+  const [customFont, setCustomFont] = useState("")
+
+  // Resolved font family string
+  const fontFamily =
+    fontPresetId === "custom"
+      ? customFont.trim() || "sans-serif"
+      : FONT_PRESETS.find((f) => f.id === fontPresetId)!.value
 
   // Export dimensions
   const baseRatio = RATIOS.find((r) => r.id === ratioId)!
@@ -225,6 +244,43 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
         </p>
       </section>
 
+      {/* Font */}
+      <section className="flex flex-col gap-2.5">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+          {t("quotes.exportFont")}
+        </p>
+        <div className="grid grid-cols-4 gap-1.5">
+          {FONT_PRESETS.map((fp) => (
+            <button
+              key={fp.id}
+              onClick={() => setFontPresetId(fp.id)}
+              className={[
+                "rounded-md border px-2 py-1.5 text-xs font-medium transition-all",
+                fontPresetId === fp.id
+                  ? "border-primary bg-accent ring-1 ring-primary"
+                  : "border-border hover:bg-accent/50",
+              ].join(" ")}
+              style={{
+                fontFamily:
+                  fp.id !== "custom" ? fp.value : undefined,
+              }}
+            >
+              {fp.label}
+            </button>
+          ))}
+        </div>
+        {fontPresetId === "custom" && (
+          <input
+            type="text"
+            value={customFont}
+            onChange={(e) => setCustomFont(e.target.value)}
+            placeholder={t("quotes.exportFontCustomPlaceholder")}
+            className="h-7 w-full rounded-md border border-input bg-background px-2 text-xs"
+            style={{ fontFamily: customFont || undefined }}
+          />
+        )}
+      </section>
+
       {/* Watermark toggle */}
       <section className="flex items-center justify-between">
         <span className="text-xs text-muted-foreground">{t("quotes.exportWatermark")}</span>
@@ -276,6 +332,7 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
           width={exportWidth}
           height={exportHeight}
           showWatermark={showWatermark}
+          fontFamily={fontFamily}
         />
       </div>
     </div>
@@ -296,6 +353,7 @@ export function QuoteExportModal({ children, quote, book }: QuoteExportModalProp
           width={exportWidth}
           height={exportHeight}
           showWatermark={showWatermark}
+          fontFamily={fontFamily}
         />
       </div>
 

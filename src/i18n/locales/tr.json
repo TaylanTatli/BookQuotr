@@ -62,6 +62,8 @@
     "exportAccent": "Vurgu",
     "exportSize": "Boyut",
     "exportWatermark": "BookQuotr watermark",
+    "exportFont": "Yazı Tipi",
+    "exportFontCustomPlaceholder": "Yazı tipi adı girin…",
     "exportDownload": "PNG İndir",
     "viewDefault": "Varsayılan (Tek sütun)",
     "viewTwoColumn": "İki sütun",
