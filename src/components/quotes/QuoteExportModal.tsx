@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Slider } from "@/components/ui/slider"
 import {
   QuoteImageTemplate,
   type ExportColors,
@@ -140,6 +141,7 @@ export function QuoteExportModal({
   const [exporting, setExporting] = useState(false)
   const [fontPresetId, setFontPresetId] = useState<FontPresetId>("sans")
   const [customFont, setCustomFont] = useState("")
+  const [fontSizeScale, setFontSizeScale] = useState(1)
 
   // Resolved font family string
   const fontFamily =
@@ -365,6 +367,32 @@ export function QuoteExportModal({
         )}
       </section>
 
+      {/* Font size scale */}
+      <section className="flex flex-col gap-2.5">
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase">
+            {t("quotes.exportFontSize")}
+          </p>
+          <span
+            className="cursor-pointer font-mono text-[11px] text-muted-foreground"
+            onDoubleClick={() => setFontSizeScale(1)}
+            title={t("quotes.exportFontSizeHint")}
+          >
+            {Math.round(fontSizeScale * 100)}%
+          </span>
+        </div>
+        <Slider
+          min={60}
+          max={150}
+          step={5}
+          value={[Math.round(fontSizeScale * 100)]}
+          onValueChange={([v]) => setFontSizeScale(v / 100)}
+        />
+        <p className="text-[11px] text-muted-foreground">
+          {t("quotes.exportFontSizeHint")}
+        </p>
+      </section>
+
       {/* Watermark toggle */}
       <section className="flex items-center justify-between">
         <span className="text-xs text-muted-foreground">
@@ -420,6 +448,7 @@ export function QuoteExportModal({
           height={exportHeight}
           showWatermark={showWatermark}
           fontFamily={fontFamily}
+          fontSizeScale={fontSizeScale}
         />
       </div>
     </div>
@@ -449,6 +478,7 @@ export function QuoteExportModal({
           height={exportHeight}
           showWatermark={showWatermark}
           fontFamily={fontFamily}
+          fontSizeScale={fontSizeScale}
         />
       </div>
 

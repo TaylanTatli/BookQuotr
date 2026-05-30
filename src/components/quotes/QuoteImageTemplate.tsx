@@ -23,6 +23,7 @@ interface QuoteImageTemplateProps {
   height: number
   showWatermark?: boolean
   fontFamily?: string
+  fontSizeScale?: number
 }
 
 /**
@@ -87,13 +88,14 @@ export const QuoteImageTemplate = React.forwardRef<
     height,
     showWatermark = true,
     fontFamily = "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    fontSizeScale = 1,
   },
   ref
 ) {
   const attribution = [bookTitle, author].filter(Boolean).join(", ")
   const meta = [chapter, page ? `s. ${page}` : null].filter(Boolean).join(" · ")
   const hasAttr = Boolean(attribution || meta)
-  const fontSize = solveFontSize(content, width, height, hasAttr)
+  const fontSize = Math.round(solveFontSize(content, width, height, hasAttr) * fontSizeScale)
 
   const paddingH = Math.round(width * 0.08)
   const paddingV = Math.round(height * 0.08)

@@ -64,6 +64,8 @@
     "exportWatermark": "BookQuotr watermark",
     "exportFont": "Yazı Tipi",
     "exportFontCustomPlaceholder": "Yazı tipi adı girin…",
+    "exportFontSize": "Yazı Boyutu",
+    "exportFontSizeHint": "Sıfırlamak için çift tıkla",
     "exportDownload": "PNG İndir",
     "viewDefault": "Varsayılan (Tek sütun)",
     "viewTwoColumn": "İki sütun",
