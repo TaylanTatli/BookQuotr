@@ -69,8 +69,8 @@ function solveFontSize(
     fs = fs * (targetH / totalH)
   }
 
-  // Clamp: 12–34 px
-  return Math.max(12, Math.min(34, Math.round(fs)))
+  // Clamp: 12–34 px (keep 1 decimal so sub-pixel scale steps are visible)
+  return Math.max(12, Math.min(34, parseFloat(fs.toFixed(1))))
 }
 
 export const QuoteImageTemplate = React.forwardRef<
@@ -95,7 +95,7 @@ export const QuoteImageTemplate = React.forwardRef<
   const attribution = [bookTitle, author].filter(Boolean).join(", ")
   const meta = [chapter, page ? `s. ${page}` : null].filter(Boolean).join(" · ")
   const hasAttr = Boolean(attribution || meta)
-  const fontSize = Math.round(solveFontSize(content, width, height, hasAttr) * fontSizeScale)
+  const fontSize = parseFloat((solveFontSize(content, width, height, hasAttr) * fontSizeScale).toFixed(1))
 
   const paddingH = Math.round(width * 0.08)
   const paddingV = Math.round(height * 0.08)

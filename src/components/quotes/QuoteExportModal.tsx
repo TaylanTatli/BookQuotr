@@ -302,7 +302,8 @@ export function QuoteExportModal({
               onClick={() => setRatioId(ratio.id)}
               className={cn(
                 "text-xs",
-                ratioId === ratio.id && "border-primary bg-accent ring-1 ring-primary"
+                ratioId === ratio.id &&
+                  "border-primary bg-accent ring-1 ring-primary"
               )}
             >
               {ratio.label}
@@ -349,7 +350,8 @@ export function QuoteExportModal({
               onClick={() => setFontPresetId(fp.id)}
               className={cn(
                 "text-xs",
-                fontPresetId === fp.id && "border-primary bg-accent ring-1 ring-primary"
+                fontPresetId === fp.id &&
+                  "border-primary bg-accent ring-1 ring-primary"
               )}
               style={{
                 fontFamily: fp.id !== "custom" ? fp.value : undefined,
@@ -388,11 +390,14 @@ export function QuoteExportModal({
         <Slider
           min={60}
           max={150}
-          step={5}
-          value={[isFinite(fontSizeScale) ? Math.round(fontSizeScale * 100) : 100]}
+          step={1}
+          value={[
+            isFinite(fontSizeScale) ? Math.round(fontSizeScale * 100) : 100,
+          ]}
           onValueChange={(v) => {
             const val = Array.isArray(v) ? v[0] : v
-            if (typeof val === "number" && isFinite(val)) setFontSizeScale(val / 100)
+            if (typeof val === "number" && isFinite(val))
+              setFontSizeScale(val / 100)
           }}
         />
         <p className="text-[11px] text-muted-foreground">
@@ -402,7 +407,10 @@ export function QuoteExportModal({
 
       {/* Watermark toggle */}
       <section className="flex items-center justify-between">
-        <Label className="text-xs text-muted-foreground font-normal cursor-pointer" htmlFor="watermark-switch">
+        <Label
+          className="cursor-pointer text-xs font-normal text-muted-foreground"
+          htmlFor="watermark-switch"
+        >
           {t("quotes.exportWatermark")}
         </Label>
         <Switch

@@ -45,6 +45,29 @@ export default async function RootLayout({
   return (
     <html lang={locale} className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+try {
+  var fs = localStorage.getItem('bq_font_size');
+  var fm = localStorage.getItem('bq_font_mode');
+  if (fs) {
+    var n = parseFloat(fs);
+    if (!isNaN(n)) {
+      if (fm === 'responsive') {
+        var min = Math.max(12, n - 2);
+        var max = Math.min(26, n + 4);
+        var spread = max - min;
+        document.documentElement.style.fontSize = 'clamp(' + min + 'px, calc(' + (min - 4) + 'px + ' + (spread / 16 * 100).toFixed(2) + 'vw), ' + max + 'px)';
+      } else {
+        document.documentElement.style.fontSize = n + 'px';
+      }
+    }
+  }
+} catch(e) {}
+          `,
+          }}
+        />
         <ThemeProvider>
           <I18nProvider dictionary={dictionary} locale={locale}>
             <TooltipProvider>

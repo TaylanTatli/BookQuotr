@@ -24,7 +24,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import {
   Field,
   FieldContent,
@@ -39,6 +42,7 @@ import {
   SelectItem,
   SelectTrigger
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/i18n/client";
@@ -59,6 +63,21 @@ interface SettingsModalProps {
   children: React.ReactElement;
   onImportSuccess: () => void;
 }
+
+const FONT_SIZE_KEY = "bq_font_size";
+const FONT_MODE_KEY = "bq_font_mode";
+
+type FontMode = "fixed" | "responsive";
+
+function computeFontSize(size: number, mode: FontMode): string {
+  if (mode === "fixed") return `${size}px`;
+  const min = Math.max(12, size - 2);
+  const max = Math.min(26, size + 4);
+  const spread = max - min;
+  return `clamp(${min}px, calc(${min - 4}px + ${((spread / 16) * 100).toFixed(2)}vw), ${max}px)`;
+}
+
+
 
 const VIEW_MODE_KEY = "bq_quote_view_mode";
 
@@ -82,6 +101,22 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
       return "default";
     }
   });
+  const [fontSize, setFontSize] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(FONT_SIZE_KEY);
+      const n = saved ? parseFloat(saved) : 16;
+      return isNaN(n) ? 16 : n;
+    } catch {
+      return 16;
+    }
+  });
+  const [fontMode, setFontMode] = useState<FontMode>(() => {
+    try {
+      return (localStorage.getItem(FONT_MODE_KEY) as FontMode) || "fixed";
+    } catch {
+      return "fixed";
+    }
+  });
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { t, locale } = useTranslation();
@@ -91,6 +126,27 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const [displaySize, setDisplaySize] = useState<string>(`${fontSize}px`);
+
+  // Apply font size to root and persist
+  useEffect(() => {
+    const value = computeFontSize(fontSize, fontMode);
+    document.documentElement.style.fontSize = value;
+    // Read back the computed value so the UI shows real px, not the formula
+    const computed = parseFloat(
+      window.getComputedStyle(document.documentElement).fontSize
+    );
+    setDisplaySize(
+      fontMode === "fixed"
+        ? `${fontSize}px`
+        : `~${isNaN(computed) ? fontSize : computed.toFixed(1)}px`
+    );
+    try {
+      localStorage.setItem(FONT_SIZE_KEY, String(fontSize));
+      localStorage.setItem(FONT_MODE_KEY, fontMode);
+    } catch {}
+  }, [fontSize, fontMode]);
 
   // Sync state when Modal is opened
   useEffect(() => {
@@ -252,6 +308,63 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
                   </SelectGroup>
                 </SelectContent>
               </Select>
+            </FieldContent>
+          </Field>
+
+          <Separator />
+
+          {/* Font size */}
+          <Field>
+            <div className="flex flex-col gap-1">
+              <FieldLabel>{t("settings.fontSize")}</FieldLabel>
+              <FieldDescription className="font-mono">
+                {displaySize}
+              </FieldDescription>
+            </div>
+            <FieldContent className="flex min-w-48 flex-col gap-3">
+              {/* Mode toggle */}
+              <div className="flex items-center gap-2">
+                <Label
+                  htmlFor="font-mode-switch"
+                  className={cn(
+                    "text-xs transition-colors",
+                    fontMode === "fixed" ? "text-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  {t("settings.fontModeFixed")}
+                </Label>
+                <Switch
+                  id="font-mode-switch"
+                  size="sm"
+                  checked={fontMode === "responsive"}
+                  onCheckedChange={(v) => setFontMode(v ? "responsive" : "fixed")}
+                />
+                <Label
+                  htmlFor="font-mode-switch"
+                  className={cn(
+                    "text-xs transition-colors",
+                    fontMode === "responsive" ? "text-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  {t("settings.fontModeResponsive")}
+                </Label>
+              </div>
+              {/* Size slider */}
+              <Slider
+                min={12}
+                max={24}
+                step={1}
+                value={[fontSize]}
+                onValueChange={(v) => {
+                  const val = Array.isArray(v) ? v[0] : v;
+                  if (typeof val === "number" && isFinite(val)) setFontSize(val);
+                }}
+              />
+              <div className="flex justify-between text-[11px] text-muted-foreground">
+                <span>12px</span>
+                <span className="font-mono font-semibold text-foreground">{fontSize}px</span>
+                <span>24px</span>
+              </div>
             </FieldContent>
           </Field>
 

@@ -17,7 +17,10 @@
     "theme": "Theme",
     "themeLight": "Light",
     "themeDark": "Dark",
-    "themeSystem": "System"
+    "themeSystem": "System",
+    "fontSize": "Font Size",
+    "fontModeFixed": "Fixed",
+    "fontModeResponsive": "Responsive (clamp)"
   },
   "login": {
     "title": "BookQuotr",
