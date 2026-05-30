@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Pencil, Trash2, Copy, Check, ImageDown } from "lucide-react"
 import { toast } from "sonner"
 import { useTranslation } from "@/i18n/client"
@@ -10,6 +10,7 @@ import remarkBreaks from "remark-breaks"
 import remarkSmartypants from "remark-smartypants"
 import rehypeSanitize from "rehype-sanitize"
 
+import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -34,6 +35,7 @@ interface QuoteCardProps {
   book?: BookWithQuotes | null
   onDeleted: (id: string) => void
   onUpdated: (quote: Quote) => void
+  isHighlighted?: boolean
 }
 
 export function QuoteCard({
@@ -42,9 +44,29 @@ export function QuoteCard({
   book,
   onDeleted,
   onUpdated,
+  isHighlighted,
 }: QuoteCardProps) {
   const [copied, setCopied] = useState(false)
+  const [showHighlight, setShowHighlight] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
   const { t } = useTranslation()
+
+  // Scroll into view and show ring animation when highlighted
+  useEffect(() => {
+    if (!isHighlighted) return
+    const scrollTimer = setTimeout(() => {
+      cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+      setShowHighlight(true)
+    }, 150)
+    return () => clearTimeout(scrollTimer)
+  }, [isHighlighted])
+
+  // Fade out the highlight after 2.5s
+  useEffect(() => {
+    if (!showHighlight) return
+    const fadeTimer = setTimeout(() => setShowHighlight(false), 2500)
+    return () => clearTimeout(fadeTimer)
+  }, [showHighlight])
 
   async function handleDelete() {
     try {
@@ -70,7 +92,13 @@ export function QuoteCard({
   }
 
   return (
-    <div className="group relative rounded-lg border border-border bg-card p-4 transition-shadow hover:shadow-sm">
+    <div
+      ref={cardRef}
+      className={cn(
+        "group relative rounded-lg border border-border bg-card p-4 transition-all duration-700 hover:shadow-sm",
+        showHighlight && "ring-2 ring-primary/70 shadow-md"
+      )}
+    >
       {/* Quote content */}
       <div className="prose prose-sm max-w-none dark:prose-invert [&_p+p]:mt-[1.2em]">
         <ReactMarkdown

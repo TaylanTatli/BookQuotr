@@ -25,6 +25,7 @@ interface QuotesPanelProps {
   onQuoteUpdated: (quote: Quote) => void;
   onBookUpdated: () => void;
   onBookDeleted: (id: string) => void;
+  highlightedQuoteId?: string | null;
 }
 
 export function QuotesPanel({
@@ -36,6 +37,7 @@ export function QuotesPanel({
   onQuoteUpdated,
   onBookUpdated,
   onBookDeleted,
+  highlightedQuoteId,
 }: QuotesPanelProps) {
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<QuoteViewMode>("default");
@@ -148,6 +150,7 @@ export function QuotesPanel({
             onQuoteDeleted={onQuoteDeleted}
             onQuoteUpdated={onQuoteUpdated}
             viewMode={viewMode}
+            highlightedQuoteId={highlightedQuoteId}
           />
         )}
       </div>

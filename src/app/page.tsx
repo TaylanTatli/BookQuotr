@@ -31,6 +31,7 @@ export default function HomePage() {
   const [loadingBooks, setLoadingBooks] = useState(true)
   const [loadingQuotes, setLoadingQuotes] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [highlightedQuoteId, setHighlightedQuoteId] = useState<string | null>(null)
 
   const isMobile = useIsMobile()
 
@@ -78,6 +79,12 @@ export default function HomePage() {
     fetchBooks()
   }, [fetchBooks])
 
+  // Selecting a book directly clears any active quote highlight
+  const handleSelectBook = useCallback((id: string) => {
+    setSelectedBookId(id)
+    setHighlightedQuoteId(null)
+  }, [])
+
   const handleBookDeleted = useCallback(
     (id: string) => {
       setBooks((prev) => prev.filter((b) => b.id !== id))
@@ -118,7 +125,11 @@ export default function HomePage() {
         <CommandPalette
           open={searchOpen}
           onOpenChange={setSearchOpen}
-          onSelectBook={setSelectedBookId}
+          onSelectBook={handleSelectBook}
+          onSelectQuote={(bookId, quoteId) => {
+            setSelectedBookId(bookId)
+            setHighlightedQuoteId(quoteId)
+          }}
         />
         <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-sidebar px-4">
           <Sheet>
@@ -146,7 +157,7 @@ export default function HomePage() {
                 books={books}
                 selectedBookId={selectedBookId}
                 loading={loadingBooks}
-                onSelectBook={setSelectedBookId}
+                onSelectBook={handleSelectBook}
                 onBookAdded={handleBookAdded}
                 onBookDeleted={handleBookDeleted}
                 onImportSuccess={fetchBooks}
@@ -164,6 +175,7 @@ export default function HomePage() {
             onQuoteAdded={handleQuoteAdded}
             onQuoteDeleted={handleQuoteDeleted}
             onQuoteUpdated={handleQuoteUpdated}
+            highlightedQuoteId={highlightedQuoteId}
             onBookUpdated={() => selectedBookId && fetchQuotes(selectedBookId)}
             onBookDeleted={handleBookDeleted}
           />
@@ -178,7 +190,11 @@ export default function HomePage() {
       <CommandPalette
         open={searchOpen}
         onOpenChange={setSearchOpen}
-        onSelectBook={setSelectedBookId}
+        onSelectBook={handleSelectBook}
+        onSelectQuote={(bookId, quoteId) => {
+          setSelectedBookId(bookId)
+          setHighlightedQuoteId(quoteId)
+        }}
       />
       <ResizablePanelGroup orientation="horizontal">
         <ResizablePanel minSize="20%" defaultSize="25%" maxSize="40%">
@@ -186,7 +202,7 @@ export default function HomePage() {
             books={books}
             selectedBookId={selectedBookId}
             loading={loadingBooks}
-            onSelectBook={setSelectedBookId}
+            onSelectBook={handleSelectBook}
             onBookAdded={handleBookAdded}
             onBookDeleted={handleBookDeleted}
             onImportSuccess={fetchBooks}
@@ -205,6 +221,7 @@ export default function HomePage() {
               onQuoteAdded={handleQuoteAdded}
               onQuoteDeleted={handleQuoteDeleted}
               onQuoteUpdated={handleQuoteUpdated}
+              highlightedQuoteId={highlightedQuoteId}
               onBookUpdated={() =>
                 selectedBookId && fetchQuotes(selectedBookId)
               }

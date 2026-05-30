@@ -33,9 +33,10 @@ interface CommandPaletteProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSelectBook: (id: string) => void
+  onSelectQuote?: (bookId: string, quoteId: string) => void
 }
 
-export function CommandPalette({ open, onOpenChange, onSelectBook }: CommandPaletteProps) {
+export function CommandPalette({ open, onOpenChange, onSelectBook, onSelectQuote }: CommandPaletteProps) {
   const { t } = useTranslation()
   const [query, setQuery] = useState("")
   const [books, setBooks] = useState<BookResult[]>([])
@@ -101,8 +102,12 @@ export function CommandPalette({ open, onOpenChange, onSelectBook }: CommandPale
     onOpenChange(false)
   }
 
-  function handleSelectQuote(bookId: string) {
-    onSelectBook(bookId)
+  function handleSelectQuote(bookId: string, quoteId: string) {
+    if (onSelectQuote) {
+      onSelectQuote(bookId, quoteId)
+    } else {
+      onSelectBook(bookId)
+    }
     onOpenChange(false)
   }
 
@@ -180,7 +185,7 @@ export function CommandPalette({ open, onOpenChange, onSelectBook }: CommandPale
                 <CommandItem
                   key={quote.id}
                   value={quote.id}
-                  onSelect={() => handleSelectQuote(quote.book.id)}
+                  onSelect={() => handleSelectQuote(quote.book.id, quote.id)}
                   className="gap-3 items-start"
                 >
                   <Quote className="mt-0.5 size-4 shrink-0 text-muted-foreground" />

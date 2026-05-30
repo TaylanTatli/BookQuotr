@@ -11,6 +11,7 @@ interface QuoteListProps {
   onQuoteDeleted: (id: string) => void;
   onQuoteUpdated: (quote: Quote) => void;
   viewMode?: QuoteViewMode;
+  highlightedQuoteId?: string | null;
 }
 
 export function QuoteList({
@@ -19,6 +20,7 @@ export function QuoteList({
   onQuoteDeleted,
   onQuoteUpdated,
   viewMode = "default",
+  highlightedQuoteId,
 }: QuoteListProps) {
   const { t } = useTranslation();
 
@@ -42,6 +44,7 @@ export function QuoteList({
             book={book}
             onDeleted={onQuoteDeleted}
             onUpdated={onQuoteUpdated}
+            isHighlighted={quote.id === highlightedQuoteId}
           />
         ))}
       </div>
@@ -59,6 +62,7 @@ export function QuoteList({
               book={book}
               onDeleted={onQuoteDeleted}
               onUpdated={onQuoteUpdated}
+              isHighlighted={quote.id === highlightedQuoteId}
             />
           </div>
         ))}
@@ -83,6 +87,7 @@ export function QuoteList({
               book={book}
               onDeleted={onQuoteDeleted}
               onUpdated={onQuoteUpdated}
+              isHighlighted={quote.id === highlightedQuoteId}
             />
           </div>
         ))}
@@ -101,6 +106,7 @@ export function QuoteList({
           book={book}
           onDeleted={onQuoteDeleted}
           onUpdated={onQuoteUpdated}
+          isHighlighted={quote.id === highlightedQuoteId}
         />
       ))}
     </div>
