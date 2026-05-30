@@ -90,7 +90,7 @@ export function QuotesPanel({
       <Separator className="mx-6 mt-4" />
 
       {/* Toolbar: count + view options */}
-      <div className="shrink-0 flex items-center justify-end gap-3 px-6 py-2">
+      <div className="shrink-0 flex items-center justify-between gap-3 px-6 py-2">
         {/* Count */}
         <p className="text-xs text-muted-foreground">
           {`${quotes.length} ${quotes.length === 1 ? t("books.quoteCount") : t("books.quotesCount")}`}

@@ -17,7 +17,7 @@ import {
 import { useTranslation } from "@/i18n/client";
 import { ItemGroup } from "@/components/ui/item";
 import type { BookWithQuoteCount } from "@/types";
-import { LogOut, Plus, Settings, Search } from "lucide-react";
+import { LogOut, Plus, Settings, Search, ListFilter } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -114,26 +114,26 @@ export function BookSidebar({
           </SettingsModal>
         </div>
 
-        {/* Search button */}
-        <div className="px-1">
+        {/* Search + Sort — same row */}
+        <div className="flex gap-2 px-1">
           <Button
             variant="outline"
             size="sm"
-            className="w-full justify-start text-muted-foreground"
+            className="flex-1 min-w-0 justify-start text-muted-foreground"
             onClick={onSearchOpen}
           >
-            <Search className="mr-2 size-3.5" />
-            <span className="flex-1 text-left text-xs">{t("search.buttonLabel")}</span>
-            <kbd className="text-xs opacity-50">Ctrl K</kbd>
+            <Search className="mr-1.5 size-3.5 shrink-0" />
+            <span className="flex-1 truncate text-left text-xs">{t("search.buttonLabel")}</span>
+            <kbd className="ml-1 shrink-0 text-xs opacity-50">Ctrl K</kbd>
           </Button>
-        </div>
 
-        {/* Sort selector */}
-        {books.length > 1 && (
-          <div className="px-1">
+          {books.length > 1 && (
             <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
-              <SelectTrigger className="h-7 w-full text-xs">
-                {SORT_OPTIONS.find((o) => o.value === sortKey) ? t(SORT_OPTIONS.find((o) => o.value === sortKey)!.labelKey) : <SelectValue />}
+              <SelectTrigger
+                className="h-8 w-8 shrink-0 px-0 text-xs [&>svg:last-child]:hidden"
+                aria-label="Sort order"
+              >
+                <ListFilter className="size-3.5 text-muted-foreground" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -145,8 +145,8 @@ export function BookSidebar({
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="flex-1 overflow-auto">
