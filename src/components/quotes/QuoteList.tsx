@@ -2,12 +2,12 @@
 
 import { QuoteCard } from "@/components/quotes/QuoteCard";
 import { useTranslation } from "@/i18n/client";
-import { cn } from "@/lib/utils";
 import type { Quote } from "@/types";
 import type { QuoteViewMode } from "@/components/quotes/QuoteViewOptions";
 
 interface QuoteListProps {
   quotes: Quote[];
+  book?: { title: string; author: string } | null;
   onQuoteDeleted: (id: string) => void;
   onQuoteUpdated: (quote: Quote) => void;
   viewMode?: QuoteViewMode;
@@ -15,6 +15,7 @@ interface QuoteListProps {
 
 export function QuoteList({
   quotes,
+  book,
   onQuoteDeleted,
   onQuoteUpdated,
   viewMode = "default",
@@ -38,6 +39,7 @@ export function QuoteList({
             key={quote.id}
             quote={quote}
             bookId={quote.bookId}
+            book={book}
             onDeleted={onQuoteDeleted}
             onUpdated={onQuoteUpdated}
           />
@@ -54,6 +56,7 @@ export function QuoteList({
             <QuoteCard
               quote={quote}
               bookId={quote.bookId}
+              book={book}
               onDeleted={onQuoteDeleted}
               onUpdated={onQuoteUpdated}
             />
@@ -77,6 +80,7 @@ export function QuoteList({
             <QuoteCard
               quote={quote}
               bookId={quote.bookId}
+              book={book}
               onDeleted={onQuoteDeleted}
               onUpdated={onQuoteUpdated}
             />
@@ -94,6 +98,7 @@ export function QuoteList({
           key={quote.id}
           quote={quote}
           bookId={quote.bookId}
+          book={book}
           onDeleted={onQuoteDeleted}
           onUpdated={onQuoteUpdated}
         />

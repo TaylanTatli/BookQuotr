@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, BookOpen } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Plus, BookOpen, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,6 +39,12 @@ export function QuotesPanel({
 }: QuotesPanelProps) {
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<QuoteViewMode>("default");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Reset search when selected book changes
+  useEffect(() => {
+    setSearchQuery("");
+  }, [book?.id]);
 
   // Persist view mode and sync with localStorage changes
   useEffect(() => {
@@ -65,6 +72,18 @@ export function QuotesPanel({
     window.dispatchEvent(new Event("local-storage-update"));
   }
 
+  // Client-side search: content, chapter, note
+  const filteredQuotes = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return quotes;
+    return quotes.filter(
+      (quote) =>
+        quote.content.toLowerCase().includes(q) ||
+        quote.chapter?.toLowerCase().includes(q) ||
+        quote.note?.toLowerCase().includes(q)
+    );
+  }, [quotes, searchQuery]);
+
   if (!book) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-4 bg-background text-muted-foreground">
@@ -87,11 +106,26 @@ export function QuotesPanel({
 
       <Separator className="mx-6 mt-4" />
 
-      {/* Toolbar: count + view options */}
-      <div className="shrink-0 flex items-center justify-between px-6 py-2">
-        <p className="text-xs text-muted-foreground">
-          {quotes.length} {quotes.length === 1 ? t("books.quoteCount") : t("books.quotesCount")}
+      {/* Toolbar: search + count + view options */}
+      <div className="shrink-0 flex items-center justify-between gap-3 px-6 py-2">
+        {/* Search input */}
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t("quotes.searchPlaceholder")}
+            className="h-7 pl-8 text-xs"
+          />
+        </div>
+
+        {/* Count */}
+        <p className="text-xs text-muted-foreground shrink-0">
+          {searchQuery
+            ? `${filteredQuotes.length} / ${quotes.length}`
+            : `${quotes.length} ${quotes.length === 1 ? t("books.quoteCount") : t("books.quotesCount")}`}
         </p>
+
         <QuoteViewOptions value={viewMode} onChange={handleViewModeChange} />
       </div>
 
@@ -109,7 +143,8 @@ export function QuotesPanel({
           </div>
         ) : (
           <QuoteList
-            quotes={quotes}
+            quotes={filteredQuotes}
+            book={book}
             onQuoteDeleted={onQuoteDeleted}
             onQuoteUpdated={onQuoteUpdated}
             viewMode={viewMode}
@@ -129,3 +164,4 @@ export function QuotesPanel({
     </main>
   );
 }
+
