@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import Image from "next/image"
-import { Search, Loader2 } from "lucide-react"
+import { Search, Loader2, Link2, Upload, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -49,7 +49,7 @@ const FIELDS: FieldDef[] = [
   { key: "language", label: "addBook.language" },
   { key: "startedAt", label: "addBook.startedAt", type: "date" },
   { key: "finishedAt", label: "addBook.finishedAt", type: "date" },
-  { key: "thumbnail", label: "addBook.coverUrl", colSpan: true },
+
 ]
 
 type BookFormData = Record<string, string>
@@ -88,6 +88,9 @@ export function AddBookModal({
   const [formData, setFormData] = useState<BookFormData>(() =>
     buildInitialFormData(existingBook)
   )
+  const [uploadMode, setUploadMode] = useState(false)
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Fix: Reset formData with latest existingBook data whenever modal opens
   // This prevents stale data from a previously opened book
@@ -135,6 +138,35 @@ export function AddBookModal({
         : { openLibraryId: result.externalId }),
     })
     setResults([])
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Existing book update needs to happen when saving, 
+    // but we can pre-upload the file to get the path
+    const uploadFormData = new FormData()
+    uploadFormData.append("file", file)
+    // Use existing book ID or a temporary one (server handles it)
+    const tempId = existingBook?.id || crypto.randomUUID()
+    uploadFormData.append("bookId", tempId)
+
+    setUploadingCover(true)
+    try {
+      const res = await fetch("/api/covers/upload", {
+        method: "POST",
+        body: uploadFormData,
+      })
+      if (!res.ok) throw new Error("Upload failed")
+      const data = await res.json()
+      setFormData((prev) => ({ ...prev, thumbnail: data.path }))
+      toast.success(t("addBook.coverUploaded"))
+    } catch {
+      toast.error(t("addBook.coverUploadError"))
+    } finally {
+      setUploadingCover(false)
+    }
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -275,30 +307,105 @@ export function AddBookModal({
             {/* Manual form */}
             <form onSubmit={handleSave} className="flex flex-col gap-3">
               <FieldGroup className="grid grid-cols-2 gap-3">
-                {FIELDS.map(
-                  ({ key, label, required, type, colSpan }: FieldDef) => (
-                    <Field key={key} className={colSpan ? "col-span-2" : ""}>
-                      <FieldLabel>
-                        {t(label)}{" "}
-                        {required && (
-                          <span className="text-destructive">*</span>
-                        )}
-                      </FieldLabel>
-                      <FieldContent>
+                <Field className="col-span-2">
+                  <div className="flex items-center justify-between">
+                    <FieldLabel>{t("addBook.coverUrl")}</FieldLabel>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs"
+                      onClick={() => setUploadMode(!uploadMode)}
+                    >
+                      {uploadMode ? (
+                        <>
+                          <Link2 className="mr-1 size-3" />
+                          {t("addBook.useUrl")}
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-1 size-3" />
+                          {t("addBook.uploadFile")}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <FieldContent className="flex gap-2">
+                    {uploadMode ? (
+                      <div className="flex flex-1 items-center gap-2">
                         <Input
-                          type={type ?? "text"}
-                          value={formData[key] ?? ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              [key]: e.target.value,
-                            }))
-                          }
-                          placeholder={type === "date" ? undefined : t(label)}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          ref={fileInputRef}
+                          onChange={handleFileUpload}
                         />
-                      </FieldContent>
-                    </Field>
-                  )
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="flex-1"
+                          disabled={uploadingCover}
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          {uploadingCover ? (
+                            <Loader2 className="mr-2 size-4 animate-spin" />
+                          ) : (
+                            <Upload className="mr-2 size-4" />
+                          )}
+                          {formData.thumbnail && formData.thumbnail.startsWith("/api/covers") 
+                            ? t("addBook.changeCover") 
+                            : t("addBook.selectFile")}
+                        </Button>
+                        {formData.thumbnail && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setFormData((prev) => ({ ...prev, thumbnail: "" }))}
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <Input
+                        value={formData.thumbnail ?? ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, thumbnail: e.target.value }))
+                        }
+                        placeholder="https://..."
+                      />
+                    )}
+                  </FieldContent>
+                </Field>
+
+                {FIELDS.map(
+                  ({ key, label, required, type, colSpan }: FieldDef) => {
+                    if (key === "thumbnail") return null; // Handled specially above
+                    return (
+                      <Field key={key} className={colSpan ? "col-span-2" : ""}>
+                        <FieldLabel>
+                          {t(label)}{" "}
+                          {required && (
+                            <span className="text-destructive">*</span>
+                          )}
+                        </FieldLabel>
+                        <FieldContent>
+                          <Input
+                            type={type ?? "text"}
+                            value={formData[key] ?? ""}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                [key]: e.target.value,
+                              }))
+                            }
+                            placeholder={type === "date" ? undefined : t(label)}
+                          />
+                        </FieldContent>
+                      </Field>
+                    )
+                  }
                 )}
               </FieldGroup>
               <div className="flex justify-end gap-2 pt-2">

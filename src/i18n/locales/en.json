@@ -120,7 +120,13 @@
     "cancel": "Cancel",
     "required": "Title and author are required",
     "sourceGoogle": "Google Books",
-    "sourceOpenLibrary": "Open Library"
+    "sourceOpenLibrary": "Open Library",
+    "useUrl": "Use URL",
+    "uploadFile": "Upload File",
+    "selectFile": "Select a file...",
+    "changeCover": "Change cover",
+    "coverUploaded": "Cover image uploaded",
+    "coverUploadError": "Failed to upload cover"
   },
   "addQuote": {
     "addTitle": "Add Quote",

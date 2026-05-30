@@ -120,7 +120,13 @@
     "cancel": "İptal",
     "required": "Başlık ve yazar zorunludur",
     "sourceGoogle": "Google Books",
-    "sourceOpenLibrary": "Open Library"
+    "sourceOpenLibrary": "Open Library",
+    "useUrl": "URL Kullan",
+    "uploadFile": "Dosya Yükle",
+    "selectFile": "Dosya seç...",
+    "changeCover": "Kapağı değiştir",
+    "coverUploaded": "Kapak resmi yüklendi",
+    "coverUploadError": "Kapak yüklenemedi"
   },
   "addQuote": {
     "addTitle": "Alıntı Ekle",
