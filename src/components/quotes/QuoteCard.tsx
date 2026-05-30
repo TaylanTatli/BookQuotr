@@ -137,7 +137,7 @@ export function QuoteCard({
           <AddQuoteModal
             bookId={bookId}
             existingQuote={quote}
-            onQuoteAdded={() => onUpdated(quote)}
+            onQuoteAdded={onUpdated}
           >
             <Button
               variant="outline"

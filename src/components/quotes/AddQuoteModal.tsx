@@ -28,7 +28,7 @@ import { Collapsible, CollapsibleTrigger } from "../ui/collapsible"
 interface AddQuoteModalProps {
   children: React.ReactElement
   bookId: string
-  onQuoteAdded: () => void
+  onQuoteAdded: (quote: Quote) => void
   existingQuote?: Quote
 }
 
@@ -78,7 +78,8 @@ export function AddQuoteModal({
           }),
         })
         if (!res.ok) throw new Error()
-        onQuoteAdded()
+        const data = await res.json()
+        onQuoteAdded(data.quote)
         toast.success(t("quotes.updateSuccess"))
         setOpen(false)
       } else {
@@ -95,7 +96,7 @@ export function AddQuoteModal({
         })
         if (!res.ok) throw new Error()
         const data = await res.json()
-        onQuoteAdded()
+        onQuoteAdded(data.quotes?.[0] ?? data)
         toast.success(
           data.count > 1
             ? t("quotes.saveMultipleSuccess", { count: data.count })
