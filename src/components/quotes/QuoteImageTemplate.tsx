@@ -1,4 +1,7 @@
 import React from "react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import remarkBreaks from "remark-breaks"
 
 export interface ExportColors {
   bg: string
@@ -143,19 +146,96 @@ export const QuoteImageTemplate = React.forwardRef<
         &ldquo;
       </div>
 
-      {/* Quote content */}
+      {/* Quote content – rendered as markdown */}
       <div
         style={{
           fontSize: `${fontSize}px`,
           lineHeight: "1.85",
           fontWeight: "400",
-          whiteSpace: "pre-wrap",
           letterSpacing: "-0.01em",
           color: colors.fg,
           marginBottom: `${contentGap}px`,
         }}
       >
-        {content}
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkBreaks]}
+          components={{
+            // Paragraphs: inline, no extra margin (layout handled by parent)
+            p: ({ children }) => (
+              <p
+                style={{
+                  margin: 0,
+                  marginBottom: `${Math.round(fontSize * 0.5)}px`,
+                }}
+              >
+                {children}
+              </p>
+            ),
+            // Bold
+            strong: ({ children }) => (
+              <strong style={{ fontWeight: "700", color: colors.fg }}>
+                {children}
+              </strong>
+            ),
+            // Italic
+            em: ({ children }) => (
+              <em style={{ fontStyle: "italic" }}>{children}</em>
+            ),
+            // Strikethrough
+            del: ({ children }) => (
+              <del style={{ textDecoration: "line-through", opacity: 0.6 }}>
+                {children}
+              </del>
+            ),
+            // Unordered list
+            ul: ({ children }) => (
+              <ul
+                style={{
+                  listStyle: "disc",
+                  margin: 0,
+                  paddingLeft: `${Math.round(fontSize * 1.2)}px`,
+                  marginBottom: `${Math.round(fontSize * 0.5)}px`,
+                }}
+              >
+                {children}
+              </ul>
+            ),
+            // Ordered list
+            ol: ({ children }) => (
+              <ol
+                style={{
+                  listStyle: "decimal",
+                  margin: 0,
+                  paddingLeft: `${Math.round(fontSize * 1.2)}px`,
+                  marginBottom: `${Math.round(fontSize * 0.5)}px`,
+                }}
+              >
+                {children}
+              </ol>
+            ),
+            // List item
+            li: ({ children }) => (
+              <li style={{ marginBottom: `${Math.round(fontSize * 0.2)}px` }}>
+                {children}
+              </li>
+            ),
+            // Blockquote
+            blockquote: ({ children }) => (
+              <blockquote
+                style={{
+                  borderLeft: `3px solid ${colors.accent}`,
+                  paddingLeft: `${Math.round(fontSize * 0.75)}px`,
+                  margin: `0 0 ${Math.round(fontSize * 0.5)}px 0`,
+                  opacity: 0.85,
+                }}
+              >
+                {children}
+              </blockquote>
+            ),
+          }}
+        >
+          {content}
+        </ReactMarkdown>
       </div>
 
       {/* Attribution */}
