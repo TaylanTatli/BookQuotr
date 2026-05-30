@@ -44,7 +44,7 @@ export function QuotesPanel({
   // Reset search when selected book changes
   useEffect(() => {
     setSearchQuery("");
-  }, [book?.id]);
+  }, [book]);
 
   // Persist view mode and sync with localStorage changes
   useEffect(() => {

@@ -2,12 +2,12 @@
 
 import { QuoteCard } from "@/components/quotes/QuoteCard";
 import { useTranslation } from "@/i18n/client";
-import type { Quote } from "@/types";
+import type { Quote, BookWithQuotes } from "@/types";
 import type { QuoteViewMode } from "@/components/quotes/QuoteViewOptions";
 
 interface QuoteListProps {
   quotes: Quote[];
-  book?: { title: string; author: string } | null;
+  book?: BookWithQuotes | null;
   onQuoteDeleted: (id: string) => void;
   onQuoteUpdated: (quote: Quote) => void;
   viewMode?: QuoteViewMode;
