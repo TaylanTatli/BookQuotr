@@ -136,5 +136,15 @@
   "common": {
     "delete": "Sil",
     "cancel": "İptal"
+  },
+  "search": {
+    "title": "Ara",
+    "description": "Kitap ve alıntılarda ara",
+    "placeholder": "Kitap veya alıntı ara…",
+    "hint": "Tüm kitap ve alıntılarınızda aramak için yazmaya başlayın",
+    "empty": "Sonuç bulunamadı",
+    "books": "Kitaplar",
+    "quotes": "Alıntılar",
+    "buttonLabel": "Ara"
   }
 }

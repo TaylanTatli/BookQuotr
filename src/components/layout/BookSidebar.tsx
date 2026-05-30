@@ -17,7 +17,7 @@ import {
 import { useTranslation } from "@/i18n/client";
 import { ItemGroup } from "@/components/ui/item";
 import type { BookWithQuoteCount } from "@/types";
-import { LogOut, Plus, Settings } from "lucide-react";
+import { LogOut, Plus, Settings, Search } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -69,6 +69,7 @@ interface BookSidebarProps {
   onBookAdded: () => void;
   onBookDeleted: (id: string) => void;
   onImportSuccess: () => void;
+  onSearchOpen: () => void;
 }
 
 export function BookSidebar({
@@ -79,6 +80,7 @@ export function BookSidebar({
   onBookAdded,
   onBookDeleted,
   onImportSuccess,
+  onSearchOpen,
 }: BookSidebarProps) {
   const router = useRouter();
   const { t } = useTranslation();
@@ -110,6 +112,20 @@ export function BookSidebar({
               <Settings className="size-4" />
             </Button>
           </SettingsModal>
+        </div>
+
+        {/* Search button */}
+        <div className="px-1">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start text-muted-foreground"
+            onClick={onSearchOpen}
+          >
+            <Search className="mr-2 size-3.5" />
+            <span className="flex-1 text-left text-xs">{t("search.buttonLabel")}</span>
+            <kbd className="text-xs opacity-50">Ctrl K</kbd>
+          </Button>
         </div>
 
         {/* Sort selector */}

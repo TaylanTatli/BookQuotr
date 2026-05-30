@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { BookSidebar } from "@/components/layout/BookSidebar"
 import { QuotesPanel } from "@/components/layout/QuotesPanel"
+import { CommandPalette } from "@/components/search/CommandPalette"
 import type { BookWithQuoteCount, BookWithQuotes, Quote } from "@/types"
 
 import {
@@ -29,6 +30,7 @@ export default function HomePage() {
   const [quotes, setQuotes] = useState<Quote[]>([])
   const [loadingBooks, setLoadingBooks] = useState(true)
   const [loadingQuotes, setLoadingQuotes] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
 
   const isMobile = useIsMobile()
 
@@ -113,6 +115,11 @@ export default function HomePage() {
   if (isMobile) {
     return (
       <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
+        <CommandPalette
+          open={searchOpen}
+          onOpenChange={setSearchOpen}
+          onSelectBook={setSelectedBookId}
+        />
         <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-sidebar px-4">
           <Sheet>
             <SheetTrigger
@@ -143,6 +150,7 @@ export default function HomePage() {
                 onBookAdded={handleBookAdded}
                 onBookDeleted={handleBookDeleted}
                 onImportSuccess={fetchBooks}
+                onSearchOpen={() => setSearchOpen(true)}
               />
             </SheetContent>
           </Sheet>
@@ -167,6 +175,11 @@ export default function HomePage() {
   // Desktop layout using resizable panels
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
+      <CommandPalette
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        onSelectBook={setSelectedBookId}
+      />
       <ResizablePanelGroup orientation="horizontal">
         <ResizablePanel minSize="20%" defaultSize="25%" maxSize="40%">
           <BookSidebar
@@ -177,6 +190,7 @@ export default function HomePage() {
             onBookAdded={handleBookAdded}
             onBookDeleted={handleBookDeleted}
             onImportSuccess={fetchBooks}
+            onSearchOpen={() => setSearchOpen(true)}
           />
         </ResizablePanel>
 

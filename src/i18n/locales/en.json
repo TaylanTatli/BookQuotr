@@ -136,5 +136,15 @@
   "common": {
     "delete": "Delete",
     "cancel": "Cancel"
+  },
+  "search": {
+    "title": "Search",
+    "description": "Search books and quotes",
+    "placeholder": "Search books and quotes…",
+    "hint": "Type to search across all your books and quotes",
+    "empty": "No results found",
+    "books": "Books",
+    "quotes": "Quotes",
+    "buttonLabel": "Search"
   }
 }
