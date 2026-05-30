@@ -73,11 +73,10 @@ jobs:
             NOTES="${NOTES}**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${{ steps.get_version.outputs.tag }}"
           fi
 
-          {
-            echo "notes<<EOF"
-            printf "%b" "$NOTES"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "notes<<$EOF" >> "$GITHUB_OUTPUT"
+          echo -e "$NOTES" >> "$GITHUB_OUTPUT"
+          echo "$EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
