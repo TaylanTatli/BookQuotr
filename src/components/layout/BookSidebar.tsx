@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { AddBookModal } from "@/components/books/AddBookModal";
-import { BookCard } from "@/components/books/BookCard";
-import { SettingsModal } from "@/components/settings/SettingsModal";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react"
+import { AddBookModal } from "@/components/books/AddBookModal"
+import { BookCard } from "@/components/books/BookCard"
+import { SettingsModal } from "@/components/settings/SettingsModal"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Select,
   SelectContent,
@@ -13,15 +13,15 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useTranslation } from "@/i18n/client";
-import { ItemGroup } from "@/components/ui/item";
-import type { BookWithQuoteCount } from "@/types";
-import { LogOut, Plus, Settings, Search, ListFilter } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+} from "@/components/ui/select"
+import { useTranslation } from "@/i18n/client"
+import { ItemGroup } from "@/components/ui/item"
+import type { BookWithQuoteCount } from "@/types"
+import { LogOut, Plus, Settings, Search, ListFilter } from "lucide-react"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
 
-type SortKey = "createdAt" | "finishedAt" | "title" | "author" | "rating";
+type SortKey = "createdAt" | "finishedAt" | "title" | "author" | "rating"
 
 const SORT_OPTIONS: { value: SortKey; labelKey: string }[] = [
   { value: "createdAt", labelKey: "books.sortByAdded" },
@@ -29,47 +29,53 @@ const SORT_OPTIONS: { value: SortKey; labelKey: string }[] = [
   { value: "title", labelKey: "books.sortByTitle" },
   { value: "author", labelKey: "books.sortByAuthor" },
   { value: "rating", labelKey: "books.sortByRating" },
-];
+]
 
-function sortBooks(books: BookWithQuoteCount[], sortKey: SortKey): BookWithQuoteCount[] {
-  const copy = [...books];
+function sortBooks(
+  books: BookWithQuoteCount[],
+  sortKey: SortKey
+): BookWithQuoteCount[] {
+  const copy = [...books]
   switch (sortKey) {
     case "finishedAt":
       return copy.sort((a, b) => {
         if (a.finishedAt && b.finishedAt)
-          return new Date(b.finishedAt).getTime() - new Date(a.finishedAt).getTime();
-        if (a.finishedAt) return -1;
-        if (b.finishedAt) return 1;
-        return a.title.localeCompare(b.title);
-      });
+          return (
+            new Date(b.finishedAt).getTime() - new Date(a.finishedAt).getTime()
+          )
+        if (a.finishedAt) return -1
+        if (b.finishedAt) return 1
+        return a.title.localeCompare(b.title)
+      })
     case "title":
-      return copy.sort((a, b) => a.title.localeCompare(b.title));
+      return copy.sort((a, b) => a.title.localeCompare(b.title))
     case "author":
-      return copy.sort((a, b) => a.author.localeCompare(b.author));
+      return copy.sort((a, b) => a.author.localeCompare(b.author))
     case "rating":
       return copy.sort((a, b) => {
-        const ra = a.rating ?? 0;
-        const rb = b.rating ?? 0;
-        if (rb !== ra) return rb - ra;
-        return a.title.localeCompare(b.title);
-      });
+        const ra = a.rating ?? 0
+        const rb = b.rating ?? 0
+        if (rb !== ra) return rb - ra
+        return a.title.localeCompare(b.title)
+      })
     case "createdAt":
     default:
       return copy.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
   }
 }
 
 interface BookSidebarProps {
-  books: BookWithQuoteCount[];
-  selectedBookId: string | null;
-  loading: boolean;
-  onSelectBook: (id: string) => void;
-  onBookAdded: () => void;
-  onBookDeleted: (id: string) => void;
-  onImportSuccess: () => void;
-  onSearchOpen: () => void;
+  books: BookWithQuoteCount[]
+  selectedBookId: string | null
+  loading: boolean
+  onSelectBook: (id: string) => void
+  onBookAdded: () => void
+  onBookDeleted: (id: string) => void
+  onImportSuccess: () => void
+  onSearchOpen: () => void
 }
 
 export function BookSidebar({
@@ -82,22 +88,28 @@ export function BookSidebar({
   onImportSuccess,
   onSearchOpen,
 }: BookSidebarProps) {
-  const router = useRouter();
-  const { t } = useTranslation();
-  const [sortKey, setSortKey] = useState<SortKey>("createdAt");
+  const router = useRouter()
+  const { t } = useTranslation()
+  const [sortKey, setSortKey] = useState<SortKey>("createdAt")
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-  };
+    await fetch("/api/auth/logout", { method: "POST" })
+    router.push("/login")
+  }
 
-  const sortedBooks = sortBooks(books, sortKey);
+  const sortedBooks = sortBooks(books, sortKey)
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex flex-col gap-3 border-b p-4">
         <div className="flex items-center gap-2 px-2">
-          <Image src="/favicon.svg" alt="BookQuotr" width={28} height={28} className="text-primary" />
+          <Image
+            src="/favicon.svg"
+            alt="BookQuotr"
+            width={28}
+            height={28}
+            className="text-primary"
+          />
           <h1 className="text-lg font-semibold tracking-tight">BookQuotr</h1>
         </div>
         <div className="flex gap-2 px-1">
@@ -119,23 +131,33 @@ export function BookSidebar({
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 min-w-0 justify-start text-muted-foreground"
+            className="min-w-0 flex-1 justify-start text-muted-foreground"
             onClick={onSearchOpen}
           >
             <Search className="mr-1.5 size-3.5 shrink-0" />
-            <span className="flex-1 truncate text-left text-xs">{t("search.buttonLabel")}</span>
+            <span className="flex-1 truncate text-left text-xs">
+              {t("search.buttonLabel")}
+            </span>
             <kbd className="ml-1 shrink-0 text-xs opacity-50">Ctrl K</kbd>
           </Button>
 
           {books.length > 1 && (
-            <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+            <Select
+              value={sortKey}
+              onValueChange={(v) => setSortKey(v as SortKey)}
+            >
               <SelectTrigger
-                className="h-8 w-8 shrink-0 px-0 text-xs [&>svg:last-child]:hidden"
+                className="shrink-0 text-xs"
                 aria-label="Sort order"
+                size="sm"
               >
-                <ListFilter className="size-3.5 text-muted-foreground" />
+                <ListFilter className="size-3.5 shrink-0 text-muted-foreground" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                side="bottom"
+                align="center"
+                alignItemWithTrigger={false}
+              >
                 <SelectGroup>
                   {SORT_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
@@ -180,11 +202,15 @@ export function BookSidebar({
       </div>
 
       <div className="mt-auto border-t p-4">
-        <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+        <Button
+          variant="ghost"
+          className="w-full justify-start"
+          onClick={handleLogout}
+        >
           <LogOut className="mr-2 size-4" />
           {t("sidebar.logout")}
         </Button>
       </div>
     </div>
-  );
+  )
 }
