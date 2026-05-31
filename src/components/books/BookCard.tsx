@@ -65,8 +65,8 @@ export function BookCard({
     >
       {/* Thumbnail */}
       <ItemMedia
-        variant="image"
-        className="h-16 w-auto shrink-0 overflow-hidden rounded"
+        variant="default"
+        className="h-16 w-12 shrink-0 self-start overflow-hidden rounded"
       >
         {book.thumbnail ? (
           <Image
@@ -74,7 +74,7 @@ export function BookCard({
             alt={book.title}
             width={50}
             height={100}
-            className="size-full w-auto object-cover"
+            className="h-full w-full object-cover"
             unoptimized
           />
         ) : (
