@@ -100,7 +100,9 @@
     "sortByFinished": "Bitirilme Tarihi",
     "sortByTitle": "Başlık",
     "sortByAuthor": "Yazar",
-    "sortByRating": "Puan"
+    "sortByRating": "Puan",
+    "showDetails": "Detayları göster",
+    "hideDetails": "Detayları gizle"
   },
   "addBook": {
     "addTitle": "Kitap Ekle",

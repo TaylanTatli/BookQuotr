@@ -100,7 +100,9 @@
     "sortByFinished": "Date Finished",
     "sortByTitle": "Title",
     "sortByAuthor": "Author",
-    "sortByRating": "Rating"
+    "sortByRating": "Rating",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details"
   },
   "addBook": {
     "addTitle": "Add Book",

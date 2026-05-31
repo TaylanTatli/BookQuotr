@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Trash2, Pencil, Star, Heart } from "lucide-react"
+import { Trash2, Pencil, Star, Heart, ChevronDown } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
@@ -17,8 +17,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { AddBookModal } from "@/components/books/AddBookModal"
 import { useTranslation } from "@/i18n/client"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { getLanguageName } from "@/lib/languageMap"
 import { cn } from "@/lib/utils"
 import type { BookWithQuotes } from "@/types"
@@ -61,11 +67,13 @@ export function BookDetail({
   onBookDeleted,
 }: BookDetailProps) {
   const { t, locale } = useTranslation()
+  const isMobile = useIsMobile()
   const [rating, setRating] = useState<number | null>(book.rating ?? null)
   const [isFavorite, setIsFavorite] = useState(book.isFavorite ?? false)
   const [hoveredStar, setHoveredStar] = useState<number | null>(null)
   const [savingRating, setSavingRating] = useState(false)
   const [savingFavorite, setSavingFavorite] = useState(false)
+  const [detailsOpen, setDetailsOpen] = useState(false)
 
   async function handleDelete() {
     try {
@@ -120,8 +128,111 @@ export function BookDetail({
 
   const readingDays = calcReadingDays(book.startedAt, book.finishedAt)
 
+  const hasCollapsibleContent =
+    rating !== null ||
+    book.publishedDate ||
+    book.publisher ||
+    (book.pageCount || 0) > 0 ||
+    book.language ||
+    book.isbn ||
+    book.startedAt ||
+    book.finishedAt ||
+    book.description
+
+  // The collapsible details section (ratings, meta, dates, description)
+  const detailsContent = (
+    <>
+      {/* Star rating */}
+      <div
+        className="mt-2 flex items-center gap-0.5"
+        aria-label={t("books.rating")}
+      >
+        {[1, 2, 3, 4, 5].map((star) => {
+          const filled = (hoveredStar ?? rating ?? 0) >= star
+          return (
+            <button
+              key={star}
+              type="button"
+              disabled={savingRating}
+              onClick={() => handleRating(star)}
+              onMouseEnter={() => setHoveredStar(star)}
+              onMouseLeave={() => setHoveredStar(null)}
+              className="text-muted-foreground transition-colors hover:text-yellow-400 disabled:opacity-50"
+              aria-label={`${star} ${t("books.stars")}`}
+            >
+              <Star
+                className={cn(
+                  "size-4 transition-colors",
+                  filled ? "fill-yellow-400 text-yellow-400" : "fill-none"
+                )}
+              />
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Meta badges */}
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {book.publishedDate && (
+          <Badge variant="outline" className="text-xs">
+            {book.publishedDate}
+          </Badge>
+        )}
+        {book.publisher && (
+          <Badge variant="outline" className="text-xs">
+            {book.publisher}
+          </Badge>
+        )}
+        {(book.pageCount || 0) > 0 && (
+          <Badge variant="outline" className="text-xs">
+            {book.pageCount} {t("books.pages")}
+          </Badge>
+        )}
+        {book.language && (
+          <Badge variant="outline" className="text-xs">
+            {getLanguageName(book.language, locale)}
+          </Badge>
+        )}
+        {book.isbn && (
+          <Badge variant="outline" className="font-mono text-xs">
+            {book.isbn}
+          </Badge>
+        )}
+      </div>
+
+      {/* Reading dates */}
+      {(book.startedAt || book.finishedAt) && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {book.startedAt && (
+            <Badge variant="secondary" className="text-xs">
+              📖 {t("books.startedAt")}: {formatDate(book.startedAt, locale)}
+            </Badge>
+          )}
+          {book.finishedAt && (
+            <Badge variant="secondary" className="text-xs">
+              ✅ {t("books.finishedAt")}:{" "}
+              {formatDate(book.finishedAt, locale)}
+            </Badge>
+          )}
+          {readingDays !== null && (
+            <Badge variant="secondary" className="text-xs">
+              ⏱ {t("books.readingDuration", { days: readingDays })}
+            </Badge>
+          )}
+        </div>
+      )}
+
+      {/* Description */}
+      {book.description && (
+        <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
+          {book.description}
+        </p>
+      )}
+    </>
+  )
+
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-start gap-5">
       {/* Cover */}
       <div className="h-30 w-auto shrink-0 overflow-hidden rounded-lg shadow-md">
         {book.thumbnail ? (
@@ -198,91 +309,22 @@ export function BookDetail({
           </div>
         </div>
 
-        {/* Star rating */}
-        <div
-          className="mt-2 flex items-center gap-0.5"
-          aria-label={t("books.rating")}
-        >
-          {[1, 2, 3, 4, 5].map((star) => {
-            const filled = (hoveredStar ?? rating ?? 0) >= star
-            return (
-              <button
-                key={star}
-                type="button"
-                disabled={savingRating}
-                onClick={() => handleRating(star)}
-                onMouseEnter={() => setHoveredStar(star)}
-                onMouseLeave={() => setHoveredStar(null)}
-                className="text-muted-foreground transition-colors hover:text-yellow-400 disabled:opacity-50"
-                aria-label={`${star} ${t("books.stars")}`}
-              >
-                <Star
-                  className={cn(
-                    "size-4 transition-colors",
-                    filled ? "fill-yellow-400 text-yellow-400" : "fill-none"
-                  )}
-                />
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Meta badges */}
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {book.publishedDate && (
-            <Badge variant="outline" className="text-xs">
-              {book.publishedDate}
-            </Badge>
-          )}
-          {book.publisher && (
-            <Badge variant="outline" className="text-xs">
-              {book.publisher}
-            </Badge>
-          )}
-          {(book.pageCount || 0) > 0 && (
-            <Badge variant="outline" className="text-xs">
-              {book.pageCount} {t("books.pages")}
-            </Badge>
-          )}
-          {book.language && (
-            <Badge variant="outline" className="text-xs">
-              {getLanguageName(book.language, locale)}
-            </Badge>
-          )}
-          {book.isbn && (
-            <Badge variant="outline" className="font-mono text-xs">
-              {book.isbn}
-            </Badge>
-          )}
-        </div>
-
-        {/* Reading dates */}
-        {(book.startedAt || book.finishedAt) && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {book.startedAt && (
-              <Badge variant="secondary" className="text-xs">
-                📖 {t("books.startedAt")}: {formatDate(book.startedAt, locale)}
-              </Badge>
-            )}
-            {book.finishedAt && (
-              <Badge variant="secondary" className="text-xs">
-                ✅ {t("books.finishedAt")}:{" "}
-                {formatDate(book.finishedAt, locale)}
-              </Badge>
-            )}
-            {readingDays !== null && (
-              <Badge variant="secondary" className="text-xs">
-                ⏱ {t("books.readingDuration", { days: readingDays })}
-              </Badge>
-            )}
-          </div>
-        )}
-
-        {/* Description */}
-        {book.description && (
-          <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
-            {book.description}
-          </p>
+        {/* Mobile: collapsible details */}
+        {isMobile && hasCollapsibleContent ? (
+          <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
+            <CollapsibleTrigger className="mt-2 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronDown
+                className={cn(
+                  "size-3.5 transition-transform duration-200",
+                  detailsOpen && "rotate-180"
+                )}
+              />
+              {detailsOpen ? t("books.hideDetails") : t("books.showDetails")}
+            </CollapsibleTrigger>
+            <CollapsibleContent>{detailsContent}</CollapsibleContent>
+          </Collapsible>
+        ) : (
+          detailsContent
         )}
       </div>
     </div>
