@@ -11,8 +11,16 @@ import {
   BookOpen,
   CheckCircle2,
   XCircle,
+  Calendar as CalendarIcon,
 } from "lucide-react"
 import { toast } from "sonner"
+import { format, parse, isValid } from "date-fns"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Dialog,
   DialogContent,
@@ -28,6 +36,7 @@ import { Separator } from "@/components/ui/separator"
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group"
@@ -61,7 +70,7 @@ const FIELDS: FieldDef[] = [
   { key: "subtitle", label: "addBook.subtitle" },
   { key: "author", label: "addBook.author", required: true },
   { key: "publisher", label: "addBook.publisher" },
-  { key: "publishedDate", label: "addBook.publishedDate" },
+  { key: "publishedDate", label: "addBook.publishedDate", type: "date" },
   { key: "isbn", label: "addBook.isbn" },
   { key: "pageCount", label: "addBook.pageCount", type: "number" },
   { key: "language", label: "addBook.language" },
@@ -91,6 +100,106 @@ function buildInitialFormData(book?: BookWithQuotes): BookFormData {
       : "",
     readingStatus: book.readingStatus ?? "",
   }
+}
+
+function DatePickerInput({
+  value,
+  onChange,
+  placeholder = "gg.aa.yyyy",
+}: {
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const [inputValue, setInputValue] = useState(() => {
+    if (!value) return ""
+    const d = parse(value, "yyyy-MM-dd", new Date())
+    if (isValid(d)) return format(d, "dd.MM.yyyy")
+    return value
+  })
+
+  useEffect(() => {
+    if (!value) setInputValue("")
+    else {
+      const d = parse(value, "yyyy-MM-dd", new Date())
+      if (isValid(d)) setInputValue(format(d, "dd.MM.yyyy"))
+      else setInputValue(value)
+    }
+  }, [value])
+
+  const [month, setMonth] = useState<Date | undefined>(() => {
+    if (!value) return new Date()
+    const d = parse(value, "yyyy-MM-dd", new Date())
+    return isValid(d) ? d : new Date()
+  })
+
+  const date = value && isValid(parse(value, "yyyy-MM-dd", new Date()))
+    ? parse(value, "yyyy-MM-dd", new Date())
+    : undefined
+
+  return (
+    <InputGroup>
+      <InputGroupInput
+        value={inputValue}
+        placeholder={placeholder}
+        onChange={(e) => {
+          const val = e.target.value
+          setInputValue(val)
+          const parsed = parse(val, "dd.MM.yyyy", new Date())
+          if (isValid(parsed) && val.length === 10) {
+            setMonth(parsed)
+            onChange(format(parsed, "yyyy-MM-dd"))
+          } else {
+            onChange(val)
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowDown") {
+            e.preventDefault()
+            setOpen(true)
+          }
+        }}
+      />
+      <InputGroupAddon align="inline-end">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger render={
+            <InputGroupButton type="button" variant="ghost" size="icon-xs" aria-label="Select date">
+              <CalendarIcon />
+              <span className="sr-only">Select date</span>
+            </InputGroupButton>
+          } />
+          <PopoverContent
+            className="w-auto overflow-hidden p-0"
+            align="end"
+            alignOffset={-8}
+            sideOffset={10}
+          >
+            <Calendar
+              mode="single"
+              selected={date}
+              month={month}
+              onMonthChange={setMonth}
+              captionLayout="dropdown"
+              startMonth={new Date(1900, 0)}
+              endMonth={new Date(new Date().getFullYear() + 10, 11)}
+              onSelect={(d) => {
+                if (d) {
+                  onChange(format(d, "yyyy-MM-dd"))
+                  setInputValue(format(d, "dd.MM.yyyy"))
+                  setOpen(false)
+                } else {
+                  onChange("")
+                  setInputValue("")
+                  setOpen(false)
+                }
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+      </InputGroupAddon>
+    </InputGroup>
+  )
 }
 
 export function AddBookModal({
@@ -525,17 +634,29 @@ export function AddBookModal({
                           )}
                         </FieldLabel>
                         <FieldContent>
-                          <Input
-                            type={type ?? "text"}
-                            value={formData[key] ?? ""}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                [key]: e.target.value,
-                              }))
-                            }
-                            placeholder={type === "date" ? undefined : t(label)}
-                          />
+                          {type === "date" ? (
+                            <DatePickerInput
+                              value={formData[key] ?? ""}
+                              onChange={(val) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  [key]: val,
+                                }))
+                              }
+                            />
+                          ) : (
+                            <Input
+                              type={type ?? "text"}
+                              value={formData[key] ?? ""}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  [key]: e.target.value,
+                                }))
+                              }
+                              placeholder={t(label)}
+                            />
+                          )}
                         </FieldContent>
                       </Field>
                     )
