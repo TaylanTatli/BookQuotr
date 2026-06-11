@@ -95,6 +95,11 @@ export default function HomePage() {
     fetchBooks()
   }, [fetchBooks])
 
+  const handleBookUpdated = useCallback(() => {
+    if (selectedBookId) fetchQuotes(selectedBookId)
+    fetchBooks()
+  }, [selectedBookId, fetchQuotes, fetchBooks])
+
   // Selecting a book directly clears any active quote highlight
   const handleSelectBook = useCallback((id: string) => {
     setSelectedBookId(id)
@@ -192,7 +197,7 @@ export default function HomePage() {
             onQuoteDeleted={handleQuoteDeleted}
             onQuoteUpdated={handleQuoteUpdated}
             highlightedQuoteId={highlightedQuoteId}
-            onBookUpdated={() => selectedBookId && fetchQuotes(selectedBookId)}
+            onBookUpdated={handleBookUpdated}
             onBookDeleted={handleBookDeleted}
           />
         </main>
@@ -251,9 +256,7 @@ export default function HomePage() {
               onQuoteDeleted={handleQuoteDeleted}
               onQuoteUpdated={handleQuoteUpdated}
               highlightedQuoteId={highlightedQuoteId}
-              onBookUpdated={() =>
-                selectedBookId && fetchQuotes(selectedBookId)
-              }
+              onBookUpdated={handleBookUpdated}
               onBookDeleted={handleBookDeleted}
             />
           </main>
