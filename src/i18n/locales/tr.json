@@ -37,7 +37,8 @@
     "title": "BookQuotr",
     "addBook": "Kitap Ekle",
     "noBooks": "Henüz kitap yok. İlk kitabınızı ekleyin!",
-    "logout": "Çıkış Yap"
+    "logout": "Çıkış Yap",
+    "books": "kitap"
   },
   "quotes": {
     "emptySelection": "Alıntılarını görmek için bir kitap seçin",

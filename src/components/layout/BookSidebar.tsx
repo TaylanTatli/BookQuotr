@@ -98,6 +98,7 @@ export function BookSidebar({
   }
 
   const sortedBooks = sortBooks(books, sortKey)
+  const totalQuotes = books.reduce((sum, b) => sum + b._count.quotes, 0)
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
@@ -170,6 +171,20 @@ export function BookSidebar({
           )}
         </div>
       </div>
+
+      {/* Stats row */}
+      {!loading && books.length > 0 && (
+        <div className="flex items-center justify-between gap-3 border-b px-4 py-2">
+          <span className="text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">{books.length}</span>{" "}
+            {books.length === 1 ? t("books.quoteCount") : t("sidebar.books")}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">{totalQuotes}</span>{" "}
+            {totalQuotes === 1 ? t("books.quoteCount") : t("books.quotesCount")}
+          </span>
+        </div>
+      )}
 
       <div className="flex-1 overflow-auto">
         <ItemGroup className="gap-1 p-2">

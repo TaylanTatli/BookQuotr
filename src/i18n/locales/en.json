@@ -37,7 +37,8 @@
     "title": "BookQuotr",
     "addBook": "Add Book",
     "noBooks": "No books yet. Add your first book!",
-    "logout": "Logout"
+    "logout": "Logout",
+    "books": "books"
   },
   "quotes": {
     "emptySelection": "Select a book to see its quotes",
