@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import Image from "next/image"
-import { Search, Loader2, Link2, Upload, Trash2 } from "lucide-react"
+import { Search, Loader2, Link2, Upload, Trash2, BookOpen, CheckCircle2, XCircle } from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -22,6 +22,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
+import { ButtonGroup } from "@/components/ui/button-group"
 import { useTranslation } from "@/i18n/client"
 import type { SearchResult, BookWithQuotes } from "@/types"
 
@@ -71,6 +72,7 @@ function buildInitialFormData(book?: BookWithQuotes): BookFormData {
     finishedAt: book.finishedAt
       ? new Date(book.finishedAt).toISOString().split("T")[0]
       : "",
+    readingStatus: book.readingStatus ?? "",
   }
 }
 
@@ -133,6 +135,7 @@ export function AddBookModal({
       thumbnail: result.thumbnail ?? "",
       startedAt: "",
       finishedAt: "",
+      readingStatus: "",
       ...(result.source === "google"
         ? { googleBooksId: result.externalId }
         : { openLibraryId: result.externalId }),
@@ -190,6 +193,7 @@ export function AddBookModal({
         finishedAt: formData.finishedAt
           ? new Date(formData.finishedAt).toISOString()
           : null,
+        readingStatus: formData.readingStatus || null,
       }
       const res = await fetch(url, {
         method,
@@ -376,6 +380,50 @@ export function AddBookModal({
                         placeholder="https://..."
                       />
                     )}
+                  </FieldContent>
+                </Field>
+
+                <Field className="col-span-2">
+                  <FieldLabel>{t("addBook.readingStatus") || "Status"}</FieldLabel>
+                  <FieldContent>
+                    <ButtonGroup className="w-full">
+                      <Button
+                        type="button"
+                        variant={formData.readingStatus === "reading" ? "default" : "outline"}
+                        className="flex-1"
+                        onClick={() => setFormData(prev => ({ ...prev, readingStatus: prev.readingStatus === "reading" ? "" : "reading" }))}
+                      >
+                        <BookOpen className="mr-2 size-4" />
+                        {t("books.readingStatus.reading")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={formData.readingStatus === "finished" ? "default" : "outline"}
+                        className="flex-1"
+                        onClick={() => {
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            readingStatus: prev.readingStatus === "finished" ? "" : "finished",
+                            // Set finishedAt to today if switching to finished and no date is set
+                            ...(prev.readingStatus !== "finished" && !prev.finishedAt 
+                                ? { finishedAt: new Date().toISOString().split("T")[0] } 
+                                : {})
+                          }))
+                        }}
+                      >
+                        <CheckCircle2 className="mr-2 size-4" />
+                        {t("books.readingStatus.finished")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={formData.readingStatus === "abandoned" ? "default" : "outline"}
+                        className="flex-1"
+                        onClick={() => setFormData(prev => ({ ...prev, readingStatus: prev.readingStatus === "abandoned" ? "" : "abandoned" }))}
+                      >
+                        <XCircle className="mr-2 size-4" />
+                        {t("books.readingStatus.abandoned")}
+                      </Button>
+                    </ButtonGroup>
                   </FieldContent>
                 </Field>
 

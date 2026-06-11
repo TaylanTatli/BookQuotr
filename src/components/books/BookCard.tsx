@@ -1,6 +1,6 @@
 import { useState } from "react"
 import Image from "next/image"
-import { Trash2, Heart } from "lucide-react"
+import { Trash2, Heart, BookOpen, CheckCircle2, XCircle } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/client"
@@ -102,13 +102,31 @@ export function BookCard({
         <ItemDescription className="truncate text-xs text-muted-foreground">
           {book.author}
         </ItemDescription>
-        <div>
-          <Badge variant="secondary" className="mt-1 text-xs">
+        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          <Badge variant="secondary" className="text-xs">
             {book._count.quotes}{" "}
             {book._count.quotes === 1
               ? t("books.quoteCount")
               : t("books.quotesCount")}
           </Badge>
+          {book.readingStatus === "reading" && (
+            <Badge variant="outline" className="gap-1 border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300">
+              <BookOpen className="size-3" />
+              {t("books.readingStatus.reading")}
+            </Badge>
+          )}
+          {book.readingStatus === "finished" && (
+            <Badge variant="outline" className="gap-1 border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300">
+              <CheckCircle2 className="size-3" />
+              {t("books.readingStatus.finished")}
+            </Badge>
+          )}
+          {book.readingStatus === "abandoned" && (
+            <Badge variant="outline" className="gap-1 border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300">
+              <XCircle className="size-3" />
+              {t("books.readingStatus.abandoned")}
+            </Badge>
+          )}
         </div>
       </ItemContent>
 

@@ -5,6 +5,6 @@ export default {
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env.DATABASE_URL ?? "file:../data/bookquotr.db",
+    url: process.env.DATABASE_URL ?? "file:./data/bookquotr.db",
   },
 };

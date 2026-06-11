@@ -24,6 +24,7 @@ model Book {
   finishedAt    DateTime?
   rating        Int?
   isFavorite    Boolean   @default(false)
+  readingStatus String?   // "reading" | "finished" | "abandoned"
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

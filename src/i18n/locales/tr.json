@@ -103,7 +103,12 @@
     "sortByAuthor": "Yazar",
     "sortByRating": "Puan",
     "showDetails": "Detayları göster",
-    "hideDetails": "Detayları gizle"
+    "hideDetails": "Detayları gizle",
+    "readingStatus": {
+      "reading": "Okuyorum",
+      "finished": "Tamamlandı",
+      "abandoned": "Bıraktım"
+    }
   },
   "addBook": {
     "addTitle": "Kitap Ekle",
@@ -119,6 +124,7 @@
     "coverUrl": "Kapak URL'si",
     "startedAt": "Okumaya Başlama Tarihi",
     "finishedAt": "Bitirilme Tarihi",
+    "readingStatus": "Okuma Durumu",
     "saveChanges": "Değişiklikleri Kaydet",
     "cancel": "İptal",
     "required": "Başlık ve yazar zorunludur",

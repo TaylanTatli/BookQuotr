@@ -103,7 +103,12 @@
     "sortByAuthor": "Author",
     "sortByRating": "Rating",
     "showDetails": "Show details",
-    "hideDetails": "Hide details"
+    "hideDetails": "Hide details",
+    "readingStatus": {
+      "reading": "Reading",
+      "finished": "Finished",
+      "abandoned": "Abandoned"
+    }
   },
   "addBook": {
     "addTitle": "Add Book",
@@ -119,6 +124,7 @@
     "coverUrl": "Cover URL",
     "startedAt": "Started Reading",
     "finishedAt": "Finished Reading",
+    "readingStatus": "Reading Status",
     "saveChanges": "Save Changes",
     "cancel": "Cancel",
     "required": "Title and author are required",

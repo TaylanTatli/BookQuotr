@@ -13,7 +13,10 @@ export interface BookBase extends Book {
   finishedAt: Date | null;
   rating: number | null;
   isFavorite: boolean;
+  readingStatus: string | null;
 }
+
+export type ReadingStatus = "reading" | "finished" | "abandoned"
 
 export type { Book };
 
