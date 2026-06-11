@@ -1,5 +1,4 @@
-"use client"
-
+import { useState } from "react"
 import Image from "next/image"
 import { Trash2, Heart } from "lucide-react"
 import { toast } from "sonner"
@@ -41,6 +40,7 @@ export function BookCard({
   onDeleted,
 }: BookCardProps) {
   const { t } = useTranslation()
+  const [imgLoaded, setImgLoaded] = useState(false)
 
   async function handleDelete(e: React.MouseEvent) {
     e.stopPropagation()
@@ -66,7 +66,7 @@ export function BookCard({
       {/* Thumbnail */}
       <ItemMedia
         variant="default"
-        className="h-16 w-12 shrink-0 self-start overflow-hidden rounded"
+        className="relative h-16 w-12 shrink-0 self-start overflow-hidden rounded bg-muted"
       >
         {book.thumbnail ? (
           <Image
@@ -74,7 +74,12 @@ export function BookCard({
             alt={book.title}
             width={50}
             height={100}
-            className="h-full w-full object-cover"
+            loading="lazy"
+            className={cn(
+              "h-full w-full object-cover transition-all duration-500",
+              imgLoaded ? "scale-100 blur-0" : "scale-110 blur-md"
+            )}
+            onLoad={() => setImgLoaded(true)}
             unoptimized
           />
         ) : (
