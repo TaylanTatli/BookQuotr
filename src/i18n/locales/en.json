@@ -117,6 +117,7 @@
     "editTitle": "Edit Book",
     "searchPlaceholder": "Search by title, author, or ISBN…",
     "title": "Title",
+    "subtitle": "Subtitle",
     "author": "Author",
     "publisher": "Publisher",
     "publishedDate": "Published Date",

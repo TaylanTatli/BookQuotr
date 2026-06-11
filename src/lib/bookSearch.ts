@@ -23,6 +23,7 @@ export async function searchGoogleBooks(query: string): Promise<SearchResult[]> 
       source: "google",
       externalId: item.id,
       title: info.title ?? "Unknown Title",
+      subtitle: info.subtitle,
       authors: info.authors ?? [],
       publisher: info.publisher,
       publishedDate: info.publishedDate,
@@ -52,6 +53,7 @@ export async function searchOpenLibrary(query: string): Promise<SearchResult[]> 
     source: "openlibrary",
     externalId: doc.key,
     title: doc.title ?? "Unknown Title",
+    subtitle: doc.subtitle,
     authors: doc.author_name ?? [],
     publisher: doc.publisher?.[0],
     publishedDate: doc.first_publish_year?.toString(),
@@ -70,6 +72,7 @@ interface GoogleBooksItem {
   id: string;
   volumeInfo: {
     title?: string;
+    subtitle?: string;
     authors?: string[];
     publisher?: string;
     publishedDate?: string;
@@ -84,6 +87,7 @@ interface GoogleBooksItem {
 interface OpenLibraryDoc {
   key: string;
   title?: string;
+  subtitle?: string;
   author_name?: string[];
   publisher?: string[];
   first_publish_year?: number;

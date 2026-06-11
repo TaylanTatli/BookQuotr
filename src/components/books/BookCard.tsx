@@ -94,6 +94,11 @@ export function BookCard({
         <ItemTitle className="flex w-full items-start justify-between gap-1">
           <span className="min-w-0 flex-1 truncate text-sm leading-tight font-medium">
             {book.title}
+            {book.subtitle && (
+              <span className="ml-1.5 font-normal text-muted-foreground/80">
+                ({book.subtitle})
+              </span>
+            )}
           </span>
           {book.isFavorite && (
             <Heart className="mt-0.5 size-3 shrink-0 fill-red-500 text-red-500" />

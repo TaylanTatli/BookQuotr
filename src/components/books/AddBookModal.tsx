@@ -42,6 +42,7 @@ type FieldDef = {
 
 const FIELDS: FieldDef[] = [
   { key: "title", label: "addBook.title", required: true },
+  { key: "subtitle", label: "addBook.subtitle" },
   { key: "author", label: "addBook.author", required: true },
   { key: "publisher", label: "addBook.publisher" },
   { key: "publishedDate", label: "addBook.publishedDate" },
@@ -59,6 +60,7 @@ function buildInitialFormData(book?: BookWithQuotes): BookFormData {
   if (!book) return {}
   return {
     title: book.title,
+    subtitle: book.subtitle ?? "",
     author: book.author,
     publisher: book.publisher ?? "",
     publishedDate: book.publishedDate ?? "",
@@ -125,6 +127,7 @@ export function AddBookModal({
   function handleSelectResult(result: SearchResult) {
     setFormData({
       title: result.title,
+      subtitle: result.subtitle ?? "",
       author: result.authors.join(", "),
       publisher: result.publisher ?? "",
       publishedDate: result.publishedDate ?? "",

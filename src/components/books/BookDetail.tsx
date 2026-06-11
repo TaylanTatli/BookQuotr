@@ -1,7 +1,16 @@
 "use client"
 
 import Image from "next/image"
-import { Trash2, Pencil, Star, Heart, ChevronDown, BookOpen, CheckCircle2, XCircle } from "lucide-react"
+import {
+  Trash2,
+  Pencil,
+  Star,
+  Heart,
+  ChevronDown,
+  BookOpen,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
@@ -175,19 +184,28 @@ export function BookDetail({
       {/* Meta badges */}
       <div className="mt-2 flex flex-wrap gap-1.5">
         {book.readingStatus === "reading" && (
-          <Badge variant="outline" className="gap-1 border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300 text-xs">
+          <Badge
+            variant="outline"
+            className="gap-1 border-blue-200 bg-blue-50 text-xs text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300"
+          >
             <BookOpen className="size-3" />
             {t("books.readingStatus.reading")}
           </Badge>
         )}
         {book.readingStatus === "finished" && (
-          <Badge variant="outline" className="gap-1 border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300 text-xs">
+          <Badge
+            variant="outline"
+            className="gap-1 border-green-200 bg-green-50 text-xs text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300"
+          >
             <CheckCircle2 className="size-3" />
             {t("books.readingStatus.finished")}
           </Badge>
         )}
         {book.readingStatus === "abandoned" && (
-          <Badge variant="outline" className="gap-1 border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300 text-xs">
+          <Badge
+            variant="outline"
+            className="gap-1 border-orange-200 bg-orange-50 text-xs text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300"
+          >
             <XCircle className="size-3" />
             {t("books.readingStatus.abandoned")}
           </Badge>
@@ -229,8 +247,7 @@ export function BookDetail({
           )}
           {book.finishedAt && (
             <Badge variant="secondary" className="text-xs">
-              ✅ {t("books.finishedAt")}:{" "}
-              {formatDate(book.finishedAt, locale)}
+              ✅ {t("books.finishedAt")}: {formatDate(book.finishedAt, locale)}
             </Badge>
           )}
           {readingDays !== null && (
@@ -276,6 +293,11 @@ export function BookDetail({
           <div className="min-w-0">
             <h2 className="truncate text-xl leading-tight font-semibold">
               {book.title}
+              {book.subtitle && (
+                <span className="ml-1.5 text-base font-normal text-muted-foreground/80">
+                  ({book.subtitle})
+                </span>
+              )}
             </h2>
             <p className="text-sm text-muted-foreground">{book.author}</p>
           </div>
@@ -331,7 +353,7 @@ export function BookDetail({
         {/* Mobile: collapsible details */}
         {isMobile && hasCollapsibleContent ? (
           <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
-            <CollapsibleTrigger className="mt-2 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <CollapsibleTrigger className="mt-2 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground">
               <ChevronDown
                 className={cn(
                   "size-3.5 transition-transform duration-200",

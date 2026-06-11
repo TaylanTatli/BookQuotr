@@ -9,6 +9,7 @@ export type { Quote };
  * regardless of Prisma client cache state.
  */
 export interface BookBase extends Book {
+  subtitle: string | null;
   startedAt: Date | null;
   finishedAt: Date | null;
   rating: number | null;
@@ -32,6 +33,7 @@ export interface SearchResult {
   source: "google" | "openlibrary";
   externalId: string;
   title: string;
+  subtitle?: string;
   authors: string[];
   publisher?: string;
   publishedDate?: string;
