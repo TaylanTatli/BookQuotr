@@ -75,8 +75,8 @@ export async function deleteCover(bookId: string): Promise<void> {
 export async function readCoverFile(bookId: string): Promise<Buffer | null> {
   try {
     return await fs.readFile(path.join(COVERS_DIR, `${bookId}.jpg`));
-  } catch (error) {
-    console.error("readCoverFile failed for", bookId, error);
+  } catch {
+    // File not found is expected (not yet cached) — return null to trigger download
     return null;
   }
 }

@@ -23,13 +23,13 @@ export async function GET(request: Request) {
       include: { _count: { select: { quotes: true } } },
     });
 
-    // Rewrite remote URLs to use our local proxy/cache on the fly
+    // Rewrite remote URLs to our local cover cache so covers are served
+    // from our server (faster, CDN-independent). The local route downloads
+    // and caches on the first request. updatedAt is used for cache-busting.
     for (const book of books) {
       if (book.thumbnail && book.thumbnail.startsWith("http")) {
-        // We do NOT update the database here.
-        // We just tell the frontend to load it from our local route.
-        // The local route will download and cache it on the first request.
-        book.thumbnail = `/api/covers/${book.id}`;
+        const v = book.updatedAt.getTime();
+        book.thumbnail = `/api/covers/${book.id}?v=${v}`;
       }
     }
 

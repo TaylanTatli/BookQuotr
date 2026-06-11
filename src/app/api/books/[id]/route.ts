@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { deleteCover, downloadAndSaveCover, isLocalCover } from "@/lib/coverCache";
+import { deleteCover, downloadAndSaveCover } from "@/lib/coverCache";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -16,10 +16,8 @@ export async function GET(_req: Request, { params }: Params) {
     }
 
     if (book.thumbnail && book.thumbnail.startsWith("http")) {
-      // We do NOT update the database here.
-      // We just tell the frontend to load it from our local route.
-      // The local route will download and cache it on the first request.
-      book.thumbnail = `/api/covers/${book.id}`;
+      const v = book.updatedAt.getTime();
+      book.thumbnail = `/api/covers/${book.id}?v=${v}`;
     }
 
     return NextResponse.json({ book });
@@ -32,24 +30,19 @@ export async function PATCH(request: Request, { params }: Params) {
   try {
     const { id } = await params;
     const body = await request.json();
-    
-    // If thumbnail is being updated
+
+    // If thumbnail is being updated, invalidate the local cover cache
     if ('thumbnail' in body) {
        const existingBook = await prisma.book.findUnique({ where: { id }});
-       // If the new thumbnail is different from the existing one
        if (existingBook && existingBook.thumbnail !== body.thumbnail) {
-          // If there was an existing local cover, delete it
-          if (isLocalCover(existingBook.thumbnail)) {
-             await deleteCover(id);
-          }
-          // Note: we don't download remote URLs here anymore. 
-          // They will be downloaded and cached on-the-fly by the /api/covers route.
+          await deleteCover(id);
        }
     }
 
     const book = await prisma.book.update({ where: { id }, data: body });
     return NextResponse.json({ book });
-  } catch {
+  } catch (err) {
+    console.error("[PATCH] error:", err);
     return NextResponse.json({ error: "Failed to update book" }, { status: 500 });
   }
 }
