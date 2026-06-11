@@ -91,15 +91,17 @@ export function BookCard({
 
       {/* Info */}
       <ItemContent className="min-w-0 flex-1">
-        <ItemTitle className="flex w-full items-start justify-between gap-1">
-          <span className="min-w-0 flex-1 truncate text-sm leading-tight font-medium">
-            {book.title}
+        <ItemTitle className="flex w-full items-start justify-between gap-2 pr-6">
+          <div className="flex min-w-0 flex-1 items-baseline gap-1.5">
+            <span className="truncate shrink-0 max-w-full font-medium text-sm leading-tight text-foreground">
+              {book.title}
+            </span>
             {book.subtitle && (
-              <span className="ml-1.5 font-normal text-muted-foreground/80">
+              <span className="truncate shrink min-w-0 text-xs font-normal text-muted-foreground/80">
                 ({book.subtitle})
               </span>
             )}
-          </span>
+          </div>
           {book.isFavorite && (
             <Heart className="mt-0.5 size-3 shrink-0 fill-red-500 text-red-500" />
           )}

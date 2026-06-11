@@ -291,7 +291,7 @@ export function BookDetail({
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h2 className="truncate text-xl leading-tight font-semibold">
+            <h2 className="text-xl leading-tight font-semibold text-balance">
               {book.title}
               {book.subtitle && (
                 <span className="ml-1.5 text-base font-normal text-muted-foreground/80">
