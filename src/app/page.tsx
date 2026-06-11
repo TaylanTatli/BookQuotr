@@ -51,19 +51,19 @@ export default function HomePage() {
 
   const isMobile = useIsMobile()
 
-  const fetchBooks = useCallback(async () => {
-    setLoadingBooks(true)
+  const fetchBooks = useCallback(async (background = false) => {
+    if (!background) setLoadingBooks(true)
     try {
       const res = await fetch("/api/books")
       const data = await res.json()
       setBooks(data.books ?? [])
     } finally {
-      setLoadingBooks(false)
+      if (!background) setLoadingBooks(false)
     }
   }, [])
 
-  const fetchQuotes = useCallback(async (bookId: string) => {
-    setLoadingQuotes(true)
+  const fetchQuotes = useCallback(async (bookId: string, background = false) => {
+    if (!background) setLoadingQuotes(true)
     try {
       const [bookRes, quotesRes] = await Promise.all([
         fetch(`/api/books/${bookId}`),
@@ -74,7 +74,7 @@ export default function HomePage() {
       setSelectedBook(bookData.book ?? null)
       setQuotes(quotesData.quotes ?? [])
     } finally {
-      setLoadingQuotes(false)
+      if (!background) setLoadingQuotes(false)
     }
   }, [])
 
@@ -92,12 +92,12 @@ export default function HomePage() {
   }, [selectedBookId, fetchQuotes])
 
   const handleBookAdded = useCallback(() => {
-    fetchBooks()
+    fetchBooks(true)
   }, [fetchBooks])
 
   const handleBookUpdated = useCallback(() => {
-    if (selectedBookId) fetchQuotes(selectedBookId)
-    fetchBooks()
+    if (selectedBookId) fetchQuotes(selectedBookId, true)
+    fetchBooks(true)
   }, [selectedBookId, fetchQuotes, fetchBooks])
 
   // Selecting a book directly clears any active quote highlight
@@ -117,8 +117,8 @@ export default function HomePage() {
   )
 
   const handleQuoteAdded = useCallback(() => {
-    if (selectedBookId) fetchQuotes(selectedBookId)
-    fetchBooks()
+    if (selectedBookId) fetchQuotes(selectedBookId, true)
+    fetchBooks(true)
   }, [selectedBookId, fetchQuotes, fetchBooks])
 
   const handleQuoteDeleted = useCallback(
