@@ -2,7 +2,16 @@
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import Image from "next/image"
-import { Search, Loader2, Link2, Upload, Trash2, BookOpen, CheckCircle2, XCircle } from "lucide-react"
+import {
+  Search,
+  Loader2,
+  Link2,
+  Upload,
+  Trash2,
+  BookOpen,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -51,7 +60,6 @@ const FIELDS: FieldDef[] = [
   { key: "language", label: "addBook.language" },
   { key: "startedAt", label: "addBook.startedAt", type: "date" },
   { key: "finishedAt", label: "addBook.finishedAt", type: "date" },
-
 ]
 
 type BookFormData = Record<string, string>
@@ -150,7 +158,7 @@ export function AddBookModal({
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Existing book update needs to happen when saving, 
+    // Existing book update needs to happen when saving,
     // but we can pre-upload the file to get the path
     const uploadFormData = new FormData()
     uploadFormData.append("file", file)
@@ -359,8 +367,9 @@ export function AddBookModal({
                           ) : (
                             <Upload className="mr-2 size-4" />
                           )}
-                          {formData.thumbnail && formData.thumbnail.startsWith("/api/covers") 
-                            ? t("addBook.changeCover") 
+                          {formData.thumbnail &&
+                          formData.thumbnail.startsWith("/api/covers")
+                            ? t("addBook.changeCover")
                             : t("addBook.selectFile")}
                         </Button>
                         {formData.thumbnail && (
@@ -368,7 +377,12 @@ export function AddBookModal({
                             type="button"
                             variant="ghost"
                             size="icon"
-                            onClick={() => setFormData((prev) => ({ ...prev, thumbnail: "" }))}
+                            onClick={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                thumbnail: "",
+                              }))
+                            }
                           >
                             <Trash2 className="size-4 text-destructive" />
                           </Button>
@@ -378,7 +392,10 @@ export function AddBookModal({
                       <Input
                         value={formData.thumbnail ?? ""}
                         onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, thumbnail: e.target.value }))
+                          setFormData((prev) => ({
+                            ...prev,
+                            thumbnail: e.target.value,
+                          }))
                         }
                         placeholder="https://..."
                       />
@@ -387,30 +404,56 @@ export function AddBookModal({
                 </Field>
 
                 <Field className="col-span-2">
-                  <FieldLabel>{t("addBook.readingStatus") || "Status"}</FieldLabel>
+                  <FieldLabel>
+                    {t("addBook.readingStatus") || "Status"}
+                  </FieldLabel>
                   <FieldContent>
                     <ButtonGroup className="w-full">
                       <Button
                         type="button"
-                        variant={formData.readingStatus === "reading" ? "default" : "outline"}
+                        size="sm"
+                        variant={
+                          formData.readingStatus === "reading"
+                            ? "default"
+                            : "outline"
+                        }
                         className="flex-1"
-                        onClick={() => setFormData(prev => ({ ...prev, readingStatus: prev.readingStatus === "reading" ? "" : "reading" }))}
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            readingStatus:
+                              prev.readingStatus === "reading" ? "" : "reading",
+                          }))
+                        }
                       >
                         <BookOpen className="mr-2 size-4" />
                         {t("books.readingStatus.reading")}
                       </Button>
                       <Button
                         type="button"
-                        variant={formData.readingStatus === "finished" ? "default" : "outline"}
+                        size="sm"
+                        variant={
+                          formData.readingStatus === "finished"
+                            ? "default"
+                            : "outline"
+                        }
                         className="flex-1"
                         onClick={() => {
-                          setFormData(prev => ({ 
-                            ...prev, 
-                            readingStatus: prev.readingStatus === "finished" ? "" : "finished",
+                          setFormData((prev) => ({
+                            ...prev,
+                            readingStatus:
+                              prev.readingStatus === "finished"
+                                ? ""
+                                : "finished",
                             // Set finishedAt to today if switching to finished and no date is set
-                            ...(prev.readingStatus !== "finished" && !prev.finishedAt 
-                                ? { finishedAt: new Date().toISOString().split("T")[0] } 
-                                : {})
+                            ...(prev.readingStatus !== "finished" &&
+                            !prev.finishedAt
+                              ? {
+                                  finishedAt: new Date()
+                                    .toISOString()
+                                    .split("T")[0],
+                                }
+                              : {}),
                           }))
                         }}
                       >
@@ -419,9 +462,22 @@ export function AddBookModal({
                       </Button>
                       <Button
                         type="button"
-                        variant={formData.readingStatus === "abandoned" ? "default" : "outline"}
+                        size="sm"
+                        variant={
+                          formData.readingStatus === "abandoned"
+                            ? "default"
+                            : "outline"
+                        }
                         className="flex-1"
-                        onClick={() => setFormData(prev => ({ ...prev, readingStatus: prev.readingStatus === "abandoned" ? "" : "abandoned" }))}
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            readingStatus:
+                              prev.readingStatus === "abandoned"
+                                ? ""
+                                : "abandoned",
+                          }))
+                        }
                       >
                         <XCircle className="mr-2 size-4" />
                         {t("books.readingStatus.abandoned")}
@@ -432,7 +488,7 @@ export function AddBookModal({
 
                 {FIELDS.map(
                   ({ key, label, required, type, colSpan }: FieldDef) => {
-                    if (key === "thumbnail") return null; // Handled specially above
+                    if (key === "thumbnail") return null // Handled specially above
                     return (
                       <Field key={key} className={colSpan ? "col-span-2" : ""}>
                         <FieldLabel>
