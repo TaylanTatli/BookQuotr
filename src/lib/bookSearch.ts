@@ -3,8 +3,38 @@ import type { SearchResult } from "@/types";
 const GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes";
 const OPEN_LIBRARY_URL = "https://openlibrary.org/search.json";
 
+function parseQuery(query: string) {
+  const terms = query.match(/(?:title|author|isbn|publisher):\s*(?:"[^"]*"|\S+)/gi) || [];
+  let raw = query;
+  const filters: Record<string, string> = {};
+
+  for (const term of terms) {
+    raw = raw.replace(term, "");
+    const colonIdx = term.indexOf(":");
+    const key = term.substring(0, colonIdx).toLowerCase().trim();
+    let value = term.substring(colonIdx + 1).trim();
+    if (value.startsWith('"') && value.endsWith('"')) {
+      value = value.slice(1, -1);
+    }
+    filters[key] = value;
+  }
+
+  return { raw: raw.trim(), filters };
+}
+
 export async function searchGoogleBooks(query: string): Promise<SearchResult[]> {
-  const params = new URLSearchParams({ q: query, maxResults: "10" });
+  const { raw, filters } = parseQuery(query);
+  
+  let q = raw;
+  if (filters.title) q += ` intitle:"${filters.title}"`;
+  if (filters.author) q += ` inauthor:"${filters.author}"`;
+  if (filters.publisher) q += ` inpublisher:"${filters.publisher}"`;
+  if (filters.isbn) q += ` isbn:${filters.isbn}`;
+  q = q.trim();
+
+  if (!q) return [];
+
+  const params = new URLSearchParams({ q, maxResults: "10" });
   if (process.env.GOOGLE_BOOKS_API_KEY) {
     params.set("key", process.env.GOOGLE_BOOKS_API_KEY);
   }
@@ -39,7 +69,16 @@ export async function searchGoogleBooks(query: string): Promise<SearchResult[]> 
 }
 
 export async function searchOpenLibrary(query: string): Promise<SearchResult[]> {
-  const params = new URLSearchParams({ q: query, limit: "10" });
+  const { raw, filters } = parseQuery(query);
+  
+  const params = new URLSearchParams({ limit: "10" });
+  if (raw) params.set("q", raw);
+  if (filters.title) params.set("title", filters.title);
+  if (filters.author) params.set("author", filters.author);
+  if (filters.isbn) params.set("isbn", filters.isbn);
+  if (filters.publisher) params.set("publisher", filters.publisher);
+
+  if (Array.from(params.keys()).length === 1) return [];
 
   const res = await fetch(`${OPEN_LIBRARY_URL}?${params}`, {
     next: { revalidate: 0 },
