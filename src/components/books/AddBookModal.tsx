@@ -121,6 +121,7 @@ export function AddBookModal({
       e.preventDefault()
       if (!query.trim()) return
       setSearching(true)
+      setResults([])
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
         const data = await res.json()
