@@ -21,10 +21,12 @@ import { LogOut, Plus, Settings, Search, ListFilter } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
-type SortKey = "createdAt" | "finishedAt" | "title" | "author" | "rating"
+type SortKey = "createdAt" | "finishedAt" | "title" | "author" | "rating" | "quoteCount" | "readingStatus"
 
 const SORT_OPTIONS: { value: SortKey; labelKey: string }[] = [
   { value: "createdAt", labelKey: "books.sortByAdded" },
+  { value: "quoteCount", labelKey: "books.sortByQuoteCount" },
+  { value: "readingStatus", labelKey: "books.sortByReadingStatus" },
   { value: "finishedAt", labelKey: "books.sortByFinished" },
   { value: "title", labelKey: "books.sortByTitle" },
   { value: "author", labelKey: "books.sortByAuthor" },
@@ -36,35 +38,48 @@ function sortBooks(
   sortKey: SortKey
 ): BookWithQuoteCount[] {
   const copy = [...books]
-  switch (sortKey) {
-    case "finishedAt":
-      return copy.sort((a, b) => {
+  return copy.sort((a, b) => {
+    // Always pin "reading" books to the top
+    const aIsReading = a.readingStatus === "reading"
+    const bIsReading = b.readingStatus === "reading"
+    if (aIsReading && !bIsReading) return -1
+    if (!aIsReading && bIsReading) return 1
+
+    switch (sortKey) {
+      case "quoteCount": {
+        const diff = b._count.quotes - a._count.quotes
+        if (diff !== 0) return diff
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      }
+      case "readingStatus": {
+        // "reading" is already at top. Let's order the rest: finished, abandoned, null
+        const order: Record<string, number> = { finished: 1, abandoned: 2, null: 3 }
+        const aStatus = order[a.readingStatus ?? "null"] ?? 4
+        const bStatus = order[b.readingStatus ?? "null"] ?? 4
+        if (aStatus !== bStatus) return aStatus - bStatus
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      }
+      case "finishedAt":
         if (a.finishedAt && b.finishedAt)
-          return (
-            new Date(b.finishedAt).getTime() - new Date(a.finishedAt).getTime()
-          )
+          return new Date(b.finishedAt).getTime() - new Date(a.finishedAt).getTime()
         if (a.finishedAt) return -1
         if (b.finishedAt) return 1
         return a.title.localeCompare(b.title)
-      })
-    case "title":
-      return copy.sort((a, b) => a.title.localeCompare(b.title))
-    case "author":
-      return copy.sort((a, b) => a.author.localeCompare(b.author))
-    case "rating":
-      return copy.sort((a, b) => {
+      case "title":
+        return a.title.localeCompare(b.title)
+      case "author":
+        return a.author.localeCompare(b.author)
+      case "rating": {
         const ra = a.rating ?? 0
         const rb = b.rating ?? 0
         if (rb !== ra) return rb - ra
         return a.title.localeCompare(b.title)
-      })
-    case "createdAt":
-    default:
-      return copy.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-  }
+      }
+      case "createdAt":
+      default:
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    }
+  })
 }
 
 interface BookSidebarProps {

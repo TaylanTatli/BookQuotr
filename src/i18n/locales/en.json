@@ -102,6 +102,8 @@
     "sortByTitle": "Title",
     "sortByAuthor": "Author",
     "sortByRating": "Rating",
+    "sortByQuoteCount": "Quote Count",
+    "sortByReadingStatus": "Reading Status",
     "showDetails": "Show details",
     "hideDetails": "Hide details",
     "readingStatus": {

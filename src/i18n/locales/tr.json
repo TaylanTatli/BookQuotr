@@ -102,6 +102,8 @@
     "sortByTitle": "Başlık",
     "sortByAuthor": "Yazar",
     "sortByRating": "Puan",
+    "sortByQuoteCount": "Alıntı Sayısı",
+    "sortByReadingStatus": "Okuma Durumu",
     "showDetails": "Detayları göster",
     "hideDetails": "Detayları gizle",
     "readingStatus": {
