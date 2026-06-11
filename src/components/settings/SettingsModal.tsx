@@ -93,6 +93,7 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
   const [defaultViewMode, setDefaultViewMode] = useState<QuoteViewMode>(() => {
     try {
       const saved = localStorage.getItem(VIEW_MODE_KEY) as QuoteViewMode | null;
@@ -226,6 +227,7 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
       toast.success(
         `Imported ${data.importedBooks} books and ${data.importedQuotes} quotes`
       );
+      setTimeout(() => window.location.reload(), 500); // hard refresh to clear local state safely
     } catch {
       toast.error("Import failed — make sure the file is a valid BookQuotr backup");
     } finally {
@@ -235,6 +237,7 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
   }
 
   async function handleDeleteAll() {
+    setIsDeleting(true);
     try {
       const res = await fetch("/api/books");
       const { books } = await res.json();
@@ -247,11 +250,13 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
       setDeleteConfirm("");
       setOpen(false);
       toast.success("All data deleted");
+      setTimeout(() => window.location.reload(), 500); // hard refresh to clear local state safely
     } catch {
       toast.error("Failed to delete data");
+    } finally {
+      setIsDeleting(false);
     }
   }
-
   function handleLanguageChange(newLocale: string | null) {
     if (!newLocale) return;
     document.cookie = `bq_locale=${newLocale}; path=/; max-age=31536000`;
@@ -464,9 +469,9 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
                     </AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDeleteAll}
-                      disabled={deleteConfirm !== "DELETE"}
+                      disabled={deleteConfirm !== "DELETE" || isDeleting}
                     >
-                      {t("settings.deleteAll")}
+                      {isDeleting ? <Loader2 className="size-4 animate-spin" /> : t("settings.deleteAll")}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
