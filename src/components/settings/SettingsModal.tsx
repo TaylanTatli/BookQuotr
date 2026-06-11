@@ -268,48 +268,44 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
 
         <FieldGroup className="mt-4">
           {/* Language Selection */}
-          <Field orientation="horizontal">
-            <FieldLabel>{t("settings.language")}</FieldLabel>
-            <FieldContent>
-              <Select value={locale} onValueChange={handleLanguageChange}>
-                <SelectTrigger className="w-[180px]">
-                  {LANGUAGES.find((l) => l.value === locale)?.label ?? "Select language"}
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {LANGUAGES.map((lang) => (
-                      <SelectItem key={lang.value} value={lang.value}>
-                        {lang.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </FieldContent>
-          </Field>
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">{t("settings.language")}</Label>
+            <Select value={locale} onValueChange={handleLanguageChange}>
+              <SelectTrigger className="w-[180px]">
+                {LANGUAGES.find((l) => l.value === locale)?.label ?? "Select language"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
 
           <Separator />
 
           {/* Theme Selection */}
-          <Field orientation="horizontal">
-            <FieldLabel>{t("settings.theme")}</FieldLabel>
-            <FieldContent>
-              <Select value={mounted ? theme : "system"} onValueChange={(val) => setTheme(val || "system")}>
-                <SelectTrigger className="w-[180px]">
-                  {mounted && theme ? t(THEME_OPTIONS.find((t) => t.value === theme)?.labelKey || "settings.themeSystem") : t("settings.themeSystem")}
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {THEME_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {t(opt.labelKey)}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </FieldContent>
-          </Field>
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">{t("settings.theme")}</Label>
+            <Select value={mounted ? theme : "system"} onValueChange={(val) => setTheme(val || "system")}>
+              <SelectTrigger className="w-[180px]">
+                {mounted && theme ? t(THEME_OPTIONS.find((t) => t.value === theme)?.labelKey || "settings.themeSystem") : t("settings.themeSystem")}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {THEME_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {t(opt.labelKey)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
 
           <Separator />
 
@@ -371,25 +367,23 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
           <Separator />
 
           {/* Default quote view */}
-          <Field orientation="horizontal">
-            <FieldLabel>{t("settings.defaultQuoteView")}</FieldLabel>
-            <FieldContent>
-              <Select value={defaultViewMode} onValueChange={handleDefaultViewChange}>
-                <SelectTrigger className="w-[180px]">
-                  {VIEW_MODE_OPTIONS.find((o) => o.value === defaultViewMode) ? t(VIEW_MODE_OPTIONS.find((o) => o.value === defaultViewMode)!.labelKey) : "Select"}
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {VIEW_MODE_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {t(opt.labelKey)}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </FieldContent>
-          </Field>
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">{t("settings.defaultQuoteView")}</Label>
+            <Select value={defaultViewMode} onValueChange={handleDefaultViewChange}>
+              <SelectTrigger className="w-[200px]">
+                {VIEW_MODE_OPTIONS.find((o) => o.value === defaultViewMode) ? t(VIEW_MODE_OPTIONS.find((o) => o.value === defaultViewMode)!.labelKey) : "Select"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {VIEW_MODE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {t(opt.labelKey)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
 
           <Separator />
 
