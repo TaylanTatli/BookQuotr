@@ -116,6 +116,7 @@
     "addTitle": "Kitap Ekle",
     "editTitle": "Kitabı Düzenle",
     "searchPlaceholder": "Başlık, yazar veya ISBN ile ara…",
+    "resultsCount": "{count} sonuç",
     "title": "Başlık",
     "subtitle": "Alt Başlık",
     "author": "Yazar",

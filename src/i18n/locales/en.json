@@ -116,6 +116,7 @@
     "addTitle": "Add Book",
     "editTitle": "Edit Book",
     "searchPlaceholder": "Search by title, author, or ISBN…",
+    "resultsCount": "{count} results",
     "title": "Title",
     "subtitle": "Subtitle",
     "author": "Author",

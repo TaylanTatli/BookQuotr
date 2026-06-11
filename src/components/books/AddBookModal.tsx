@@ -26,6 +26,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group"
+import {
   Field,
   FieldContent,
   FieldGroup,
@@ -240,20 +246,27 @@ export function AddBookModal({
             {/* Search */}
             {!existingBook && (
               <>
-                <form onSubmit={handleSearch} className="flex gap-2">
-                  <Input
-                    placeholder={t("addBook.searchPlaceholder")}
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button type="submit" variant="outline" disabled={searching}>
-                    {searching ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Search className="size-4" />
-                    )}
-                  </Button>
+                <form onSubmit={handleSearch}>
+                  <InputGroup>
+                    <InputGroupAddon>
+                      <Search />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      placeholder={t("addBook.searchPlaceholder")}
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                    />
+                    <InputGroupAddon align="inline-end">
+                      {searching ? (
+                        <Loader2 className="animate-spin text-muted-foreground" />
+                      ) : results.length > 0 ? (
+                        <InputGroupText>
+                          {t("addBook.resultsCount", { count: results.length })}
+                        </InputGroupText>
+                      ) : null}
+                    </InputGroupAddon>
+                  </InputGroup>
+                  <button type="submit" className="hidden" />
                 </form>
 
                 {/* Search results */}
