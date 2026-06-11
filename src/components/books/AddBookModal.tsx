@@ -36,6 +36,7 @@ import {
   FieldContent,
   FieldGroup,
   FieldLabel,
+  FieldDescription,
 } from "@/components/ui/field"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { useTranslation } from "@/i18n/client"
@@ -246,32 +247,44 @@ export function AddBookModal({
             {/* Search */}
             {!existingBook && (
               <>
-                <form onSubmit={handleSearch}>
-                  <InputGroup>
-                    <InputGroupAddon>
-                      <Search />
-                    </InputGroupAddon>
-                    <InputGroupInput
-                      placeholder={t("addBook.searchPlaceholder")}
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                    />
-                    <InputGroupAddon align="inline-end">
-                      {searching ? (
-                        <Loader2 className="animate-spin text-muted-foreground" />
-                      ) : results.length > 0 ? (
-                        <InputGroupText>
-                          {t("addBook.resultsCount", { count: results.length })}
-                        </InputGroupText>
-                      ) : null}
-                    </InputGroupAddon>
-                  </InputGroup>
-                  <button type="submit" className="hidden" />
-                </form>
+                <Field>
+                  <FieldContent>
+                    <form onSubmit={handleSearch}>
+                      <InputGroup>
+                        <InputGroupAddon>
+                          <Search />
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          placeholder={t("addBook.searchPlaceholder")}
+                          value={query}
+                          onChange={(e) => setQuery(e.target.value)}
+                        />
+                        <InputGroupAddon align="inline-end">
+                          {searching ? (
+                            <Loader2 className="animate-spin text-muted-foreground" />
+                          ) : results.length > 0 ? (
+                            <InputGroupText>
+                              {t("addBook.resultsCount", {
+                                count: results.length,
+                              })}
+                            </InputGroupText>
+                          ) : null}
+                        </InputGroupAddon>
+                      </InputGroup>
+                      <button type="submit" className="hidden" />
+                    </form>
+                  </FieldContent>
+                  <FieldDescription
+                    className="text-xs"
+                    dangerouslySetInnerHTML={{
+                      __html: t("addBook.searchHints"),
+                    }}
+                  />
+                </Field>
 
                 {/* Search results */}
                 {searching && (
-                  <div className="flex flex-col gap-2">
+                  <div className="mt-2 flex flex-col gap-2">
                     {Array.from({ length: 3 }).map((_, i) => (
                       <div key={i} className="flex gap-3 rounded-md border p-3">
                         <Skeleton className="size-12 rounded" />
