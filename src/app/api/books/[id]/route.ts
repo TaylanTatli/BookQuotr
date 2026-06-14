@@ -15,11 +15,6 @@ export async function GET(_req: Request, { params }: Params) {
       return NextResponse.json({ error: "Book not found" }, { status: 404 });
     }
 
-    if (book.thumbnail && book.thumbnail.startsWith("http")) {
-      const v = book.updatedAt.getTime();
-      book.thumbnail = `/api/covers/${book.id}?v=${v}`;
-    }
-
     return NextResponse.json({ book });
   } catch {
     return NextResponse.json({ error: "Failed to fetch book" }, { status: 500 });
@@ -35,7 +30,11 @@ export async function PATCH(request: Request, { params }: Params) {
     if ('thumbnail' in body) {
        const existingBook = await prisma.book.findUnique({ where: { id }});
        if (existingBook && existingBook.thumbnail !== body.thumbnail) {
-          await deleteCover(id);
+          // Do not delete if the new thumbnail is the local API route for this specific book,
+          // because it means the user JUST uploaded a file that overwrote it!
+          if (!body.thumbnail || !body.thumbnail.startsWith(`/api/covers/${id}`)) {
+            await deleteCover(id);
+          }
        }
     }
 

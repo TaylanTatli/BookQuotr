@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react"
+import { getCoverUrl } from "@/lib/utils"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
@@ -273,7 +274,7 @@ export function BookDetail({
       <div className="h-30 w-auto shrink-0 overflow-hidden rounded-lg shadow-md">
         {book.thumbnail ? (
           <Image
-            src={book.thumbnail}
+            src={getCoverUrl(book)!}
             alt={book.title}
             width={96}
             height={96}

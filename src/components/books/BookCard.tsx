@@ -1,6 +1,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import { Trash2, Heart, BookOpen, CheckCircle2, XCircle } from "lucide-react"
+import { getCoverUrl } from "@/lib/utils"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/client"
@@ -70,7 +71,7 @@ export function BookCard({
       >
         {book.thumbnail ? (
           <Image
-            src={book.thumbnail}
+            src={getCoverUrl(book)!}
             alt={book.title}
             width={50}
             height={100}
