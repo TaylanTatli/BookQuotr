@@ -6,10 +6,12 @@ export async function GET() {
     const quoteCount = await prisma.quote.count()
 
     if (quoteCount === 0) {
-      return NextResponse.json(
-        { error: "No quotes available" },
-        { status: 404 }
-      )
+      return NextResponse.json({
+        available: false,
+        quote: null,
+        book: null,
+        message: "No quotes available",
+      })
     }
 
     const randomOffset = Math.floor(Math.random() * quoteCount)
@@ -38,13 +40,16 @@ export async function GET() {
     })
 
     if (!quote) {
-      return NextResponse.json(
-        { error: "No quotes available" },
-        { status: 404 }
-      )
+      return NextResponse.json({
+        available: false,
+        quote: null,
+        book: null,
+        message: "No quotes available",
+      })
     }
 
     return NextResponse.json({
+      available: true,
       quote: {
         id: quote.id,
         content: quote.content,
