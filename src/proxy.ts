@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { verifyToken } from "@/lib/auth";
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import { verifyToken } from "@/lib/auth"
 
 export async function proxy(request: NextRequest) {
-  const authEnabled = process.env.AUTH_ENABLED === "true";
+  const authEnabled = process.env.AUTH_ENABLED === "true"
 
   if (!authEnabled) {
-    return NextResponse.next();
+    return NextResponse.next()
   }
 
-  const path = request.nextUrl.pathname;
+  const path = request.nextUrl.pathname
 
   // Allow static files, manifests, icons, and login route
   if (
@@ -22,36 +22,37 @@ export async function proxy(request: NextRequest) {
     path === "/web-app-manifest-192x192.png" ||
     path === "/web-app-manifest-512x512.png" ||
     path.startsWith("/api/covers") ||
+    path.startsWith("/api/v1/random") ||
     path === "/login" ||
     path === "/api/health" ||
     path === "/api/auth/login"
   ) {
-    return NextResponse.next();
+    return NextResponse.next()
   }
 
-  const token = request.cookies.get("auth_token")?.value;
+  const token = request.cookies.get("auth_token")?.value
 
   if (!token) {
     if (path.startsWith("/api/")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  const payload = await verifyToken(token);
+  const payload = await verifyToken(token)
 
   if (!payload) {
     if (path.startsWith("/api/")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  return NextResponse.next();
+  return NextResponse.next()
 }
 
 export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon\\.ico|favicon\\.svg|site\\.webmanifest|apple-touch-icon\\.png|favicon-96x96\\.png|web-app-manifest-192x192\\.png|web-app-manifest-512x512\\.png).*)",
   ],
-};
+}
