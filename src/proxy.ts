@@ -22,7 +22,7 @@ export async function proxy(request: NextRequest) {
     path === "/web-app-manifest-192x192.png" ||
     path === "/web-app-manifest-512x512.png" ||
     path.startsWith("/api/covers") ||
-    path.startsWith("/api/v1/random") ||
+    path.startsWith("/api/quotes/random") ||
     path === "/login" ||
     path === "/api/health" ||
     path === "/api/auth/login"
