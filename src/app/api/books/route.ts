@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { downloadAndSaveCover } from "@/lib/coverCache";
+import { sanitizeBookFields } from "@/lib/sanitize";
+import type { Prisma } from "@prisma/client";
 
 export async function GET(request: Request) {
   try {
@@ -33,22 +34,31 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, author, ...rest } = body;
+    const { title, author } = body ?? {};
 
-    if (!title || !author) {
+    if (
+      typeof title !== "string" ||
+      !title.trim() ||
+      typeof author !== "string" ||
+      !author.trim()
+    ) {
       return NextResponse.json(
         { error: "title and author are required" },
         { status: 400 }
       );
     }
 
-    const book = await prisma.book.create({
-      data: { title, author, ...rest },
-    });
-    
-    // Note: we don't download remote URLs here anymore. 
-    // They will be downloaded and cached on-the-fly by the /api/covers route.
+    const fields = sanitizeBookFields(body);
 
+    const book = await prisma.book.create({
+      data: {
+        ...fields,
+        title: title.trim(),
+        author: author.trim(),
+      } as Prisma.BookUncheckedCreateInput,
+    });
+
+    // Remote covers are downloaded and cached on-the-fly by the /api/covers route.
     return NextResponse.json({ book }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to create book" }, { status: 500 });

@@ -20,7 +20,9 @@
     "themeSystem": "Sistem",
     "fontSize": "Yazı Boyutu",
     "fontModeFixed": "Sabit",
-    "fontModeResponsive": "Dinamik (clamp)"
+    "fontModeResponsive": "Dinamik (clamp)",
+    "madeBy": "Taylan Tatlı tarafından geliştirildi",
+    "sourceCode": "Kaynak kodu"
   },
   "login": {
     "title": "BookQuotr",

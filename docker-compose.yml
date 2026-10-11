@@ -5,18 +5,29 @@ services:
     ports:
       - "3000:3000"
     volumes:
+      # Persistent application data (SQLite database + cached covers).
+      # Keep this directory safe: it is your entire library.
       - ./data:/app/data
     environment:
-      - DATABASE_URL=file:/app/data/bookquotr.db
-      # Authentication (Optional)
-      # - AUTH_ENABLED=true
-      # - AUTH_USERNAME=admin
-      # - AUTH_PASSWORD=bookquotr
-      # External APIs (Optional)
-      # - GOOGLE_BOOKS_API_KEY=your_api_key_here
+      DATABASE_URL: "${DATABASE_URL:-file:/app/data/bookquotr.db}"
+      # Authentication. Production defaults to ENABLED; set these values in a
+      # .env file next to this compose file. Generate a secret with:
+      #   openssl rand -base64 32
+      AUTH_ENABLED: ${AUTH_ENABLED:-}
+      AUTH_USERNAME: ${AUTH_USERNAME:-}
+      AUTH_PASSWORD: ${AUTH_PASSWORD:-}
+      AUTH_SECRET: ${AUTH_SECRET:-}
+      AUTH_SESSION_DAYS: ${AUTH_SESSION_DAYS:-30}
+      # Optional: expose /api/quotes/random without authentication (no private notes).
+      PUBLIC_RANDOM_QUOTES: ${PUBLIC_RANDOM_QUOTES:-false}
+      # Optional: raises the Google Books API quota.
+      GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY:-}
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       test: ["CMD", "wget", "-qO-", "-Y", "off", "http://127.0.0.1:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 20s

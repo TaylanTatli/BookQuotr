@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+/**
+ * Random quote endpoint, intended for optional public integrations
+ * (e.g. a home dashboard). Public access must be explicitly enabled with
+ * `PUBLIC_RANDOM_QUOTES=true`; otherwise the proxy requires authentication.
+ *
+ * Private metadata (the personal `note`) is never exposed here.
+ */
 export async function GET() {
   try {
     const quoteCount = await prisma.quote.count()
@@ -29,8 +36,6 @@ export async function GET() {
             publishedDate: true,
             thumbnail: true,
             language: true,
-            googleBooksId: true,
-            openLibraryId: true,
           },
         },
       },
@@ -48,19 +53,21 @@ export async function GET() {
       })
     }
 
-    return NextResponse.json({
-      available: true,
-      quote: {
-        id: quote.id,
-        content: quote.content,
-        page: quote.page,
-        chapter: quote.chapter,
-        note: quote.note,
-        createdAt: quote.createdAt,
-        updatedAt: quote.updatedAt,
+    return NextResponse.json(
+      {
+        available: true,
+        quote: {
+          id: quote.id,
+          content: quote.content,
+          page: quote.page,
+          chapter: quote.chapter,
+          createdAt: quote.createdAt,
+          updatedAt: quote.updatedAt,
+        },
+        book: quote.book,
       },
-      book: quote.book,
-    })
+      { headers: { "Cache-Control": "no-store" } }
+    )
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch random quote" },

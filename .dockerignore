@@ -1,0 +1,40 @@
+# Dependencies and build output
+node_modules
+.next
+out
+build
+dist
+*.tsbuildinfo
+
+# Never ship secrets or local data
+.env
+.env.*
+!.env.example
+data
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+covers
+
+# Git and tooling
+.git
+.gitignore
+.github
+.agents
+.openchamber
+.vscode
+.idea
+coverage
+
+# Docs and repo metadata (not needed to build or run)
+*.md
+!README.md
+LICENSE
+docs
+tests
+Dockerfile
+docker-compose.yml
+.dockerignore
+.prettierignore
+.prettierrc

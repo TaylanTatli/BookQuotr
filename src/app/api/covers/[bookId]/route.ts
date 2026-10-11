@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { readCoverFile, downloadAndSaveCover } from "@/lib/coverCache";
+import { downloadAndSaveCover, readCoverFile } from "@/lib/coverCache";
+import { isSafeCoverId, sniffImageType } from "@/lib/security";
 import { prisma } from "@/lib/prisma";
 
 type Params = { params: Promise<{ bookId: string }> };
@@ -7,6 +8,10 @@ type Params = { params: Promise<{ bookId: string }> };
 export async function GET(_req: Request, { params }: Params) {
   const { bookId } = await params;
   const id = bookId.replace(/\.[^.]+$/, "");
+
+  if (!isSafeCoverId(id)) {
+    return NextResponse.json({ error: "Cover not found" }, { status: 404 });
+  }
 
   let buffer = await readCoverFile(id);
 
@@ -29,10 +34,13 @@ export async function GET(_req: Request, { params }: Params) {
     return NextResponse.json({ error: "Cover not found" }, { status: 404 });
   }
 
+  // Serve the real content type detected from the bytes, never a fixed guess.
+  const image = sniffImageType(buffer);
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
-      "Content-Type": "image/jpeg",
-      "Cache-Control": "public, max-age=31536000",
+      "Content-Type": image?.mime ?? "image/jpeg",
+      "X-Content-Type-Options": "nosniff",
+      "Cache-Control": "private, max-age=31536000, immutable",
     },
   });
 }

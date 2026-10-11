@@ -12,7 +12,6 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select"
 import { useTranslation } from "@/i18n/client"
 import { ItemGroup } from "@/components/ui/item"

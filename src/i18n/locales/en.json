@@ -20,7 +20,9 @@
     "themeSystem": "System",
     "fontSize": "Font Size",
     "fontModeFixed": "Fixed",
-    "fontModeResponsive": "Responsive (clamp)"
+    "fontModeResponsive": "Responsive (clamp)",
+    "madeBy": "Created by Taylan Tatlı",
+    "sourceCode": "Source code"
   },
   "login": {
     "title": "BookQuotr",

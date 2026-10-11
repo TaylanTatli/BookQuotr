@@ -1,9 +1,23 @@
 ---
 activation: always_on
-description: BookQuotr API contracts, bulk quote parsing, UI layout, component behaviour, styling, and Docker configuration.
+description: BookQuotr API contracts, auth, bulk quote parsing, UI layout, and Docker configuration.
 ---
 
-# BookQuotr — API, UI & Docker Rules
+# BookQuotr — API, Auth, UI & Docker Rules
+
+## Authentication
+
+- `src/proxy.ts` gates every route except static assets and:
+  `/login`, `/api/auth/login`, `/api/auth/logout`, `/api/health`.
+- Auth is **enabled by default in production**; set `AUTH_ENABLED=false` for a
+  trusted local deployment. If enabled without `AUTH_USERNAME`, `AUTH_PASSWORD`
+  and a strong `AUTH_SECRET` (>= 32 chars), requests are rejected (503) with a
+  clear server log.
+- `POST /api/auth/login` validates credentials (constant-time) and rate-limits
+  failed attempts (5 per 15 min per IP). The session JWT lives in an httpOnly,
+  SameSite=Lax cookie (`Secure` only over HTTPS).
+- `/api/quotes/random` is public **only** when `PUBLIC_RANDOM_QUOTES=true`, and
+  never returns the private `note` field.
 
 ## API Route Contracts
 
@@ -11,65 +25,54 @@ description: BookQuotr API contracts, bulk quote parsing, UI layout, component b
 
 | Method | Route | Description |
 |--------|-------|-------------|
-| GET | `/api/books` | All books ordered by `createdAt DESC`, includes `_count.quotes` |
-| POST | `/api/books` | Create book. Body: `{ title, author, ...optionalFields }` |
+| GET | `/api/books` | All books, ordered by `createdAt DESC`, includes `_count.quotes` |
+| POST | `/api/books` | Create book (`title`, `author` required; other fields sanitized) |
 | GET | `/api/books/[id]` | Single book with all quotes |
-| PATCH | `/api/books/[id]` | Update any subset of book fields |
-| DELETE | `/api/books/[id]` | Delete book (quotes cascade) |
+| PATCH | `/api/books/[id]` | Update a subset of allowed book fields |
+| DELETE | `/api/books/[id]` | Delete book (quotes cascade; cover removed) |
 
 ### Quotes
 
 | Method | Route | Description |
 |--------|-------|-------------|
-| GET | `/api/quotes?bookId=<id>` | All quotes for a book, ordered `createdAt ASC` |
-| POST | `/api/quotes` | Create single or bulk quotes |
+| GET | `/api/quotes?bookId=<id>` | Quotes for a book, ordered `createdAt ASC` |
+| POST | `/api/quotes` | Create single or bulk quotes (`---` separated) |
 | PATCH | `/api/quotes/[id]` | Update `content`, `page`, `chapter`, `note` |
 | DELETE | `/api/quotes/[id]` | Delete single quote |
 
-**POST `/api/quotes` body:**
-```ts
-{
-  bookId:   string;
-  content:  string;  // May contain \n---\n bulk separators
-  page?:    number;
-  chapter?: string;
-  note?:    string;
-}
-```
-The route calls `parseQuotes(content)` and inserts all segments via `prisma.quote.createMany`.
-Response: `{ quotes: Quote[]; count: number }`
+### Covers
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/api/covers/[bookId]` | Serve cached cover; downloads on-the-fly if the book has a remote URL. **Requires auth.** |
+| POST | `/api/covers/upload` | Upload a cover (multipart `file`, `bookId`). **Requires auth.** |
+| POST | `/api/admin/migrate-covers` | Cache remote covers for all books. **Requires auth.** |
+
+Cover security: ids must match `^[A-Za-z0-9_-]{1,64}$`; remote URLs must be public
+http(s) (SSRF guard in `lib/security.ts`); uploads are validated by magic bytes,
+size-capped, and stored under `data/covers/`. Content type is derived from the
+bytes, never trusted from the client.
 
 ### Search
 
-`GET /api/search?q=<query>&source=all|google|openlibrary`
-
-Proxies to:
-- **Google Books** — `https://www.googleapis.com/books/v1/volumes?q={q}&key={KEY}`
-- **Open Library** — `https://openlibrary.org/search.json?q={q}&limit=10`
-
-Normalise both responses into:
-```ts
-interface SearchResult {
-  source:         'google' | 'openlibrary';
-  externalId:     string;
-  title:          string;
-  authors:        string[];
-  publisher?:     string;
-  publishedDate?: string;
-  description?:  string;
-  isbn?:          string;
-  pageCount?:     number;
-  language?:      string;
-  thumbnail?:     string;
-}
-```
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/api/search?q=&source=all\|google\|openlibrary` | Proxy to Google Books / Open Library |
+| GET | `/api/db-search?q=` | Search local books and quotes |
 
 ### Export / Import
 
 | Method | Route | Description |
 |--------|-------|-------------|
 | GET | `/api/export` | Full JSON dump: `{ books: (Book & { quotes: Quote[] })[] }` |
-| POST | `/api/export` | Import same JSON structure; upsert books and quotes by `id` |
+| POST | `/api/export` | Import the same shape; sanitized upsert by unique id |
+
+### Misc
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/api/health` | Public health check (`{ status: "ok" }`) |
+| POST | `/api/auth/login` / `/api/auth/logout` | Session cookie management |
 
 ---
 
@@ -99,111 +102,84 @@ Called **server-side** in `POST /api/quotes` before `createMany`.
 ┌──────────────────────────────────────────────────────────┐
 │  BookQuotr                                               │
 ├──────────────┬───────────────────────────────────────────┤
-│  Book List   │  Quote Panel                              │
-│  (30% width) │  (70% width)                              │
-│              │                                           │
-│  ┌─────────┐ │  ┌─────────────────────────────────────┐ │
-│  │ BookCard│ │  │ BookDetail (cover + full metadata)  │ │
-│  │ ...     │ │  └─────────────────────────────────────┘ │
-│  └─────────┘ │                                           │
-│  [+ Add Book]│  ┌─────────────────────────────────────┐ │
-│  [Settings]  │  │ QuoteCard (Markdown rendered)       │ │
-│              │  └─────────────────────────────────────┘ │
-│              │                         [+ Add Quote]    │
+│  Book List   │  Quote Panel (BookDetail + QuoteList)     │
+│  (resizable) │                                           │
+│  [+ Add Book]│                         [+ Add Quote]      │
+│  [Settings]  │                                           │
 └──────────────┴───────────────────────────────────────────┘
 ```
 
-**Layout rules:**
-- Left column: `min-h-screen`, sticky header, scrollable book list.
-- Right column: `flex-1`, scrollable quote list, `Add Quote` button pinned to bottom-right.
-- Both columns have **independent scroll** (`overflow-y-auto`).
-- **Responsive**: on mobile (`<768px`) stack vertically — book list becomes a horizontal scrollable strip at the top.
+- Desktop: resizable split panels (`ResizablePanelGroup`), width persisted in
+  `localStorage`.
+- Mobile (`<768px`): the sidebar becomes a `Sheet` drawer.
+- Both columns scroll independently.
 
 ---
 
-## Component Behaviour Rules
+## Component Behaviour
 
-### `AddBookModal`
-1. Search input → calls `GET /api/search?q=...` on submit.
-2. Results list → clicking pre-fills all metadata fields.
-3. User can edit any field before saving.
-4. Save → `POST /api/books` → close modal → refresh sidebar.
-
-### `AddQuoteModal`
-1. Large `<textarea>` with monospace font.
-2. Live hint: *"Separate multiple quotes with `---` on its own line"*.
-3. Optional collapsible fields: **Page**, **Chapter**, **Note**.
-4. Submit → `POST /api/quotes` → response shows how many quotes were saved.
-5. On success → refresh quote list.
-
-### `SettingsModal`
-1. **Export**: `GET /api/export` → file download named `bookquotr-backup-YYYY-MM-DD.json`.
-2. **Import**: `<input type="file" accept=".json">` → reads file → `POST /api/export` → shows result.
-3. **Danger zone**: "Delete All Data" — requires user to type `DELETE` to confirm.
-
-### `QuoteCard`
-- Renders `content` via `react-markdown` with `remark-gfm`.
-- Shows `page`, `chapter`, `note` as small meta badges if present.
-- Edit (pencil) + delete (trash) icons — visible on hover.
-- Edit: reuse `AddQuoteModal` pre-filled, or inline edit form.
+- **AddBookModal**: search (Google/Open Library) → prefill → edit → save.
+- **AddQuoteModal**: textarea with `---` bulk separators + optional page/chapter/note.
+- **QuoteCard**: Markdown (`rehype-sanitize`) + copy / edit / delete / export image.
+- **SettingsModal**: language, theme, font size, default view, JSON backup/restore,
+  delete-all (type `DELETE`), and the project attribution link.
 
 ---
 
 ## Styling Rules
 
-- **Tailwind v4** — use `@theme inline` in `globals.css`. There is **no** `tailwind.config.ts`.
-- **Dark mode by default** — configure via shadcn theme / CSS vars in the global CSS file (the `tailwindCssFile` from `components.json`).
-- **Semantic tokens always** — `bg-primary`, `bg-muted`, `text-muted-foreground`, `border`, etc. Never raw Tailwind palette classes like `bg-zinc-800` or `text-blue-500`.
-- **shadcn/ui components first** — before writing any styled `<div>`, check if `Dialog`, `ScrollArea`, `Card`, `Badge`, `Separator`, `Skeleton`, etc. covers the need.
-- **`cn()` utility** — always use `cn()` from `@/lib/utils` for conditional `className` composition. Never manual template literal ternaries.
-- **No `space-x-*` / `space-y-*`** — use `flex gap-*` or `flex flex-col gap-*`.
-- **Equal dimensions** — use `size-*` shorthand, not `w-* h-*`.
-- **No custom font stack** — font is configured via shadcn init / preset. Do not add Google Fonts manually.
-- **No manual `z-index`** on overlay components — `Dialog`, `Popover`, `Sheet` manage their own stacking context.
+- **Tailwind v4** — `@theme inline` in `globals.css`; no `tailwind.config.ts`.
+- **Semantic tokens only** — `bg-primary`, `text-muted-foreground`, `border`, …
+- **shadcn/ui components first**; use `cn()` for conditional classes.
+- **No `space-x-*` / `space-y-*`** — use `flex gap-*`.
+- **Equal dimensions** — use `size-*`, not `w-* h-*`.
 
 ---
 
-## Docker Configuration Rules
+## Docker Configuration
 
 ### `Dockerfile` — multi-stage build
 
 ```
-Stage 1 (deps):     node:20-alpine — install production deps only
-Stage 2 (builder):  node:20-alpine — copy deps + source, run prisma generate + next build
-Stage 3 (runner):   node:20-alpine — copy built output, NODE_ENV=production, EXPOSE 3000
+Stage 1 (builder): node:22-alpine — pnpm install, prisma generate, next build
+Stage 2 (runner):  node:22-alpine — global prisma, standalone output, USER node
 ```
 
-Critical:
-- `data/` directory is **NOT** copied into the image — it is volume-mounted.
-- `prisma migrate deploy` must run at container start (entrypoint script or CMD chain).
-- `COPY prisma ./prisma` must happen **before** `RUN npx prisma generate`.
+- `data/` is **not** copied into the image; it is volume-mounted.
+- `.dockerignore` keeps `.env`, `data/`, `.git` and other artifacts out of the build.
+- `prisma migrate deploy` runs in `entrypoint.sh` before `node server.js`.
 
 ### `docker-compose.yml`
 
 ```yaml
 services:
   bookquotr:
-    build: .
-    ports:
-      - "3000:3000"
+    image: ghcr.io/taylantatli/bookquotr:latest
+    ports: ["3000:3000"]
     volumes:
-      - ./data:/app/data      # SQLite persistence — never loses data
+      - ./data:/app/data          # SQLite + covers — never lose this
     environment:
-      - DATABASE_URL=file:./data/bookquotr.db
-      - NODE_ENV=production
+      DATABASE_URL: file:/app/data/bookquotr.db
+      AUTH_ENABLED / AUTH_USERNAME / AUTH_PASSWORD / AUTH_SECRET: …
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "-Y", "off", "http://127.0.0.1:3000/api/health"]
 ```
+
+Environment values are interpolated from a `.env` file next to the compose file.
 
 ---
 
 ## Development Workflow
 
 ```bash
-npm install
+pnpm install
 cp .env.example .env
-npx prisma migrate dev --name init
-npm run dev
+pnpm exec prisma migrate deploy
+pnpm dev
+
+pnpm typecheck && pnpm lint && pnpm test && pnpm build
 
 # Docker
-docker-compose up --build
+docker compose up -d --build
 ```

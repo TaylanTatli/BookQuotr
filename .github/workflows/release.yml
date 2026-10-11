@@ -5,14 +5,17 @@ on:
     branches:
       - master
 
+# Default to read-only; the release job opts into write scopes it needs.
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
 jobs:
   release:
-    name: Create Release and Publish Docker Image
+    name: Validate, Create Release and Publish Docker Image
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
 
     steps:
       - name: Checkout repository
@@ -20,11 +23,32 @@ jobs:
         with:
           fetch-depth: 0
 
+      # --- Validation: a failing check blocks the release below ---
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
+          cache: pnpm
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Production build
+        run: pnpm build
+
+      # --- Release ---
       - name: Get version from package.json
         id: get_version
         run: |
@@ -110,7 +134,7 @@ jobs:
 
       - name: Build and push Docker image
         if: steps.check_tag.outputs.exists == 'false'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true

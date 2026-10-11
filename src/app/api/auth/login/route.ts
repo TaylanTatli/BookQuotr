@@ -1,43 +1,78 @@
 import { NextResponse } from "next/server";
-import { signToken } from "@/lib/auth";
+import { getAuthConfig, signToken, validateCredentials } from "@/lib/auth";
+import {
+  clearAttempts,
+  isRateLimited,
+  recordFailedAttempt,
+} from "@/lib/rateLimit";
+
+function clientKey(request: Request): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0]!.trim();
+  return request.headers.get("x-real-ip") ?? "unknown";
+}
 
 export async function POST(req: Request) {
+  const config = getAuthConfig();
+
+  if (!config.enabled) {
+    return NextResponse.json(
+      { error: "Authentication is disabled" },
+      { status: 403 }
+    );
+  }
+
+  if (config.errors.length > 0) {
+    return NextResponse.json(
+      { error: "Authentication is misconfigured on the server" },
+      { status: 503 }
+    );
+  }
+
+  const key = clientKey(req);
+  if (isRateLimited(key)) {
+    return NextResponse.json(
+      { error: "Too many login attempts. Please try again later." },
+      { status: 429 }
+    );
+  }
+
+  let username: unknown;
+  let password: unknown;
   try {
-    const { username, password } = await req.json();
+    ({ username, password } = await req.json());
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 
-    const envUsername = process.env.AUTH_USERNAME || "admin";
-    const envPassword = process.env.AUTH_PASSWORD || "bookquotr";
-
-    // Only set Secure flag when actually behind HTTPS (e.g. reverse proxy).
-    // This ensures cookies work in Docker/self-hosted HTTP setups too.
-    const isSecure = req.headers.get("x-forwarded-proto") === "https";
-
-    if (username === envUsername && password === envPassword) {
-      const token = await signToken({ username });
-
-      const response = NextResponse.json({ success: true });
-      
-      response.cookies.set({
-        name: "auth_token",
-        value: token,
-        httpOnly: true,
-        secure: isSecure,
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-        path: "/",
-      });
-
-      return response;
-    }
-
+  if (!validateCredentials(username, password)) {
+    recordFailedAttempt(key);
     return NextResponse.json(
       { error: "Invalid username or password" },
       { status: 401 }
     );
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
   }
+
+  clearAttempts(key);
+
+  // Only set the Secure flag when actually served over HTTPS (e.g. a reverse
+  // proxy), so cookies also work on plain-HTTP self-hosted setups.
+  const isSecure =
+    req.headers.get("x-forwarded-proto") === "https" ||
+    new URL(req.url).protocol === "https:";
+
+  const token = await signToken({ username: config.username });
+
+  const response = NextResponse.json({ success: true });
+  response.cookies.set({
+    name: "auth_token",
+    value: token,
+    httpOnly: true,
+    secure: isSecure,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * config.sessionDays,
+    path: "/",
+  });
+
+  return response;
 }

@@ -50,7 +50,7 @@ export default function LoginPage() {
         const data = await res.json()
         toast.error(data.error || t("login.failed"))
       }
-    } catch (error) {
+    } catch {
       toast.error(t("login.error"))
     } finally {
       setLoading(false)

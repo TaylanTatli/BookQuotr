@@ -7,7 +7,9 @@ description: BookQuotr core architecture, tech stack, database schema, and codin
 
 ## Overview
 
-BookQuotr is a self-hosted, single-user web app for managing book quotes and metadata. Zero external service dependencies except Google Books / Open Library for metadata fetching.
+BookQuotr is a self-hosted, single-user web app for managing book quotes and metadata.
+The only external services are the optional Google Books / Open Library metadata
+providers. Authentication is optional and handled with a signed JWT cookie.
 
 ---
 
@@ -15,15 +17,17 @@ BookQuotr is a self-hosted, single-user web app for managing book quotes and met
 
 | Layer          | Choice                       | Notes                                             |
 |----------------|------------------------------|---------------------------------------------------|
-| Framework      | Next.js 14+ (App Router)     | Server Components + API Routes                    |
+| Framework      | Next.js 16 (App Router)      | Server Components + Route Handlers                |
+| Runtime        | Node.js 22                   | Required by Next 16 and the Prisma 7 adapter      |
 | UI Components  | shadcn/ui (Base UI)          | **Primary UI layer** — use before any custom code |
 | Styling        | Tailwind CSS **v4**          | `@theme inline` blocks, no `tailwind.config.js`   |
 | Primitives     | Base UI (not Radix)          | `base` field in `components.json`                 |
 | Icons          | Lucide React                 | Configured via shadcn `iconLibrary`               |
-| Database       | SQLite via Prisma ORM        | Single `.db` file, easy backup                    |
-| Markdown       | react-markdown + remark-gfm  | Render quote content as GFM Markdown              |
+| Database       | SQLite via Prisma 7          | `@prisma/adapter-libsql` driver adapter           |
+| Auth           | `jose` (HS256 JWT)           | cookie `auth_token`, enforced in `src/proxy.ts`   |
+| Markdown       | react-markdown + remark-gfm  | Rendered with `rehype-sanitize`                   |
 | HTTP Client    | Native `fetch` (no axios)    | Both internal and external API calls              |
-| Container      | Docker + docker-compose      | Production-ready multi-stage Dockerfile           |
+| Container      | Docker + docker-compose      | Multi-stage Dockerfile, GHCR image                |
 
 ---
 
@@ -31,130 +35,77 @@ BookQuotr is a self-hosted, single-user web app for managing book quotes and met
 
 ```
 BookQuotr/
-├── .agents/rules/               ← Antigravity rules (this file)
-├── .agents/skills/shadcn/       ← shadcn skill (auto-loaded)
-├── components.json              ← shadcn/ui config (base: "base", tailwindVersion: "v4")
-├── .env.example
-├── .gitignore
-├── Dockerfile
-├── docker-compose.yml
-├── next.config.js
-├── tsconfig.json
-├── package.json
+├── .agents/rules/               ← Agent rules (this file)
+├── components.json              ← shadcn config (base: "base", tailwind: v4)
+├── .dockerignore / .gitignore
+├── Dockerfile / docker-compose.yml / entrypoint.sh
+├── next.config.mjs              ← standalone output + security headers
+├── prisma.config.ts             ← Prisma 7 config (datasource url from env)
 ├── prisma/
-│   └── schema.prisma
-├── data/                        ← SQLite .db lives here (gitignored, volume-mounted)
-│   └── bookquotr.db
-├── public/
+│   ├── schema.prisma
+│   └── migrations/
+├── data/                        ← SQLite .db + cached covers (gitignored, volume)
+├── tests/                       ← node:test regression tests
 └── src/
+    ├── proxy.ts                 ← Auth gate (replaces middleware in Next 16)
+    ├── instrumentation.ts       ← Startup auth-config warnings
     ├── app/
-    │   ├── layout.tsx           ← Root layout (fonts, metadata)
-    │   ├── page.tsx             ← Main two-column split view
-    │   ├── globals.css          ← Tailwind directives + custom CSS vars
+    │   ├── layout.tsx / page.tsx / login/page.tsx / globals.css
     │   └── api/
-    │       ├── books/
-    │       │   ├── route.ts         ← GET (list), POST (create)
-    │       │   └── [id]/route.ts    ← GET, PATCH, DELETE
-    │       ├── quotes/
-    │       │   ├── route.ts         ← GET (?bookId=), POST (create / bulk)
-    │       │   └── [id]/route.ts    ← GET, PATCH, DELETE
-    │       ├── search/route.ts      ← Proxy: Google Books + Open Library
-    │       └── export/route.ts      ← GET → JSON dump, POST → import JSON
-    ├── components/
-    │   ├── ui/                      ← shadcn/ui generated components (DO NOT edit manually)
-    │   │   ├── button.tsx
-    │   │   ├── dialog.tsx
-    │   │   ├── input.tsx
-    │   │   ├── scroll-area.tsx
-    │   │   ├── badge.tsx
-    │   │   ├── skeleton.tsx
-    │   │   ├── separator.tsx
-    │   │   └── ... (added via `pnpm dlx shadcn@latest add`)
-    │   ├── layout/
-    │   │   ├── BookSidebar.tsx      ← Left 30% column
-    │   │   └── QuotesPanel.tsx      ← Right 70% column
-    │   ├── books/
-    │   │   ├── BookCard.tsx         ← Single book item in sidebar
-    │   │   ├── BookDetail.tsx       ← Full metadata header in quotes panel
-    │   │   └── AddBookModal.tsx     ← Search + manual edit + save (uses Dialog)
-    │   ├── quotes/
-    │   │   ├── QuoteCard.tsx        ← Single rendered Markdown quote
-    │   │   ├── QuoteList.tsx        ← Scrollable quote list (uses ScrollArea)
-    │   │   └── AddQuoteModal.tsx    ← Textarea + bulk parse + save (uses Dialog)
-    │   └── settings/
-    │       └── SettingsModal.tsx    ← Export / Import JSON (uses Dialog + AlertDialog)
+    │       ├── auth/login, auth/logout
+    │       ├── books/route.ts, books/[id]/route.ts
+    │       ├── quotes/route.ts, quotes/[id]/route.ts, quotes/random/route.ts
+    │       ├── covers/[bookId]/route.ts, covers/upload/route.ts
+    │       ├── admin/migrate-covers/route.ts
+    │       ├── search/route.ts, db-search/route.ts
+    │       ├── export/route.ts
+    │       └── health/route.ts
+    ├── components/{ui,layout,books,quotes,settings,search}/
+    ├── i18n/                    ← en / tr dictionaries
     ├── lib/
-    │   ├── prisma.ts               ← Prisma client singleton
-    │   ├── parseQuotes.ts          ← Bulk quote splitting logic
-    │   └── bookSearch.ts           ← Google Books + Open Library helpers
-    └── types/
-        └── index.ts                ← Shared TS types (Book, Quote, SearchResult)
+    │   ├── auth.ts              ← auth config + JWT sign/verify
+    │   ├── security.ts          ← id / URL / image-type guards
+    │   ├── sanitize.ts          ← input sanitizers (mass-assignment guard)
+    │   ├── rateLimit.ts         ← login rate limiter
+    │   ├── coverCache.ts        ← cover download / store / read
+    │   ├── prisma.ts / bookSearch.ts / parseQuotes.ts / utils.ts
+    └── types/index.ts
 ```
 
 ---
 
 ## Database Schema (Prisma)
 
-File: `prisma/schema.prisma`
+File: `prisma/schema.prisma` — SQLite, `cuid()` ids, no `url` in the schema
+(Prisma 7 reads it from `prisma.config.ts` / `DATABASE_URL`).
 
-```prisma
-generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3-0-x"]
-}
+`Book`: id, title, subtitle, author, publisher, publishedDate, description, isbn,
+pageCount, language, thumbnail, googleBooksId\*, openLibraryId\*, startedAt,
+finishedAt, rating, isFavorite, readingStatus, createdAt, updatedAt, quotes.
 
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
+`Quote`: id, content, page, chapter, note, createdAt, updatedAt, bookId → Book
+(`onDelete: Cascade`; deleting a book deletes its quotes).
 
-model Book {
-  id            String   @id @default(cuid())
-  title         String
-  author        String
-  publisher     String?
-  publishedDate String?
-  description   String?
-  isbn          String?
-  pageCount     Int?
-  language      String?
-  thumbnail     String?
-  googleBooksId String?  @unique
-  openLibraryId String?  @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  quotes        Quote[]
-}
-
-model Quote {
-  id        String   @id @default(cuid())
-  content   String
-  page      Int?
-  chapter   String?
-  note      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  bookId    String
-  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
-}
-```
-
-Key decisions:
-- `onDelete: Cascade` — deleting a book removes all its quotes automatically.
-- `binaryTargets` includes `linux-musl-openssl-3-0-x` for Alpine-based Docker images.
+`binaryTargets = ["native", "linux-musl-openssl-3.0.x"]` for Alpine Docker images.
 
 ---
 
 ## Environment Variables
 
 ```env
-# .env.example
-DATABASE_URL="file:./data/bookquotr.db"
-GOOGLE_BOOKS_API_KEY=""   # Optional — increases quota from 100 to 1000 req/day
+DATABASE_URL="file:./data/bookquotr.db"     # SQLite file (volume-mounted)
+GOOGLE_BOOKS_API_KEY=""                     # Optional — raises Google quota
+AUTH_USERNAME / AUTH_PASSWORD               # Required when auth is enabled
+AUTH_SECRET=""                              # Required when auth is enabled (>=32 chars)
+AUTH_ENABLED="true"                         # Defaults to true in production
+AUTH_SESSION_DAYS="30"                      # Optional session lifetime
+PUBLIC_RANDOM_QUOTES="false"                # Optional: public /api/quotes/random
 ```
 
-- `DATABASE_URL` must always point inside `./data/` so it maps to the Docker volume.
-- The search route must work without `GOOGLE_BOOKS_API_KEY`.
+- `DATABASE_URL` must point inside `./data/` so it maps to the Docker volume.
+- Search must work without `GOOGLE_BOOKS_API_KEY`.
+- Auth is enabled by default in production; set `AUTH_ENABLED=false` only for a
+  trusted, private deployment (a warning is logged).
 
 ---
 
@@ -162,36 +113,31 @@ GOOGLE_BOOKS_API_KEY=""   # Optional — increases quota from 100 to 1000 req/da
 
 ### shadcn/ui First (Critical)
 
-1. **shadcn/ui before custom markup** — always check `pnpm dlx shadcn@latest search` before writing a custom component.
-2. **Never edit `components/ui/`** — these are shadcn-managed files. Compose them, don't modify them.
-3. **Base UI primitives** — `components.json` must have `"base": "base"` (not `"radix"`). Use `render` prop pattern instead of `asChild`.
-4. **Semantic Tailwind tokens only** — use `bg-primary`, `text-muted-foreground`, etc. Never raw colors like `bg-blue-500`.
-5. **Tailwind v4 syntax** — use `@theme inline` blocks in the global CSS file. No `tailwind.config.js` or `tailwind.config.ts`.
-6. **`cn()` for conditional classes** — never manual template literal ternaries.
-7. **Overlays via `Dialog`** — use shadcn `Dialog` for all modals. Never custom modal wrappers.
-8. **Toasts via `sonner`** — `toast()` from `sonner`. Never custom toast markup.
-9. **Icon sizing** — use `data-icon` inside `Button`, never add `size-4` or `w-4 h-4` to icons inside components.
+1. **shadcn/ui before custom markup** — check the registry before writing markup.
+2. **Never edit `components/ui/`** — compose them, don't modify them.
+3. **Base UI primitives** — use the `render` prop pattern, not `asChild`.
+4. **Semantic Tailwind tokens only** — no raw palette colours like `bg-blue-500`.
+5. **Tailwind v4 syntax** — `@theme inline` in the global CSS; no `tailwind.config`.
+6. **`cn()` for conditional classes**.
+7. **Overlays via `Dialog`/`Sheet`**; toasts via `sonner`.
+8. **Icon sizing** — use `data-icon` inside `Button`, not `size-4`.
 
 ### General
 
-10. **TypeScript everywhere** — no `.js` files in `src/`. Strict mode on.
-11. **Server Components by default** — add `"use client"` only for event handlers / hooks.
-12. **API routes** return `NextResponse.json(...)` with appropriate HTTP status codes.
-13. **Error handling** — all API routes wrapped in `try/catch`; return `{ error: string }` on failure.
-14. **Prisma client** — singleton pattern in `lib/prisma.ts` to avoid dev connection pool exhaustion.
-15. **No `any`** — use proper types or `unknown` with type guards.
-16. **Imports** — use `@/` alias for `src/` (configured in `tsconfig.json`).
-17. **Form validation** — basic client-side required-field checks; server-side validates before DB write.
-18. **Loading states** — every async action shows shadcn `Skeleton` or a disabled `Button` + `Spinner` composite.
-19. **Optimistic UI** — for delete operations, remove from local state immediately, revert on error.
-20. **No page reloads** — all state managed client-side via `useState` / `useEffect` + `fetch`.
+9. **TypeScript everywhere** — no `.js` in `src/`; strict mode on.
+10. **Server Components by default** — add `"use client"` only when needed.
+11. **Route Handlers** return `NextResponse.json(...)` with proper status codes.
+12. **Error handling** — wrap handlers in `try/catch`, return `{ error: string }`.
+13. **Prisma client** — singleton in `lib/prisma.ts`.
+14. **Imports** — use the `@/` alias for `src/`.
+15. **Validate untrusted input server-side** with `lib/sanitize.ts` before DB writes.
+16. **Tests** — add `node:test` cases under `tests/` for security-critical logic.
 
 ---
 
-## Out of Scope (v1)
+## Out of Scope
 
-- Authentication / multi-user support
-- Cloud sync
-- Tags / categories for quotes
-- Reading progress tracking
-- Full-text search across quotes (may be added in v2 as SQLite FTS5)
+- Multi-user / registration / roles
+- Cloud sync or managed databases
+- Tags/categories, reading-progress tracking
+- Full-text search beyond the current `contains` queries

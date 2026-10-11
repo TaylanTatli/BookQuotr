@@ -24,28 +24,38 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { bookId, content, page, chapter, note } = body;
+    const { bookId, content, page, chapter, note } = body ?? {};
 
-    if (!bookId || !content) {
+    if (
+      typeof bookId !== "string" ||
+      !bookId ||
+      typeof content !== "string" ||
+      !content.trim()
+    ) {
       return NextResponse.json(
         { error: "bookId and content are required" },
         { status: 400 }
       );
     }
 
-    const segments = parseQuotes(content as string);
+    const segments = parseQuotes(content);
 
     if (segments.length === 0) {
       return NextResponse.json({ error: "No quote content provided" }, { status: 400 });
     }
 
+    const pageNumber =
+      page === null || page === undefined || page === "" || !Number.isFinite(Number(page))
+        ? null
+        : Math.trunc(Number(page));
+
     await prisma.quote.createMany({
       data: segments.map((seg) => ({
         bookId,
         content: seg,
-        page: page ?? null,
-        chapter: chapter ?? null,
-        note: note ?? null,
+        page: pageNumber,
+        chapter: typeof chapter === "string" ? chapter : null,
+        note: typeof note === "string" ? note : null,
       })),
     });
 

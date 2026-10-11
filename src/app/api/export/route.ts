@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { ExportPayload } from "@/types";
+import { sanitizeBookFields, sanitizeQuoteFields } from "@/lib/sanitize";
 import type { Prisma } from "@prisma/client";
 
 export async function GET() {
@@ -17,79 +17,96 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body: ExportPayload = await request.json();
+    const body = await request.json();
+    const rawBooks = Array.isArray((body as { books?: unknown })?.books)
+      ? (body as { books: unknown[] }).books
+      : null;
 
-    if (!body.books || !Array.isArray(body.books)) {
+    if (!rawBooks) {
       return NextResponse.json({ error: "Invalid import format" }, { status: 400 });
     }
 
     let importedBooks = 0;
     let importedQuotes = 0;
+    let skippedBooks = 0;
 
-    for (const book of body.books) {
-      const { quotes, ...bookData } = book;
+    for (const rawBook of rawBooks) {
+      const bookData = sanitizeBookFields(rawBook, { allowId: true });
+
+      if (typeof bookData.title !== "string" || typeof bookData.author !== "string") {
+        skippedBooks++;
+        continue;
+      }
+
+      // Match on a stable unique key when available, otherwise the exported id.
+      let whereClause: Prisma.BookWhereUniqueInput | null = null;
+      if (typeof bookData.googleBooksId === "string") {
+        whereClause = { googleBooksId: bookData.googleBooksId };
+      } else if (typeof bookData.openLibraryId === "string") {
+        whereClause = { openLibraryId: bookData.openLibraryId };
+      } else if (typeof bookData.id === "string") {
+        whereClause = { id: bookData.id };
+      }
+
+      if (!whereClause) {
+        skippedBooks++;
+        continue;
+      }
+
+      const createData = bookData as unknown as Prisma.BookUncheckedCreateInput;
+      const updateData: Record<string, unknown> = { ...bookData };
+      delete updateData.id;
+      delete updateData.createdAt;
 
       try {
-        // Determine where clause for upsert - prioritize unique IDs over book ID
-        let whereClause: Prisma.BookWhereUniqueInput;
-        
-        if (bookData.googleBooksId) {
-          whereClause = { googleBooksId: bookData.googleBooksId };
-        } else if (bookData.openLibraryId) {
-          whereClause = { openLibraryId: bookData.openLibraryId };
-        } else {
-          whereClause = { id: bookData.id };
-        }
-
-        // Sanitize book data - preserve all fields from export, let Prisma handle nulls
-        const sanitizedBookData = {
-          ...bookData,
-          // Ensure null values for optional fields that might be missing
-          googleBooksId: bookData.googleBooksId ?? null,
-          openLibraryId: bookData.openLibraryId ?? null,
-          isFavorite: typeof bookData.isFavorite === 'boolean' ? bookData.isFavorite : false,
-          startedAt: bookData.startedAt ?? null,
-          finishedAt: bookData.finishedAt ?? null,
-          rating: bookData.rating ?? null,
-        };
-
-        await prisma.book.upsert({
+        const saved = await prisma.book.upsert({
           where: whereClause,
-          update: sanitizedBookData,
-          create: sanitizedBookData,
+          update: updateData as Prisma.BookUpdateInput,
+          create: createData,
         });
         importedBooks++;
 
-        // Import quotes for this book
-        if (quotes && Array.isArray(quotes)) {
-          for (const quote of quotes) {
-            try {
+        const rawQuotes = Array.isArray((rawBook as { quotes?: unknown })?.quotes)
+          ? ((rawBook as { quotes: unknown[] }).quotes)
+          : [];
+
+        for (const rawQuote of rawQuotes) {
+          const quote = sanitizeQuoteFields(rawQuote);
+          if (!quote) continue;
+          try {
+            if (quote.id) {
               await prisma.quote.upsert({
                 where: { id: quote.id },
-                update: { 
+                update: {
                   content: quote.content,
-                  page: quote.page ?? null,
-                  chapter: quote.chapter ?? null,
-                  note: quote.note ?? null,
+                  page: quote.page,
+                  chapter: quote.chapter,
+                  note: quote.note,
                 },
-                create: { 
-                  ...quote, 
-                  bookId: bookData.id,
-                  page: quote.page ?? null,
-                  chapter: quote.chapter ?? null,
-                  note: quote.note ?? null,
+                // Fix: attach to the book that actually exists after upsert,
+                // not the id from the export file (which may differ).
+                create: { ...quote, bookId: saved.id },
+              });
+            } else {
+              await prisma.quote.create({
+                data: {
+                  content: quote.content,
+                  page: quote.page,
+                  chapter: quote.chapter,
+                  note: quote.note,
+                  bookId: saved.id,
                 },
               });
-              importedQuotes++;
-            } catch {
-              // Skip individual quotes that fail
-              continue;
             }
+            importedQuotes++;
+          } catch {
+            // Skip individual quotes that fail; keep the imported book.
+            continue;
           }
         }
       } catch (error) {
-        // Skip books that fail to import and continue with next book
-        console.error(`Failed to import book ${bookData.id}:`, error);
+        console.error("Failed to import book:", error);
+        skippedBooks++;
         continue;
       }
     }
@@ -98,6 +115,7 @@ export async function POST(request: Request) {
       success: true,
       importedBooks,
       importedQuotes,
+      skippedBooks,
     });
   } catch (error) {
     console.error("Import error:", error);

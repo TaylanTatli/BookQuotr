@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Plus, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookDetail } from "@/components/books/BookDetail";

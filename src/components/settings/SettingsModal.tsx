@@ -478,6 +478,21 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
               </AlertDialog>
             </FieldContent>
           </Field>
+
+          <Separator />
+
+          {/* About / attribution */}
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{t("settings.madeBy")}</span>
+            <a
+              href="https://github.com/TaylanTatli/BookQuotr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              {t("settings.sourceCode")}
+            </a>
+          </div>
         </FieldGroup>
       </DialogContent>
     </Dialog>

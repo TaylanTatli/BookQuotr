@@ -224,8 +224,9 @@ export default function HomePage() {
           minSize="20%"
           defaultSize={`${sidebarSize}%`}
           maxSize="40%"
-          onResize={(size: any) => {
-            const newSize = typeof size === "number" ? size : size.asPercentage
+          onResize={(size: number | { asPercentage?: number }) => {
+            const newSize =
+              typeof size === "number" ? size : size.asPercentage
             if (newSize) {
               setSidebarSize(newSize)
               window.localStorage.setItem("bq_sidebar_width", String(newSize))

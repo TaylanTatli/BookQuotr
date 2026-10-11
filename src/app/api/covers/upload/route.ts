@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { saveUploadedCover } from "@/lib/coverCache";
+import { isSafeCoverId, sniffImageType } from "@/lib/security";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 export async function POST(request: Request) {
   try {
@@ -17,11 +17,8 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Only JPEG, PNG, WebP, and GIF images are allowed" },
-        { status: 400 }
-      );
+    if (!isSafeCoverId(bookId)) {
+      return NextResponse.json({ error: "Invalid bookId" }, { status: 400 });
     }
 
     if (file.size > MAX_SIZE) {
@@ -32,6 +29,22 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    if (buffer.length > MAX_SIZE) {
+      return NextResponse.json(
+        { error: "File size must be under 5 MB" },
+        { status: 400 }
+      );
+    }
+
+    // Trust the bytes, not the client-supplied content type.
+    if (!sniffImageType(buffer)) {
+      return NextResponse.json(
+        { error: "Only valid JPEG, PNG, WebP, and GIF images are allowed" },
+        { status: 400 }
+      );
+    }
+
     const path = await saveUploadedCover(bookId, buffer);
 
     return NextResponse.json({ path });

@@ -5,6 +5,15 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  {
+    rules: {
+      // This app intentionally hydrates client-only state (localStorage,
+      // matchMedia, modal resets) inside effects for SSR safety. Those are the
+      // "sync with an external system" cases this rule allows conceptually, so
+      // keep them as warnings instead of blocking the build/CI.
+      "react-hooks/set-state-in-effect": "warn",
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

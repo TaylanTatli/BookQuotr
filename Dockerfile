@@ -10,7 +10,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Generate Prisma client (with Alpine target)
-RUN npx prisma generate
+RUN pnpm exec prisma generate
 
 # Build Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -48,5 +48,8 @@ USER node
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+  CMD wget -qO- -Y off http://127.0.0.1:3000/api/health || exit 1
 
 ENTRYPOINT ["./entrypoint.sh"]

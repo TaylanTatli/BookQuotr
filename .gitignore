@@ -43,3 +43,6 @@ pnpm-debug.log*
 next-env.d.ts
 
 /generated/prisma
+
+# editor / tooling artifacts
+.openchamber/

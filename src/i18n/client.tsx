@@ -37,10 +37,10 @@ export function useTranslation() {
     if (!key || typeof key !== "string") return "";
     
     const keys = key.split(".");
-    let value: any = context.dictionary;
+    let value: unknown = context.dictionary;
     for (const k of keys) {
       if (value && typeof value === "object") {
-        value = value[k];
+        value = (value as Record<string, unknown>)[k];
       } else {
         return key;
       }

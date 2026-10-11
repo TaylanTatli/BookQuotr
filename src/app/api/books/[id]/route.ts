@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { deleteCover, downloadAndSaveCover } from "@/lib/coverCache";
+import { deleteCover } from "@/lib/coverCache";
+import { sanitizeBookFields } from "@/lib/sanitize";
+import type { Prisma } from "@prisma/client";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -25,20 +27,27 @@ export async function PATCH(request: Request, { params }: Params) {
   try {
     const { id } = await params;
     const body = await request.json();
+    const fields = sanitizeBookFields(body);
 
     // If thumbnail is being updated, invalidate the local cover cache
-    if ('thumbnail' in body) {
-       const existingBook = await prisma.book.findUnique({ where: { id }});
-       if (existingBook && existingBook.thumbnail !== body.thumbnail) {
-          // Do not delete if the new thumbnail is the local API route for this specific book,
-          // because it means the user JUST uploaded a file that overwrote it!
-          if (!body.thumbnail || !body.thumbnail.startsWith(`/api/covers/${id}`)) {
-            await deleteCover(id);
-          }
-       }
+    if ("thumbnail" in fields) {
+      const existingBook = await prisma.book.findUnique({ where: { id } });
+      if (existingBook && existingBook.thumbnail !== fields.thumbnail) {
+        // Do not delete if the new thumbnail is the local API route for this specific book,
+        // because it means the user JUST uploaded a file that overwrote it!
+        if (
+          !fields.thumbnail ||
+          !String(fields.thumbnail).startsWith(`/api/covers/${id}`)
+        ) {
+          await deleteCover(id);
+        }
+      }
     }
 
-    const book = await prisma.book.update({ where: { id }, data: body });
+    const book = await prisma.book.update({
+      where: { id },
+      data: fields as Prisma.BookUpdateInput,
+    });
     return NextResponse.json({ book });
   } catch (err) {
     console.error("[PATCH] error:", err);
