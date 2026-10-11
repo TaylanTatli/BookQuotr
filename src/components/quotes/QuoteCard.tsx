@@ -139,13 +139,13 @@ export function QuoteCard({
       {/* Action buttons — absolute positioned, no layout impact.
           Mobile: always visible in the pb-12 bottom padding space.
           Desktop: invisible, fade in on hover. */}
-      <ButtonGroup className="absolute bottom-3 right-3 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 backdrop-blur-xs">
+      <ButtonGroup className="absolute bottom-3 right-3 opacity-100 md:opacity-0 md:group-hover:opacity-100">
         {/* Export as image */}
         <QuoteExportModal quote={quote} book={book}>
           <Button
             variant="outline"
             size="icon-sm"
-            className="cursor-pointer"
+            className="cursor-pointer backdrop-blur-xs"
             onClick={(e) => e.stopPropagation()}
           >
             <ImageDown />
@@ -156,7 +156,7 @@ export function QuoteCard({
         <Button
           variant="outline"
           size="icon-sm"
-          className="cursor-pointer"
+          className="cursor-pointer backdrop-blur-xs"
           onClick={handleCopy}
         >
           {copied ? (
@@ -175,7 +175,7 @@ export function QuoteCard({
           <Button
             variant="outline"
             size="icon-sm"
-            className="cursor-pointer"
+            className="cursor-pointer backdrop-blur-xs"
             onClick={(e) => e.stopPropagation()}
           >
             <Pencil />
@@ -189,7 +189,7 @@ export function QuoteCard({
               <Button
                 variant="outline"
                 size="icon-sm"
-                className="cursor-pointer text-destructive hover:text-destructive"
+                className="cursor-pointer text-destructive hover:text-destructive backdrop-blur-xs"
                 onClick={(e) => e.stopPropagation()}
               />
             }

@@ -164,12 +164,32 @@ export function QuoteExportModal({
       ? Math.max(400, parseInt(customHeight) || 1080)
       : baseRatio.height
 
-  // Responsive preview bounds
-  const maxPreviewW = isMobile ? 260 : 600
-  const maxPreviewH = isMobile ? 220 : 680
-  const scaleByW = maxPreviewW / exportWidth
-  const scaleByH = maxPreviewH / exportHeight
-  const previewScale = Math.min(scaleByW, scaleByH)
+  // Responsive preview: fit the image into the actual available preview area
+  // (measured from the layout with ResizeObserver) instead of fixed assumptions.
+  // A callback ref attaches the observer exactly when the (portalled) node mounts.
+  const [previewArea, setPreviewArea] = useState({ width: 0, height: 0 })
+  const previewObserverRef = useRef<ResizeObserver | null>(null)
+  const previewAreaRef = useCallback((node: HTMLDivElement | null) => {
+    previewObserverRef.current?.disconnect()
+    previewObserverRef.current = null
+    if (!node) return
+    const update = () => {
+      const rect = node.getBoundingClientRect()
+      setPreviewArea({ width: rect.width, height: rect.height })
+    }
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(node)
+    previewObserverRef.current = observer
+  }, [])
+
+  const previewScale =
+    previewArea.width > 0 && previewArea.height > 0
+      ? Math.min(
+          previewArea.width / exportWidth,
+          previewArea.height / exportHeight
+        )
+      : 0
   const previewW = Math.round(exportWidth * previewScale)
   const previewH = Math.round(exportHeight * previewScale)
 
@@ -494,8 +514,8 @@ export function QuoteExportModal({
         <DialogContent
           className="flex flex-col gap-0 overflow-hidden p-0"
           style={{
-            width: "min(calc(100vw - 1rem), 960px)",
-            maxWidth: "min(calc(100vw - 1rem), 960px)",
+            width: "min(calc(100vw - 1.5rem), 60rem)",
+            maxWidth: "min(calc(100vw - 1.5rem), 60rem)",
             maxHeight: "92dvh",
           }}
         >
@@ -506,9 +526,14 @@ export function QuoteExportModal({
           {/* ── Mobile layout: preview top, settings below ── */}
           {isMobile ? (
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-t border-b">
-              {/* Preview strip */}
-              <div className="flex shrink-0 items-center justify-center border-b bg-muted/20 px-4 py-5">
-                {previewBox}
+              {/* Preview strip (fixed height so it can be measured and fitted) */}
+              <div className="flex h-[38dvh] shrink-0 items-center justify-center border-b bg-muted/20 p-4">
+                <div
+                  ref={previewAreaRef}
+                  className="flex h-full w-full min-h-0 min-w-0 items-center justify-center overflow-hidden"
+                >
+                  {previewBox}
+                </div>
               </div>
               {/* Settings scroll */}
               <div className="flex flex-1 flex-col gap-5 overflow-y-auto p-5">
@@ -518,13 +543,18 @@ export function QuoteExportModal({
           ) : (
             /* ── Desktop layout: settings left, preview right ── */
             <div className="flex min-h-0 flex-1 overflow-hidden border-t border-b">
-              {/* Settings panel */}
-              <div className="flex w-72 shrink-0 flex-col gap-5 overflow-y-auto border-r p-6">
+              {/* Settings panel — capped so it shrinks on narrow dialogs / large fonts */}
+              <div className="flex w-72 max-w-[45%] shrink-0 flex-col gap-5 overflow-y-auto border-r p-6">
                 {settingsContent}
               </div>
               {/* Preview panel */}
-              <div className="flex flex-1 items-center justify-center overflow-auto bg-muted/20 p-6">
-                {previewBox}
+              <div className="flex min-w-0 flex-1 items-center justify-center bg-muted/20 p-6">
+                <div
+                  ref={previewAreaRef}
+                  className="flex h-full w-full min-h-0 min-w-0 items-center justify-center overflow-hidden"
+                >
+                  {previewBox}
+                </div>
               </div>
             </div>
           )}
