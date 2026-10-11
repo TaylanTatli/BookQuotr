@@ -83,4 +83,6 @@ Your application will be available at `http://localhost:3000`. The database file
 
 
 
-This project is open-source and available under the [MIT License](LICENSE).
+BookQuotr is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0-only)](LICENSE).
+
+Copyright (c) 2026 Taylan Tatlı. If you modify BookQuotr and make that version available to users over a network, AGPLv3 requires you to offer those users access to the corresponding source code. Previously distributed copies remain subject to the terms under which they were originally provided.
