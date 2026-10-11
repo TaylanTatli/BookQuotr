@@ -8,7 +8,7 @@ accounts, no cloud, no telemetry. Run it with Docker Compose in a couple of
 minutes.
 
 <p align="center">
-  <img src="docs/screenshots/dashboard.jpg" alt="BookQuotr dashboard showing a book list and its quotes" width="900">
+  <img src="docs/screenshots/dashboard.png" alt="BookQuotr dashboard showing a book list and its quotes" width="900">
 </p>
 
 ---
@@ -33,8 +33,8 @@ minutes.
   an SSRF-hardened cover pipeline.
 
 <p align="center">
-  <img src="docs/screenshots/export-as-image.jpg" alt="Exporting a quote as an image" width="470">
-  <img src="docs/screenshots/mobile.jpg" alt="BookQuotr on a mobile screen" width="240">
+  <img src="docs/screenshots/export-as-image.png" alt="Exporting a quote as an image" width="470">
+  <img src="docs/screenshots/mobile.png" alt="BookQuotr on a mobile screen" width="240">
 </p>
 
 ---
@@ -90,7 +90,7 @@ docker compose up -d --build
 ```
 
 The published image is `ghcr.io/taylantatli/bookquotr:latest`. Pinned versions
-are also published, e.g. `ghcr.io/taylantatli/bookquotr:0.1.4`.
+are also published, e.g. `ghcr.io/taylantatli/bookquotr:0.2.0`.
 
 ---
 
@@ -185,12 +185,64 @@ docker compose pull
 docker compose up -d
 ```
 
-Migrations run on startup and are additive. To pin a version instead of always
-using `latest`, set the image tag in `docker-compose.yml`, e.g.
-`ghcr.io/taylantatli/bookquotr:0.1.4`.
+Migrations run on startup. To pin a version instead of always using `latest`,
+set the image tag in `docker-compose.yml`, e.g.
+`ghcr.io/taylantatli/bookquotr:0.2.0`.
 
-**Before a major update,** take a backup of `./data` (above). It is always safe
-to roll back by restoring the folder and running an older image tag.
+**Before any update,** take a backup of `./data` (above). It is always safe to
+roll back by restoring the folder and running an older image tag.
+
+### Upgrading to 0.2.0
+
+Version 0.2.0 consolidates the pre-release migrations into a single initial
+migration (`0_init`) and changes how authentication is configured. Existing
+installations need a one-time step so Prisma does not try to recreate tables
+that already exist.
+
+1. **Back up your data** (recommended before every update):
+
+   ```bash
+   docker compose stop
+   tar czf bookquotr-backup-$(date +%F).tar.gz data
+   ```
+
+2. **Pull the new image and baseline the squashed migration.** This records
+   `0_init` as already applied *without* running it against your existing tables:
+
+   ```bash
+   docker compose pull
+   docker compose run --rm --entrypoint prisma bookquotr migrate resolve --applied 0_init
+   ```
+
+   Running the image directly instead of Compose:
+
+   ```bash
+   docker run --rm -v "$PWD/data:/app/data" \
+     -e DATABASE_URL=file:/app/data/bookquotr.db \
+     --entrypoint prisma ghcr.io/taylantatli/bookquotr:0.2.0 \
+     migrate resolve --applied 0_init
+   ```
+
+3. **Start the new version:**
+
+   ```bash
+   docker compose up -d
+   ```
+
+**Authentication changes in 0.2.0.** Authentication is now enabled by default in
+production and uses a dedicated `AUTH_SECRET` — it is no longer derived from the
+password, and there are no default credentials. After upgrading, set either:
+
+- `AUTH_USERNAME`, `AUTH_PASSWORD` and `AUTH_SECRET` (generate the secret with
+  `openssl rand -base64 32`) to enable the login screen, **or**
+- `AUTH_ENABLED=false` to keep running without authentication on a trusted,
+  private network.
+
+Until one of these is set, the container starts but returns `503` for requests;
+the reason is logged at startup.
+
+Fresh installations need none of these extra steps — the initial migration runs
+automatically on first start.
 
 ---
 

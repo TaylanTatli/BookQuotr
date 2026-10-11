@@ -1,9 +1,8 @@
--- RedefineTables
-PRAGMA defer_foreign_keys=ON;
-PRAGMA foreign_keys=OFF;
-CREATE TABLE "new_Book" (
+-- CreateTable
+CREATE TABLE "Book" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "title" TEXT NOT NULL,
+    "subtitle" TEXT,
     "author" TEXT NOT NULL,
     "publisher" TEXT,
     "publishedDate" TEXT,
@@ -18,13 +17,27 @@ CREATE TABLE "new_Book" (
     "finishedAt" DATETIME,
     "rating" INTEGER,
     "isFavorite" BOOLEAN NOT NULL DEFAULT false,
+    "readingStatus" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
-INSERT INTO "new_Book" ("author", "createdAt", "description", "googleBooksId", "id", "isbn", "language", "openLibraryId", "pageCount", "publishedDate", "publisher", "thumbnail", "title", "updatedAt") SELECT "author", "createdAt", "description", "googleBooksId", "id", "isbn", "language", "openLibraryId", "pageCount", "publishedDate", "publisher", "thumbnail", "title", "updatedAt" FROM "Book";
-DROP TABLE "Book";
-ALTER TABLE "new_Book" RENAME TO "Book";
+
+-- CreateTable
+CREATE TABLE "Quote" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "content" TEXT NOT NULL,
+    "page" INTEGER,
+    "chapter" TEXT,
+    "note" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    "bookId" TEXT NOT NULL,
+    CONSTRAINT "Quote_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Book_googleBooksId_key" ON "Book"("googleBooksId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Book_openLibraryId_key" ON "Book"("openLibraryId");
-PRAGMA foreign_keys=ON;
-PRAGMA defer_foreign_keys=OFF;
+

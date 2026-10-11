@@ -139,7 +139,7 @@ export function QuoteCard({
       {/* Action buttons — absolute positioned, no layout impact.
           Mobile: always visible in the pb-12 bottom padding space.
           Desktop: invisible, fade in on hover. */}
-      <ButtonGroup className="absolute bottom-3 right-3 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+      <ButtonGroup className="absolute bottom-3 right-3 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 backdrop-blur-xs">
         {/* Export as image */}
         <QuoteExportModal quote={quote} book={book}>
           <Button

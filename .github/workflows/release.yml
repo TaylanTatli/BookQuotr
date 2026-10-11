@@ -1,57 +1,42 @@
 name: Release & Docker Image
 
+# Runs after CI finishes on master. Ordinary pushes run CI only; a Docker image
+# is published only when the version in package.json has no matching tag yet,
+# i.e. when a new version is actually being released.
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
     branches:
       - master
 
-# Default to read-only; the release job opts into write scopes it needs.
 permissions:
   contents: read
 
+concurrency:
+  group: release-master
+  cancel-in-progress: false
+
 jobs:
   release:
-    name: Validate, Create Release and Publish Docker Image
+    name: Publish release and Docker image
     runs-on: ubuntu-latest
+    # Never publish unless the triggering CI run succeeded for a master push.
+    if: >
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.conclusion == 'success'
     permissions:
       contents: write
       packages: write
 
     steps:
-      - name: Checkout repository
+      # Check out the exact commit CI validated, so the tag and image match it.
+      - name: Checkout the validated commit
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
-      # --- Validation: a failing check blocks the release below ---
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate Prisma Client
-        run: pnpm exec prisma generate
-
-      - name: Type check
-        run: pnpm typecheck
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Tests
-        run: pnpm test
-
-      - name: Production build
-        run: pnpm build
-
-      # --- Release ---
       - name: Get version from package.json
         id: get_version
         run: |
@@ -62,13 +47,48 @@ jobs:
       - name: Check if tag exists
         id: check_tag
         run: |
-          if git rev-parse ${{ steps.get_version.outputs.tag }} >/dev/null 2>&1; then
-            echo "Tag exists"
+          if git rev-parse "${{ steps.get_version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "Tag ${{ steps.get_version.outputs.tag }} already exists — nothing to release."
             echo "exists=true" >> $GITHUB_OUTPUT
           else
-            echo "Tag does not exist"
+            echo "Tag does not exist — proceeding with release."
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
+
+      # Build and push the image BEFORE creating the release: a failed Docker
+      # build must not leave a successful GitHub Release behind.
+      - name: Log in to the Container registry
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        if: steps.check_tag.outputs.exists == 'false'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ steps.get_version.outputs.version }}
+
+      - name: Set up Docker Buildx
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Generate Changelog
         if: steps.check_tag.outputs.exists == 'false'
@@ -111,37 +131,5 @@ jobs:
         with:
           tag_name: ${{ steps.get_version.outputs.tag }}
           name: Release ${{ steps.get_version.outputs.tag }}
+          target_commitish: ${{ github.event.workflow_run.head_sha }}
           body: ${{ steps.changelog.outputs.notes }}
-
-      - name: Log in to the Container registry
-        if: steps.check_tag.outputs.exists == 'false'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        if: steps.check_tag.outputs.exists == 'false'
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=raw,value=latest
-            type=raw,value=${{ steps.get_version.outputs.version }}
-
-      - name: Set up Docker Buildx
-        if: steps.check_tag.outputs.exists == 'false'
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push Docker image
-        if: steps.check_tag.outputs.exists == 'false'
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
