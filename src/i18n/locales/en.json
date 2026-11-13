@@ -22,7 +22,10 @@
     "fontModeFixed": "Fixed",
     "fontModeResponsive": "Responsive (clamp)",
     "madeBy": "Created by Taylan Tatlı",
-    "sourceCode": "Source code"
+    "sourceCode": "Source code",
+    "markdownExport": "Markdown Export",
+    "markdownExportDesc": "Export all books and quotes as a Markdown file.",
+    "exportMarkdown": "Export Markdown"
   },
   "login": {
     "title": "BookQuotr",
@@ -175,5 +178,24 @@
     "books": "Books",
     "quotes": "Quotes",
     "buttonLabel": "Search"
+  },
+  "markdownExport": {
+    "title": "Export Markdown",
+    "exportBook": "Export book as Markdown",
+    "mode": "Quote Format",
+    "modeStandard": "Standard Markdown",
+    "modeWrapper": "Custom Wrapper",
+    "prefix": "Prefix",
+    "suffix": "Suffix",
+    "preview": "Preview",
+    "previewSample": "A quote, formatted exactly as it will appear in the file.",
+    "download": "Download .md",
+    "empty": "There are no quotes to export",
+    "loadError": "Failed to load quotes",
+    "success": "Markdown downloaded",
+    "error": "Export failed",
+    "copy": "Copy Markdown",
+    "copySuccess": "Markdown copied to clipboard",
+    "copyError": "Failed to copy Markdown"
   }
 }

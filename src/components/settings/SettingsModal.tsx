@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Download, Upload, Loader2, Trash2 } from "lucide-react";
+import { Download, Upload, Loader2, Trash2, FileDown } from "lucide-react";
 import type { QuoteViewMode } from "@/components/quotes/QuoteViewOptions";
 import { toast } from "sonner";
 import {
@@ -43,6 +43,9 @@ import {
   SelectTrigger
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { MarkdownExportModal } from "@/components/quotes/MarkdownExportModal";
+import { libraryMarkdownFilename } from "@/lib/markdownExport";
+import type { BookWithQuotes } from "@/types";
 
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/i18n/client";
@@ -90,6 +93,7 @@ const VIEW_MODE_OPTIONS: { value: QuoteViewMode; labelKey: string }[] = [
 
 export function SettingsModal({ children, onImportSuccess }: SettingsModalProps) {
   const [open, setOpen] = useState(false);
+  const [markdownOpen, setMarkdownOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
@@ -207,6 +211,17 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
     } finally {
       setExporting(false);
     }
+  }
+
+  async function fetchMarkdownBooks() {
+    const res = await fetch("/api/export");
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    return ((data.books ?? []) as BookWithQuotes[]).map((b) => ({
+      title: b.title,
+      author: b.author,
+      quotes: b.quotes,
+    }));
   }
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -434,6 +449,33 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
 
           <Separator />
 
+          {/* Markdown export */}
+          <Field>
+            <div className="flex flex-col gap-1">
+              <FieldLabel>{t("settings.markdownExport")}</FieldLabel>
+              <FieldDescription>
+                {t("settings.markdownExportDesc")}
+              </FieldDescription>
+            </div>
+            <FieldContent>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-fit"
+                onClick={() => {
+                  // Close settings first so the export dialog is never nested.
+                  setOpen(false);
+                  setMarkdownOpen(true);
+                }}
+              >
+                <FileDown data-icon="inline-start" />
+                {t("settings.exportMarkdown")}
+              </Button>
+            </FieldContent>
+          </Field>
+
+          <Separator />
+
           {/* Danger zone */}
           <Field>
             <div className="flex flex-col gap-1">
@@ -495,6 +537,13 @@ export function SettingsModal({ children, onImportSuccess }: SettingsModalProps)
           </div>
         </FieldGroup>
       </DialogContent>
+
+      <MarkdownExportModal
+        open={markdownOpen}
+        onOpenChange={setMarkdownOpen}
+        loadBooks={fetchMarkdownBooks}
+        getFilename={() => libraryMarkdownFilename()}
+      />
     </Dialog>
   );
 }

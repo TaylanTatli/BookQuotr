@@ -22,7 +22,10 @@
     "fontModeFixed": "Sabit",
     "fontModeResponsive": "Dinamik (clamp)",
     "madeBy": "Taylan Tatlı tarafından geliştirildi",
-    "sourceCode": "Kaynak kodu"
+    "sourceCode": "Kaynak kodu",
+    "markdownExport": "Markdown Dışa Aktarma",
+    "markdownExportDesc": "Tüm kitapları ve alıntıları Markdown dosyası olarak dışa aktar.",
+    "exportMarkdown": "Markdown Olarak Dışa Aktar"
   },
   "login": {
     "title": "BookQuotr",
@@ -175,5 +178,24 @@
     "books": "Kitaplar",
     "quotes": "Alıntılar",
     "buttonLabel": "Ara"
+  },
+  "markdownExport": {
+    "title": "Markdown Olarak Dışa Aktar",
+    "exportBook": "Kitabı Markdown olarak dışa aktar",
+    "mode": "Alıntı Biçimi",
+    "modeStandard": "Standart Markdown",
+    "modeWrapper": "Özel Sarmalayıcı",
+    "prefix": "Önek",
+    "suffix": "Sonek",
+    "preview": "Önizleme",
+    "previewSample": "Dosyada görüneceği biçimde bir alıntı.",
+    "download": ".md indir",
+    "empty": "Dışa aktarılacak alıntı yok",
+    "loadError": "Alıntılar yüklenemedi",
+    "success": "Markdown indirildi",
+    "error": "Dışa aktarma başarısız",
+    "copy": "Markdown'ı Kopyala",
+    "copySuccess": "Markdown panoya kopyalandı",
+    "copyError": "Markdown kopyalanamadı"
   }
 }

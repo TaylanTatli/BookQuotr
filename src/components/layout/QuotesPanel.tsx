@@ -1,15 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, BookOpen } from "lucide-react";
+import { Plus, BookOpen, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { BookDetail } from "@/components/books/BookDetail";
 import { QuoteList } from "@/components/quotes/QuoteList";
 import { AddQuoteModal } from "@/components/quotes/AddQuoteModal";
+import { MarkdownExportModal } from "@/components/quotes/MarkdownExportModal";
 import { QuoteViewOptions, type QuoteViewMode } from "@/components/quotes/QuoteViewOptions";
 import { useTranslation } from "@/i18n/client";
+import { markdownFilename } from "@/lib/markdownExport";
 import type { BookWithQuotes, Quote } from "@/types";
 
 const VIEW_MODE_KEY = "bq_quote_view_mode";
@@ -39,6 +46,7 @@ export function QuotesPanel({
 }: QuotesPanelProps) {
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<QuoteViewMode>("default");
+  const [exportOpen, setExportOpen] = useState(false);
 
   // Persist view mode and sync with localStorage changes
   useEffect(() => {
@@ -95,8 +103,37 @@ export function QuotesPanel({
           {`${quotes.length} ${quotes.length === 1 ? t("books.quoteCount") : t("books.quotesCount")}`}
         </p>
 
-        <QuoteViewOptions value={viewMode} onChange={handleViewModeChange} />
+        <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7"
+                  onClick={() => setExportOpen(true)}
+                  aria-label={t("markdownExport.exportBook")}
+                />
+              }
+            >
+              <FileDown className="size-4" />
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              {t("markdownExport.exportBook")}
+            </TooltipContent>
+          </Tooltip>
+          <QuoteViewOptions value={viewMode} onChange={handleViewModeChange} />
+        </div>
       </div>
+
+      <MarkdownExportModal
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        loadBooks={async () => [
+          { title: book.title, author: book.author, quotes },
+        ]}
+        getFilename={() => markdownFilename(book.title)}
+      />
 
       {/* Quotes list */}
       <div className="flex-1 overflow-y-auto px-6 pb-4">
