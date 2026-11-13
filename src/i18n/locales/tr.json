@@ -196,6 +196,10 @@
     "error": "Dışa aktarma başarısız",
     "copy": "Markdown'ı Kopyala",
     "copySuccess": "Markdown panoya kopyalandı",
-    "copyError": "Markdown kopyalanamadı"
+    "copyError": "Markdown kopyalanamadı",
+    "separator": "Alıntılar arasında ayırıcı (---)",
+    "blankLine": "Alıntılar arasında boş satır",
+    "quotesOnly": "Yalnızca alıntılar (başlık ve bilgi yok)",
+    "previewTitleSample": "Kitap adı"
   }
 }

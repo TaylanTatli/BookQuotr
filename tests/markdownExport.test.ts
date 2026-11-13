@@ -210,6 +210,186 @@ test("private notes are never exported", () => {
   assert.ok(!markdown.includes("private note"));
 });
 
+test("quote separation defaults to a separator with blank lines", () => {
+  const markdown = buildMarkdown(
+    [{ title: "T", author: "A", quotes: [{ content: "one" }, { content: "two" }] }],
+    standard
+  );
+  assert.ok(markdown.includes("> one\n\n---\n\n> two"));
+});
+
+test("the quote separator can be disabled while blank lines stay", () => {
+  const markdown = buildMarkdown(
+    [{ title: "T", author: "A", quotes: [{ content: "one" }, { content: "two" }] }],
+    { ...standard, separator: false }
+  );
+  assert.ok(markdown.includes("> one\n\n> two"));
+  assert.ok(!markdown.includes("---"));
+});
+
+test("blank lines can be disabled while the separator stays", () => {
+  const markdown = buildMarkdown(
+    [{ title: "T", author: "A", quotes: [{ content: "one" }, { content: "two" }] }],
+    { ...standard, blankLine: false }
+  );
+  assert.ok(markdown.includes("> one\n---\n> two"));
+});
+
+test("both options off puts consecutive quotes on adjacent lines", () => {
+  const markdown = buildMarkdown(
+    [
+      {
+        title: "T",
+        author: "A",
+        quotes: [
+          { content: "First quote." },
+          { content: "Second quote." },
+          { content: "Third quote." },
+        ],
+      },
+    ],
+    { ...wrapper, separator: false, blankLine: false }
+  );
+  assert.ok(
+    markdown.includes(
+      [
+        "<Bookquote>First quote.</Bookquote>",
+        "<Bookquote>Second quote.</Bookquote>",
+        "<Bookquote>Third quote.</Bookquote>",
+      ].join("\n")
+    )
+  );
+  assert.ok(!markdown.includes("---"));
+});
+
+test("quote separation settings never collapse book separation", () => {
+  const markdown = buildMarkdown(
+    [
+      { title: "One", author: "A", quotes: [{ content: "first" }] },
+      { title: "Two", author: "B", quotes: [{ content: "second" }] },
+    ],
+    { ...wrapper, separator: false, blankLine: false }
+  );
+  assert.ok(markdown.includes("</Bookquote>\n\n---\n\n# Two"));
+});
+
+test("line breaks inside a quote survive the compactest separation", () => {
+  const markdown = buildMarkdown(
+    [
+      {
+        title: "T",
+        author: "A",
+        quotes: [{ content: "line one\nline two" }, { content: "next" }],
+      },
+    ],
+    { ...wrapper, separator: false, blankLine: false }
+  );
+  assert.ok(
+    markdown.includes(
+      "<Bookquote>\nline one\nline two\n</Bookquote>\n<Bookquote>next</Bookquote>"
+    )
+  );
+});
+
+test("quotes only + wrappers emits exactly the quote lines", () => {
+  const markdown = buildMarkdown(
+    [
+      {
+        title: "Hidden",
+        author: "Hidden",
+        quotes: [
+          { content: "First quote." },
+          { content: "Second quote." },
+          { content: "Third quote." },
+        ],
+      },
+    ],
+    { ...wrapper, quotesOnly: true, separator: false, blankLine: false }
+  );
+  assert.equal(
+    markdown,
+    [
+      "<Bookquote>First quote.</Bookquote>",
+      "<Bookquote>Second quote.</Bookquote>",
+      "<Bookquote>Third quote.</Bookquote>",
+      "",
+    ].join("\n")
+  );
+});
+
+test("quotes only excludes titles, authors and all metadata", () => {
+  const quotes: (MarkdownQuote & { note: string })[] = [
+    {
+      content: "just the quote",
+      chapter: "Chapter 1",
+      page: 12,
+      note: "private note",
+    },
+  ];
+  const markdown = buildMarkdown(
+    [{ title: "A Title", author: "An Author", quotes }],
+    { ...standard, quotesOnly: true }
+  );
+  assert.equal(markdown, "> just the quote\n");
+  for (const excluded of ["A Title", "An Author", "Chapter 1", "Page", "private note", "#"]) {
+    assert.ok(!markdown.includes(excluded), `should omit ${excluded}`);
+  }
+});
+
+test("quotes only still honours the separator preferences", () => {
+  const books = [
+    { title: "T", author: "A", quotes: [{ content: "one" }, { content: "two" }] },
+  ];
+  assert.ok(
+    buildMarkdown(books, { ...standard, quotesOnly: true }).includes(
+      "> one\n\n---\n\n> two"
+    )
+  );
+  assert.ok(
+    buildMarkdown(books, { ...standard, quotesOnly: true, separator: false }).includes(
+      "> one\n\n> two"
+    )
+  );
+});
+
+test("quotes only preserves multiline quote content", () => {
+  const markdown = buildMarkdown(
+    [
+      {
+        title: "T",
+        author: "A",
+        quotes: [{ content: "line one\nline two" }, { content: "next" }],
+      },
+    ],
+    { ...wrapper, quotesOnly: true, separator: false, blankLine: false }
+  );
+  assert.equal(
+    markdown,
+    "<Bookquote>\nline one\nline two\n</Bookquote>\n<Bookquote>next</Bookquote>\n"
+  );
+});
+
+test("quotes only disabled keeps the existing document structure", () => {
+  const markdown = buildMarkdown(
+    [{ title: "A Title", author: "An Author", quotes: [{ content: "q", page: 3 }] }],
+    { ...standard, quotesOnly: false }
+  );
+  assert.equal(markdown, "# A Title\n\n**Author:** An Author\n\n> q\n\n*Page 3*\n");
+});
+
+test("full-library exports keep headings and book separators", () => {
+  const markdown = buildMarkdown(
+    [
+      { title: "One", author: "A", quotes: [{ content: "first" }] },
+      { title: "Two", author: "B", quotes: [{ content: "second" }] },
+    ],
+    { ...standard, quotesOnly: false }
+  );
+  assert.match(markdown, /^# One$/m);
+  assert.match(markdown, /^# Two$/m);
+  assert.ok(markdown.includes("> first\n\n---\n\n# Two"));
+});
+
 test("a selection without non-empty quotes produces no document", () => {
   assert.equal(buildMarkdown([], standard), "");
   assert.equal(

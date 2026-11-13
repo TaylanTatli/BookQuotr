@@ -13,11 +13,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/client"
 import {
   buildMarkdown,
-  formatQuote,
+  DEFAULT_MARKDOWN_CONFIG,
   type MarkdownBook,
   type MarkdownExportConfig,
   type MarkdownExportMode,
@@ -26,6 +27,17 @@ import {
 const MODE_KEY = "bq_markdown_export_mode"
 const PREFIX_KEY = "bq_markdown_export_prefix"
 const SUFFIX_KEY = "bq_markdown_export_suffix"
+const SEPARATOR_KEY = "bq_markdown_export_separator"
+const BLANK_LINE_KEY = "bq_markdown_export_blank_line"
+const QUOTES_ONLY_KEY = "bq_markdown_export_quotes_only"
+
+function readToggle(key: string): boolean {
+  try {
+    return localStorage.getItem(key) !== "false"
+  } catch {
+    return true
+  }
+}
 
 function loadConfig(): MarkdownExportConfig {
   try {
@@ -33,9 +45,12 @@ function loadConfig(): MarkdownExportConfig {
       mode: localStorage.getItem(MODE_KEY) === "wrapper" ? "wrapper" : "standard",
       prefix: localStorage.getItem(PREFIX_KEY) ?? "",
       suffix: localStorage.getItem(SUFFIX_KEY) ?? "",
+      separator: readToggle(SEPARATOR_KEY),
+      blankLine: readToggle(BLANK_LINE_KEY),
+      quotesOnly: localStorage.getItem(QUOTES_ONLY_KEY) === "true",
     }
   } catch {
-    return { mode: "standard", prefix: "", suffix: "" }
+    return { ...DEFAULT_MARKDOWN_CONFIG }
   }
 }
 
@@ -45,6 +60,8 @@ interface MarkdownExportModalProps {
   /** Quotes to export; loaded once when the dialog opens. */
   loadBooks: () => Promise<MarkdownBook[]>
   getFilename: () => string
+  /** Only single-book exports may drop titles and metadata. */
+  allowQuotesOnly?: boolean
 }
 
 export function MarkdownExportModal({
@@ -52,6 +69,7 @@ export function MarkdownExportModal({
   onOpenChange,
   loadBooks,
   getFilename,
+  allowQuotesOnly = false,
 }: MarkdownExportModalProps) {
   const { t } = useTranslation()
   const [config, setConfig] = useState<MarkdownExportConfig>(loadConfig)
@@ -65,6 +83,9 @@ export function MarkdownExportModal({
       localStorage.setItem(MODE_KEY, config.mode)
       localStorage.setItem(PREFIX_KEY, config.prefix)
       localStorage.setItem(SUFFIX_KEY, config.suffix)
+      localStorage.setItem(SEPARATOR_KEY, String(config.separator !== false))
+      localStorage.setItem(BLANK_LINE_KEY, String(config.blankLine !== false))
+      localStorage.setItem(QUOTES_ONLY_KEY, String(config.quotesOnly === true))
     } catch {}
   }, [config])
 
@@ -95,9 +116,14 @@ export function MarkdownExportModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
+  // Full-library exports never expose the option; ignore a saved preference there.
+  const exportConfig: MarkdownExportConfig = allowQuotesOnly
+    ? config
+    : { ...config, quotesOnly: false }
+
   /** Single source for both actions so copy and download stay identical. */
   function generateMarkdown(): string {
-    return buildMarkdown(books, config)
+    return buildMarkdown(books, exportConfig)
   }
 
   async function handleDownload() {
@@ -143,11 +169,25 @@ export function MarkdownExportModal({
     }
   }
 
-  const firstQuote = books.flatMap((b) => b.quotes).find((q) => q.content.trim())
-  const preview = formatQuote(
-    firstQuote?.content ?? t("markdownExport.previewSample"),
-    config
-  )
+  // Preview the first book's shape: two quotes make the separation toggles visible
+  // and the heading shows whether titles/metadata are included.
+  const previewQuotes = (books[0]?.quotes ?? [])
+    .filter((quote) => quote.content.trim())
+    .slice(0, 2)
+    .map((quote) => ({ content: quote.content }))
+  while (previewQuotes.length < 2) {
+    previewQuotes.push({ content: t("markdownExport.previewSample") })
+  }
+  const preview = buildMarkdown(
+    [
+      {
+        title: books[0]?.title ?? t("markdownExport.previewTitleSample"),
+        author: books[0]?.author,
+        quotes: previewQuotes,
+      },
+    ],
+    exportConfig
+  ).trimEnd()
 
   const modes: { value: MarkdownExportMode; labelKey: string }[] = [
     { value: "standard", labelKey: "markdownExport.modeStandard" },
@@ -221,6 +261,59 @@ export function MarkdownExportModal({
               </div>
             </div>
           )}
+
+          <div className="flex flex-col gap-2">
+            {allowQuotesOnly && (
+              <div className="flex items-center justify-between gap-3">
+                <Label
+                  htmlFor="md-export-quotes-only"
+                  className="text-xs font-normal text-muted-foreground"
+                >
+                  {t("markdownExport.quotesOnly")}
+                </Label>
+                <Switch
+                  id="md-export-quotes-only"
+                  size="sm"
+                  checked={config.quotesOnly === true}
+                  onCheckedChange={(v) =>
+                    setConfig((c) => ({ ...c, quotesOnly: v }))
+                  }
+                />
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-3">
+              <Label
+                htmlFor="md-export-separator"
+                className="text-xs font-normal text-muted-foreground"
+              >
+                {t("markdownExport.separator")}
+              </Label>
+              <Switch
+                id="md-export-separator"
+                size="sm"
+                checked={config.separator !== false}
+                onCheckedChange={(v) =>
+                  setConfig((c) => ({ ...c, separator: v }))
+                }
+              />
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <Label
+                htmlFor="md-export-blank-line"
+                className="text-xs font-normal text-muted-foreground"
+              >
+                {t("markdownExport.blankLine")}
+              </Label>
+              <Switch
+                id="md-export-blank-line"
+                size="sm"
+                checked={config.blankLine !== false}
+                onCheckedChange={(v) =>
+                  setConfig((c) => ({ ...c, blankLine: v }))
+                }
+              />
+            </div>
+          </div>
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs text-muted-foreground">

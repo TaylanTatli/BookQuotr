@@ -129,6 +129,7 @@ export function QuotesPanel({
       <MarkdownExportModal
         open={exportOpen}
         onOpenChange={setExportOpen}
+        allowQuotesOnly
         loadBooks={async () => [
           { title: book.title, author: book.author, quotes },
         ]}

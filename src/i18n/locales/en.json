@@ -196,6 +196,10 @@
     "error": "Export failed",
     "copy": "Copy Markdown",
     "copySuccess": "Markdown copied to clipboard",
-    "copyError": "Failed to copy Markdown"
+    "copyError": "Failed to copy Markdown",
+    "separator": "Separator between quotes (---)",
+    "blankLine": "Blank line between quotes",
+    "quotesOnly": "Quotes only (no titles or metadata)",
+    "previewTitleSample": "Book title"
   }
 }

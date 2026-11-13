@@ -4,6 +4,12 @@ export interface MarkdownExportConfig {
   mode: MarkdownExportMode
   prefix: string
   suffix: string
+  /** Insert `---` between quotes (default true). */
+  separator?: boolean
+  /** Insert a blank line between quotes (default true). */
+  blankLine?: boolean
+  /** Emit quote content only, without book headings or metadata (default false). */
+  quotesOnly?: boolean
 }
 
 export interface MarkdownQuote {
@@ -22,9 +28,21 @@ export const DEFAULT_MARKDOWN_CONFIG: MarkdownExportConfig = {
   mode: "standard",
   prefix: "",
   suffix: "",
+  separator: true,
+  blankLine: true,
+  quotesOnly: false,
 }
 
-const QUOTE_SEPARATOR = "\n\n---\n\n"
+const BOOK_SEPARATOR = "\n\n---\n\n"
+
+/**
+ * Whitespace inserted between quotes only. Books always keep their own separator
+ * so headings stay readable.
+ */
+export function quoteSeparator(config: MarkdownExportConfig): string {
+  const blank = config.blankLine !== false ? "\n\n" : "\n"
+  return config.separator !== false ? `${blank}---${blank}` : blank
+}
 
 function normalize(content: string): string {
   return content.replace(/\r\n?/g, "\n").trim()
@@ -101,7 +119,7 @@ function bookToMarkdown(
     quoteBlocks.push(meta ? `${formatted}\n\n${meta}` : formatted)
   }
 
-  const body = quoteBlocks.join(QUOTE_SEPARATOR)
+  const body = quoteBlocks.join(quoteSeparator(config))
   return body ? `${header.join("\n\n")}\n\n${body}` : header.join("\n\n")
 }
 
@@ -116,11 +134,19 @@ export function buildMarkdown(
   // Never emit a document that is only book metadata.
   if (!hasQuotes) return ""
 
+  if (config.quotesOnly === true) {
+    const blocks = books
+      .flatMap((book) => book.quotes)
+      .map((quote) => formatQuote(quote.content, config))
+      .filter((block) => block.length > 0)
+    return `${blocks.join(quoteSeparator(config))}\n`
+  }
+
   const sections = books
     .map((book) => bookToMarkdown(book, config))
     .filter((section) => section.length > 0)
 
-  return sections.length > 0 ? `${sections.join(QUOTE_SEPARATOR)}\n` : ""
+  return sections.length > 0 ? `${sections.join(BOOK_SEPARATOR)}\n` : ""
 }
 
 /** Filesystem-safe `.md` filename derived from a book title (Turkish chars transliterated). */
